@@ -22,13 +22,20 @@ interface ToolDisplayProps {
   toolCalls?: ToolCall[];
   toolResults?: ToolResult[];
   className?: string;
+  isStreaming?: boolean;
 }
 
 /**
  * 获取工具调用状态
  */
-function getToolStatus(toolCall: ToolCall, toolResults: ToolResult[]): ToolStatus {
+function getToolStatus(toolCall: ToolCall, toolResults: ToolResult[], isStreaming = false): ToolStatus {
   const result = toolResults.find(r => r.name === toolCall.name);
+  
+  // 如果不是流式状态且有工具调用，默认认为已完成（历史记录情况）
+  if (!isStreaming && !result && toolCall) {
+    return 'completed';
+  }
+  
   if (!result) return 'calling';
   
   // 这里可以根据实际需要判断错误状态
@@ -183,7 +190,8 @@ function ToolCallItem({
 export function ToolDisplay({ 
   toolCalls = [], 
   toolResults = [], 
-  className 
+  className,
+  isStreaming = false
 }: ToolDisplayProps) {
   if (toolCalls.length === 0) {
     return null;
@@ -200,7 +208,7 @@ export function ToolDisplay({
 
       {toolCalls.map((toolCall) => {
         const toolResult = toolResults.find(r => r.name === toolCall.name);
-        const status = getToolStatus(toolCall, toolResults);
+        const status = getToolStatus(toolCall, toolResults, isStreaming);
 
         return (
           <ToolCallItem

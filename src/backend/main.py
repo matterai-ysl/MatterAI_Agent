@@ -303,70 +303,150 @@ async def get_history(user_id: str = Query(...), session_id: str = Query(...)) -
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    def serialize_event(evt: Any) -> Dict[str, Any]:
-        role: Optional[str] = getattr(evt, 'role', None)
+    def process_events(events):
+        """处理事件，将相关的事件合并为完整的消息"""
+        messages = []
+        current_user_message = None
+        current_assistant_message = None
         
-        # 基本消息结构
-        message = {
-            "role": role,
-            "content": [],
-            "toolCalls": [],
-            "toolResults": [],
-            "timestamp": getattr(evt, 'timestamp', None) or int(time.time() * 1000)
-        }
-        
-        # 处理文本内容
-        content = getattr(evt, 'content', None)
-        if content and getattr(content, 'parts', None):
-            for part in content.parts:
-                text = getattr(part, 'text', None)
-                if text:
-                    message["content"].append({"type": "text", "text": text})
-                    
-                # 处理工具调用
-                function_call = getattr(part, 'function_call', None)
-                if function_call:
-                    tool_call = {
-                        "id": f"call_{getattr(function_call, 'id', 'unknown')}",
-                        "name": getattr(function_call, 'name', 'unknown'),
-                        "args": getattr(function_call, 'args', {}),
-                        "timestamp": message["timestamp"]
-                    }
-                    message["toolCalls"].append(tool_call)
-        
-        # 处理工具调用（如果直接在事件上）
-        if hasattr(evt, 'get_function_calls'):
-            calls = evt.get_function_calls()
-            if calls:
-                for call in calls:
-                    tool_call = {
-                        "id": f"call_{getattr(call, 'id', 'unknown')}",
-                        "name": getattr(call, 'name', 'unknown'),
-                        "args": getattr(call, 'args', {}),
-                        "timestamp": message["timestamp"]
-                    }
-                    message["toolCalls"].append(tool_call)
-        
-        # 处理工具结果
-        if hasattr(evt, 'get_function_responses'):
-            responses = evt.get_function_responses()
-            if responses:
-                for resp in responses:
-                    tool_result = {
-                        "id": f"result_{getattr(resp, 'id', 'unknown')}",
-                        "name": getattr(resp, 'name', 'unknown'),
-                        "result": getattr(resp, 'response', None),
-                        "timestamp": message["timestamp"]
-                    }
-                    message["toolResults"].append(tool_result)
-        
-        # 如果没有内容，兜底处理
-        if not message["content"] and not message["toolCalls"] and not message["toolResults"]:
-            message["content"].append({"type": "text", "text": str(evt)})
+        for evt in events:
+            # 优先从 content.role 获取角色，兜底使用 evt.role
+            content = getattr(evt, 'content', None)
+            if content and hasattr(content, 'role'):
+                role = content.role
+            else:
+                role = getattr(evt, 'role', None)
             
-        return message
+            # 规范化角色名称
+            if role == 'model':
+                role = 'assistant'
+            
+            # 获取事件时间戳
+            evt_timestamp = None
+            if hasattr(evt, 'timestamp'):
+                evt_timestamp = int(evt.timestamp * 1000) if isinstance(evt.timestamp, float) else int(evt.timestamp)
+            elif hasattr(evt, 'created_at'):
+                evt_timestamp = int(evt.created_at * 1000) if isinstance(evt.created_at, float) else int(evt.created_at)
+            
+            if not evt_timestamp:
+                evt_timestamp = int(time.time() * 1000)
+            
+            # 检查事件类型
+            has_function_call = False
+            has_function_response = False
+            has_text = False
+            
+            if content and getattr(content, 'parts', None):
+                for part in content.parts:
+                    if hasattr(part, 'function_call') and part.function_call:
+                        has_function_call = True
+                    if hasattr(part, 'function_response') and part.function_response:
+                        has_function_response = True
+                    if hasattr(part, 'text') and part.text and part.text.strip():
+                        has_text = True
+            
+            print(f"🔍 处理事件: role={role}, 工具调用={has_function_call}, 工具结果={has_function_response}, 文本={has_text}, timestamp={evt_timestamp}")
+            
+            # 工具结果虽然可能标记为 'user'，但应该归属到助手消息中
+            if has_function_response:
+                role = 'assistant'
+                print(f"🔧 工具结果强制归属到助手消息")
+            
+            # 处理用户消息
+            if role == 'user':
+                # 保存之前的助手消息
+                if current_assistant_message and (current_assistant_message.get("content") or 
+                                                   current_assistant_message.get("toolCalls") or 
+                                                   current_assistant_message.get("toolResults")):
+                    messages.append(current_assistant_message)
+                    current_assistant_message = None
+                
+                # 创建或更新用户消息
+                if not current_user_message:
+                    current_user_message = {
+                        "role": "user",
+                        "content": [],
+                        "toolCalls": [],
+                        "toolResults": [],
+                        "timestamp": evt_timestamp
+                    }
+                
+                # 处理用户文本内容
+                if content and getattr(content, 'parts', None):
+                    for part in content.parts:
+                        text = getattr(part, 'text', None)
+                        if text and text.strip():
+                            current_user_message["content"].append({"type": "text", "text": text})
+            
+            # 处理助手消息
+            elif role == 'assistant':
+                # 保存之前的用户消息
+                if current_user_message and current_user_message.get("content"):
+                    messages.append(current_user_message)
+                    current_user_message = None
+                
+                # 创建或更新助手消息
+                if not current_assistant_message:
+                    current_assistant_message = {
+                        "role": "assistant",
+                        "content": [],
+                        "toolCalls": [],
+                        "toolResults": [],
+                        "timestamp": evt_timestamp
+                    }
+                
+                # 处理助手文本内容
+                if content and getattr(content, 'parts', None):
+                    for part in content.parts:
+                        text = getattr(part, 'text', None)
+                        if text and text.strip():
+                            current_assistant_message["content"].append({"type": "text", "text": text})
+                
+                # 处理工具调用
+                if hasattr(evt, 'get_function_calls'):
+                    calls = evt.get_function_calls()
+                    if calls:
+                        for call in calls:
+                            tool_call = {
+                                "id": f"call_{getattr(call, 'id', f'{getattr(call, 'name', 'unknown')}_{evt_timestamp}')}",
+                                "name": getattr(call, 'name', 'unknown'),
+                                "args": getattr(call, 'args', {}),
+                                "timestamp": evt_timestamp
+                            }
+                            current_assistant_message["toolCalls"].append(tool_call)
+                            print(f"🔧 添加工具调用: {tool_call['name']}")
+                
+                # 处理工具结果
+                if hasattr(evt, 'get_function_responses'):
+                    responses = evt.get_function_responses()
+                    if responses:
+                        for resp in responses:
+                            tool_result = {
+                                "id": f"result_{getattr(resp, 'id', f'{getattr(resp, 'name', 'unknown')}_{evt_timestamp}')}",
+                                "name": getattr(resp, 'name', 'unknown'),
+                                "result": getattr(resp, 'response', None),
+                                "timestamp": evt_timestamp
+                            }
+                            current_assistant_message["toolResults"].append(tool_result)
+                            print(f"📋 添加工具结果: {tool_result['name']}")
+        
+        # 添加剩余的消息
+        if current_user_message and current_user_message.get("content"):
+            messages.append(current_user_message)
+        
+        if current_assistant_message and (current_assistant_message.get("content") or 
+                                           current_assistant_message.get("toolCalls") or 
+                                           current_assistant_message.get("toolResults")):
+            messages.append(current_assistant_message)
+        
+        print(f"📝 处理完成，生成了 {len(messages)} 条消息")
+        for i, msg in enumerate(messages):
+            print(f"  {i+1}. {msg['role']}: 内容={len(msg.get('content', []))} 工具调用={len(msg.get('toolCalls', []))} 工具结果={len(msg.get('toolResults', []))}")
+        
+        return messages
 
-    messages = [serialize_event(evt) for evt in getattr(session, 'events', [])]
+    events = getattr(session, 'events', [])
+    messages = process_events(events)
     return JSONResponse({"session_id": session.id, "messages": messages})
 
 

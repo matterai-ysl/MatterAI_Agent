@@ -159,6 +159,7 @@ function MessageItem({ message }: { message: ChatMessage }) {
             <ToolDisplay
               toolCalls={message.toolCalls}
               toolResults={message.toolResults}
+              isStreaming={message.isStreaming}
             />
           </div>
         )}
