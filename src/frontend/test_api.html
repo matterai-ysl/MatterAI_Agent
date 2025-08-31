@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API 测试</h1>
+    <button onclick="testChat()">测试流式聊天</button>
+    <div id="output"></div>
+
+    <script>
+        async function testChat() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>开始测试...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:9000/chat/stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 'user_1',
+                        query: '你好',
+                        session_id: null
+                    }),
+                });
+
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    buffer += chunk;
+                    console.log('收到数据块:', chunk);
+
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                console.log('解析事件:', data);
+                                
+                                output.innerHTML += `<p>事件: ${JSON.stringify(data)}</p>`;
+                                
+                                if (data.type === 'done') {
+                                    output.innerHTML += '<p><strong>完成!</strong></p>';
+                                    return;
+                                }
+                            } catch (err) {
+                                console.warn('解析失败:', line, err);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('测试失败:', error);
+                output.innerHTML += `<p><strong>错误: ${error.message}</strong></p>`;
+            }
+        }
+    </script>
+</body>
+</html>
