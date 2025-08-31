@@ -4,7 +4,7 @@
  */
 
 import React, { useRef, useState, useCallback } from 'react';
-import { Upload, X, File, Image, FileText, Download } from 'lucide-react';
+import { Upload, X, File, Image, FileText } from 'lucide-react';
 import { formatFileSize, isValidFileType, getFileIconType } from '../../utils/format';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';

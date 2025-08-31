@@ -39,6 +39,15 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+        },
+        'chat-bubble': {
+          user: "hsl(var(--chat-bubble-user))",
+          'user-foreground': "hsl(var(--chat-bubble-user-foreground))",
+          assistant: "hsl(var(--chat-bubble-assistant))",
+          'assistant-foreground': "hsl(var(--chat-bubble-assistant-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -47,6 +56,12 @@ module.exports = {
       },
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "scale-in": "scale-in 0.2s ease-out",
+        "slide-up": "slide-up 0.3s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
+      },
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
     },
   },

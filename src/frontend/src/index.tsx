@@ -6,7 +6,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
+import NewApp from './NewApp';
 
 // 获取根元素
 const root = ReactDOM.createRoot(
@@ -16,6 +16,6 @@ const root = ReactDOM.createRoot(
 // 渲染应用
 root.render(
   <React.StrictMode>
-    <App />
+    <NewApp />
   </React.StrictMode>
 );

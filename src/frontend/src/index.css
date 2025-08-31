@@ -3,56 +3,88 @@
  * 包含 Tailwind CSS 基础样式和自定义 CSS 变量
  */
 
+/* 代码高亮主题 - 浅色 */
+@import 'highlight.js/styles/github.css';
+
+/* 代码高亮主题 - 深色 */
+@media (prefers-color-scheme: dark) {
+  @import 'highlight.js/styles/github-dark.css';
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* 颜色变量 - 亮色主题 */
+    /* 颜色变量 - 浅色主题 (ChatGPT风格) */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 0%;
+    --sidebar-background: 0 0% 97%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --popover-foreground: 0 0% 0%;
+    --primary: 160 100% 29%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 96%;
+    --ring: 160 100% 29%;
+    --radius: 0.75rem;
+    
+    /* 新增变量 */
+    --chat-bubble-user: 160 100% 29%;
+    --chat-bubble-user-foreground: 0 0% 100%;
+    --chat-bubble-assistant: 0 0% 96%;
+    --chat-bubble-assistant-foreground: 0 0% 0%;
+    --sidebar-item-hover: 0 0% 93%;
+    --sidebar-item-active: 160 100% 29%;
+    --sidebar-item-active-foreground: 0 0% 100%;
+    --welcome-gradient-from: 160 100% 29%;
+    --welcome-gradient-to: 160 80% 35%;
   }
 
   .dark {
-    /* 颜色变量 - 暗色主题 */
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    /* 颜色变量 - 深色主题 (ChatGPT风格) */
+    --background: 0 0% 13%;
+    --foreground: 0 0% 95%;
+    --sidebar-background: 0 0% 9%;
+    --card: 0 0% 13%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 13%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 160 100% 29%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 64%;
+    --accent: 0 0% 18%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 0 0% 25%;
+    --input: 0 0% 18%;
+    --ring: 160 100% 29%;
+    
+    /* 新增变量 */
+    --chat-bubble-user: 160 100% 29%;
+    --chat-bubble-user-foreground: 0 0% 100%;
+    --chat-bubble-assistant: 0 0% 18%;
+    --chat-bubble-assistant-foreground: 0 0% 95%;
+    --sidebar-item-hover: 0 0% 16%;
+    --sidebar-item-active: 160 100% 29%;
+    --sidebar-item-active-foreground: 0 0% 100%;
+    --welcome-gradient-from: 160 100% 29%;
+    --welcome-gradient-to: 160 80% 35%;
   }
 }
 
@@ -62,8 +94,10 @@
   }
   
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   /* 自定义滚动条样式 */
@@ -179,6 +213,62 @@
   .prose li {
     @apply my-1;
   }
+
+  /* Markdown 内容样式 */
+  .markdown-content {
+    @apply text-foreground;
+  }
+
+  .markdown-content h1,
+  .markdown-content h2,
+  .markdown-content h3,
+  .markdown-content h4,
+  .markdown-content h5,
+  .markdown-content h6 {
+    @apply text-foreground;
+  }
+
+  .markdown-content p {
+    @apply text-foreground;
+  }
+
+  .markdown-content li {
+    @apply text-foreground;
+  }
+
+  .markdown-content strong {
+    @apply text-foreground font-semibold;
+  }
+
+  .markdown-content em {
+    @apply text-foreground italic;
+  }
+
+  .markdown-content blockquote {
+    @apply text-muted-foreground;
+  }
+
+  /* 代码高亮样式 */
+  .markdown-content pre {
+    @apply bg-muted border rounded-lg;
+  }
+
+  .markdown-content pre code {
+    @apply bg-transparent text-foreground;
+  }
+
+  .markdown-content code:not(pre code) {
+    @apply bg-muted text-foreground;
+  }
+
+  /* 深色主题下的代码高亮调整 */
+  .dark .markdown-content pre {
+    @apply bg-muted border-border;
+  }
+
+  .dark .markdown-content code:not(pre code) {
+    @apply bg-muted text-foreground;
+  }
 }
 
 @layer utilities {
@@ -187,9 +277,25 @@
     animation: bounce 3s infinite;
   }
 
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
   /* 渐变背景 */
   .bg-gradient-chat {
     background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.3) 100%);
+  }
+
+  .bg-gradient-welcome {
+    background: linear-gradient(135deg, hsl(var(--welcome-gradient-from)) 0%, hsl(var(--welcome-gradient-to)) 100%);
   }
 
   /* 卡片阴影 */
@@ -197,10 +303,71 @@
     box-shadow: 0 1px 3px 0 hsl(var(--border) / 0.1), 0 1px 2px 0 hsl(var(--border) / 0.06);
   }
 
+  .shadow-elegant {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(16, 163, 127, 0.3);
+  }
+
   /* 毛玻璃效果 */
   .backdrop-blur-chat {
     backdrop-filter: blur(8px);
     background-color: hsl(var(--background) / 0.8);
+  }
+
+  /* 聊天气泡 */
+  .chat-bubble-user {
+    background-color: hsl(var(--chat-bubble-user));
+    color: hsl(var(--chat-bubble-user-foreground));
+  }
+
+  .chat-bubble-assistant {
+    background-color: hsl(var(--chat-bubble-assistant));
+    color: hsl(var(--chat-bubble-assistant-foreground));
+  }
+
+  /* 侧边栏项目 */
+  .sidebar-item-hover:hover {
+    background-color: hsl(var(--sidebar-item-hover));
+  }
+
+  .sidebar-item-active {
+    background-color: hsl(var(--sidebar-item-active));
+    color: hsl(var(--sidebar-item-active-foreground));
+  }
+}
+
+/* 动画关键帧 */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

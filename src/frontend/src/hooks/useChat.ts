@@ -14,7 +14,6 @@ import {
   AppState 
 } from '../types/chat';
 import { chatApiService, SSEClient } from '../services/api';
-import { generateSessionTitle } from '../utils/format';
 
 /**
  * 聊天 Hook 返回值接口
@@ -69,8 +68,16 @@ export function useChat(userId: string): UseChatReturn {
   const addMessage = useCallback((sessionId: string, message: ChatMessage) => {
     console.log('📨 添加消息到会话:', { sessionId, messageId: message.id, messageRole: message.role });
     updateState(prev => {
+      // 更新会话的 updatedAt 时间戳
+      const updatedSessions = prev.sessions.map(session => 
+        session.id === sessionId 
+          ? { ...session, updatedAt: message.timestamp }
+          : session
+      );
+
       const newState = {
         ...prev,
+        sessions: updatedSessions,
         messages: {
           ...prev.messages,
           [sessionId]: [...(prev.messages[sessionId] || []), message],
@@ -99,11 +106,20 @@ export function useChat(userId: string): UseChatReturn {
       const lastMessage = updatedMessages[updatedMessages.length - 1];
       console.log('📝 更新前的最后一条消息:', lastMessage);
       
-      updatedMessages[updatedMessages.length - 1] = updater(lastMessage);
-      console.log('📝 更新后的最后一条消息:', updatedMessages[updatedMessages.length - 1]);
+      const newLastMessage = updater(lastMessage);
+      updatedMessages[updatedMessages.length - 1] = newLastMessage;
+      console.log('📝 更新后的最后一条消息:', newLastMessage);
+      
+      // 更新会话的 updatedAt 时间戳
+      const updatedSessions = prev.sessions.map(session => 
+        session.id === sessionId 
+          ? { ...session, updatedAt: newLastMessage.timestamp }
+          : session
+      );
       
       const newState = {
         ...prev,
+        sessions: updatedSessions,
         messages: {
           ...prev.messages,
           [sessionId]: updatedMessages,
@@ -396,6 +412,7 @@ export function useChat(userId: string): UseChatReturn {
     if (sessionId) {
       await loadHistory(sessionId);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -405,6 +422,7 @@ export function useChat(userId: string): UseChatReturn {
     disconnect();
     currentSessionIdRef.current = null;
     updateState(prev => ({ ...prev, currentSessionId: null }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -441,11 +459,20 @@ export function useChat(userId: string): UseChatReturn {
             }
           }
           
+          // 获取最后一条消息的时间戳
+          let lastMessageTime = Date.now(); // 默认为当前时间
+          if (historyResponse.messages.length > 0) {
+            const lastMessage = historyResponse.messages[historyResponse.messages.length - 1];
+            if (lastMessage.timestamp) {
+              lastMessageTime = lastMessage.timestamp;
+            }
+          }
+
           sessions.push({
             id,
             title,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
+            createdAt: Date.now(), // 会话创建时间保持不变
+            updatedAt: lastMessageTime, // 使用最后一条消息的时间
             messageCount: historyResponse.messages.length,
           });
         } catch (error) {
