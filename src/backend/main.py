@@ -99,6 +99,16 @@ async def list_existing_sessions(session_service, user_id):
     except Exception as e:
         print(f"\n❌ 获取会话列表失败: {e}")
         return []
+def test_html(format: str = "html") -> dict:
+    """用于测试html文件前端显示效果
+    
+    Args:
+        format: 输出格式，默认为html
+    
+    Returns:
+        dict: 包含html_path的字典
+    """
+    return {"report_html_path": "/Users/ysl/Desktop/Code/MatterAI_Agent/test_report.html"}
 
 ############################
 # MCP 工具与 Agent 定义
@@ -175,7 +185,7 @@ root_agent = LlmAgent(
     - 使用简体中文，语气专业且亲切。
     - 遇到复杂查询时先在“思考”阶段分步推理，再在“行动”阶段调用工具（无需向用户展示思考内容）。
     """,
-    tools=[amap_mcp_server], # 接入 MCP 服务器
+    tools=[amap_mcp_server, test_html], # 接入 MCP 服务器
 )
 
 ############################
@@ -576,6 +586,57 @@ async def chat_stream(payload: ChatRequest) -> StreamingResponse:
         "X-Accel-Buffering": "no",
     }
     return StreamingResponse(event_gen(), media_type="text/event-stream", headers=headers)
+
+
+@app.get("/html-content")
+async def get_html_content(file_path: str = Query(..., description="HTML文件的完整路径")):
+    """获取HTML文件内容的API端点"""
+    print(f"🔍 收到HTML文件请求: {file_path}")
+    
+    try:
+        # URL解码（虽然FastAPI通常会自动处理，但我们手动确保）
+        from urllib.parse import unquote
+        decoded_path = unquote(file_path)
+        print(f"🔍 解码后路径: {decoded_path}")
+        
+        # 安全检查：确保文件路径是绝对路径且存在
+        if not os.path.isabs(decoded_path):
+            print(f"❌ 文件路径必须是绝对路径: {decoded_path}")
+            raise HTTPException(status_code=400, detail="文件路径必须是绝对路径")
+        
+        if not os.path.exists(decoded_path):
+            print(f"❌ 文件不存在: {decoded_path}")
+            print(f"🔍 当前工作目录: {os.getcwd()}")
+            # 列出目录内容帮助调试
+            dir_path = os.path.dirname(decoded_path)
+            if os.path.exists(dir_path):
+                files = os.listdir(dir_path)
+                print(f"🔍 目录 {dir_path} 内容: {files}")
+            raise HTTPException(status_code=404, detail="文件不存在")
+        
+        if not decoded_path.endswith('.html'):
+            print(f"❌ 只支持HTML文件: {decoded_path}")
+            raise HTTPException(status_code=400, detail="只支持HTML文件")
+        
+        print(f"✅ 开始读取文件: {decoded_path}")
+        # 读取文件内容
+        with open(decoded_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        print(f"✅ 文件读取成功，内容长度: {len(content)} 字符")
+        return JSONResponse({
+            "success": True,
+            "content": content,
+            "file_path": decoded_path
+        })
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ 读取文件异常: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"读取文件失败: {str(e)}")
 
 
 @app.post("/upload")

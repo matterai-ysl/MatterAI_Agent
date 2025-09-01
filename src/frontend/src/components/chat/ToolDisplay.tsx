@@ -23,6 +23,8 @@ interface ToolDisplayProps {
   toolResults?: ToolResult[];
   className?: string;
   isStreaming?: boolean;
+  onViewHtml?: (htmlPath: string, title?: string) => void;
+  highlightedToolId?: string;
 }
 
 /**
@@ -44,6 +46,27 @@ function getToolStatus(toolCall: ToolCall, toolResults: ToolResult[], isStreamin
   }
   
   return 'completed';
+}
+
+/**
+ * 从结果中提取HTML内容信息
+ */
+function extractHtmlContent(result: any): { htmlPaths: Array<{ key: string; path: string }>; htmlUrls: Array<{ key: string; url: string }> } {
+  const htmlPaths: Array<{ key: string; path: string }> = [];
+  const htmlUrls: Array<{ key: string; url: string }> = [];
+  
+  if (typeof result === 'object' && result) {
+    Object.entries(result).forEach(([key, value]) => {
+      if (key.endsWith('html_path') && typeof value === 'string') {
+        htmlPaths.push({ key, path: value });
+      }
+      if ((key.endsWith('url') || key.endsWith('html_url') || key.endsWith('report_url')) && typeof value === 'string') {
+        htmlUrls.push({ key, url: value });
+      }
+    });
+  }
+  
+  return { htmlPaths, htmlUrls };
 }
 
 /**
@@ -88,7 +111,13 @@ function ParametersDisplay({ args }: { args: Record<string, any> }) {
 /**
  * 结果展示组件
  */
-function ResultDisplay({ result }: { result: any }) {
+function ResultDisplay({ 
+  result, 
+  onViewHtml 
+}: { 
+  result: any;
+  onViewHtml?: (htmlPath: string, title?: string) => void;
+}) {
   if (result === null || result === undefined) {
     return <div className="text-muted-foreground text-sm">无结果</div>;
   }
@@ -103,16 +132,82 @@ function ResultDisplay({ result }: { result: any }) {
     );
   }
 
+  // 检查是否包含 html_path 键和 URL
+  const { htmlPaths, htmlUrls } = extractHtmlContent(result);
+
   // 处理成功结果
   const displayResult = typeof result === 'object' 
     ? JSON.stringify(result, null, 2)
     : String(result);
 
   return (
-    <div className="bg-muted rounded p-3">
-      <pre className="text-sm whitespace-pre-wrap break-words overflow-auto max-h-96">
-        {displayResult}
-      </pre>
+    <div className="space-y-3">
+      {/* HTML URL 预览按钮 */}
+      {htmlUrls.length > 0 && (
+        <div className="space-y-2">
+          {htmlUrls.map(({ key, url }) => (
+            <button
+              key={key}
+              onClick={() => onViewHtml?.(url, `${key} 预览`)}
+              className="flex items-center gap-2 p-3 bg-green-50 hover:bg-green-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50 border border-green-200 dark:border-emerald-800 rounded-lg transition-colors w-full text-left group"
+            >
+              <div className="p-1.5 bg-emerald-500/10 rounded">
+                <svg className="h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm text-emerald-700 dark:text-emerald-300 group-hover:text-emerald-800 dark:group-hover:text-emerald-200">
+                  打开报告（URL）
+                </div>
+                <div className="text-xs text-emerald-600/70 dark:text-emerald-400/70 truncate">
+                  {url}
+                </div>
+              </div>
+              <svg className="h-4 w-4 text-emerald-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* HTML 文件预览按钮 */}
+      {htmlPaths.length > 0 && (
+        <div className="space-y-2">
+          {htmlPaths.map(({ key, path }) => (
+            <button
+              key={key}
+              onClick={() => onViewHtml?.(path, `${key} 预览`)}
+              className="flex items-center gap-2 p-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:hover:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors w-full text-left group"
+            >
+              <div className="p-1.5 bg-blue-500/10 rounded">
+                <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm text-blue-700 dark:text-blue-300 group-hover:text-blue-800 dark:group-hover:text-blue-200">
+                  查看 HTML 报告（文件）
+                </div>
+                <div className="text-xs text-blue-600/70 dark:text-blue-400/70 truncate">
+                  {path}
+                </div>
+              </div>
+              <svg className="h-4 w-4 text-blue-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* 原始结果显示 */}
+      <div className="bg-muted rounded p-3">
+        <pre className="text-sm whitespace-pre-wrap break-words overflow-auto max-h-96">
+          {displayResult}
+        </pre>
+      </div>
     </div>
   );
 }
@@ -123,11 +218,15 @@ function ResultDisplay({ result }: { result: any }) {
 function ToolCallItem({ 
   toolCall, 
   toolResult, 
-  status 
+  status,
+  onViewHtml,
+  isHighlighted
 }: { 
   toolCall: ToolCall; 
   toolResult?: ToolResult; 
-  status: ToolStatus; 
+  status: ToolStatus;
+  onViewHtml?: (htmlPath: string, title?: string) => void;
+  isHighlighted?: boolean;
 }) {
   const statusText = {
     calling: '执行中...',
@@ -139,6 +238,22 @@ function ToolCallItem({
     calling: 'text-yellow-600',
     completed: 'text-green-600', 
     error: 'text-red-600',
+  };
+
+  // 处理工具展开时的自动HTML预览
+  const handleOpenChange = (isOpen: boolean) => {
+    if (isOpen && toolResult && onViewHtml) {
+      const { htmlPaths, htmlUrls } = extractHtmlContent(toolResult.result);
+      
+      // 优先使用URL，其次使用路径
+      if (htmlUrls.length > 0) {
+        const firstUrl = htmlUrls[0];
+        onViewHtml(firstUrl.url, `${firstUrl.key} 预览`);
+      } else if (htmlPaths.length > 0) {
+        const firstPath = htmlPaths[0];
+        onViewHtml(firstPath.path, `${firstPath.key} 预览`);
+      }
+    }
   };
 
   return (
@@ -155,7 +270,11 @@ function ToolCallItem({
           </div>
         </div>
       }
-      className="bg-muted/30"
+      className={cn(
+        "bg-muted/30 transition-all duration-200",
+        isHighlighted && "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 border"
+      )}
+      onOpenChange={handleOpenChange}
     >
       <div className="space-y-4 pt-3">
         {/* 调用时间 */}
@@ -173,7 +292,10 @@ function ToolCallItem({
         {toolResult && (
           <div>
             <h5 className="text-sm font-medium mb-2">结果</h5>
-            <ResultDisplay result={toolResult.result} />
+            <ResultDisplay 
+              result={toolResult.result} 
+              onViewHtml={onViewHtml}
+            />
             <div className="text-xs text-muted-foreground mt-2">
               完成时间: {formatDateTime(toolResult.timestamp)}
             </div>
@@ -191,7 +313,9 @@ export function ToolDisplay({
   toolCalls = [], 
   toolResults = [], 
   className,
-  isStreaming = false
+  isStreaming = false,
+  onViewHtml,
+  highlightedToolId
 }: ToolDisplayProps) {
   if (toolCalls.length === 0) {
     return null;
@@ -216,6 +340,8 @@ export function ToolDisplay({
             toolCall={toolCall}
             toolResult={toolResult}
             status={status}
+            onViewHtml={onViewHtml}
+            isHighlighted={highlightedToolId === toolCall.id}
           />
         );
       })}

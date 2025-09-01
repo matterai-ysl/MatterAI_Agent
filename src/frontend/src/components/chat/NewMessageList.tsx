@@ -328,10 +328,14 @@ function TypingIndicator() {
  */
 const MessageItem = React.memo(function MessageItem({ 
   message, 
-  isLast 
+  isLast,
+  onViewHtml,
+  highlightedToolId
 }: { 
   message: ChatMessage;
   isLast?: boolean;
+  onViewHtml?: (htmlPath: string, title?: string) => void;
+  highlightedToolId?: string;
 }) {
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
@@ -429,6 +433,8 @@ const MessageItem = React.memo(function MessageItem({
               toolCalls={message.toolCalls}
               toolResults={message.toolResults}
               isStreaming={message.isStreaming}
+              onViewHtml={onViewHtml}
+              highlightedToolId={highlightedToolId}
             />
           </motion.div>
         )}
@@ -470,6 +476,8 @@ interface MessageListProps {
   messages: ChatMessage[];
   isLoading?: boolean;
   className?: string;
+  onViewHtml?: (htmlPath: string, title?: string) => void;
+  highlightedToolId?: string;
 }
 
 /**
@@ -478,7 +486,9 @@ interface MessageListProps {
 export function NewMessageList({ 
   messages, 
   isLoading = false, 
-  className 
+  className,
+  onViewHtml,
+  highlightedToolId
 }: MessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -537,11 +547,13 @@ export function NewMessageList({
       <div className="min-h-full">
         {/* 使用条件渲染减少动画抖动 */}
         {messages.map((message, index) => (
-          <MessageItem 
-            key={message.id} 
-            message={message} 
-            isLast={index === messages.length - 1}
-          />
+                      <MessageItem 
+              key={message.id} 
+              message={message} 
+              isLast={index === messages.length - 1}
+              onViewHtml={onViewHtml}
+              highlightedToolId={highlightedToolId}
+            />
         ))}
         
         {/* 加载指示器 */}

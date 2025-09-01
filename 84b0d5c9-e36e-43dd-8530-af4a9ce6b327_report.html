@@ -1,0 +1,521 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据提取报告 - 84b0d5c9-e36e-43dd-8530-af4a9ce6b327</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .task-id, .task-count {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .timestamp {
+            font-size: 1em;
+            opacity: 0.8;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        
+        .section h3 {
+            color: #764ba2;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .field-analysis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .field-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .field-name {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .common-values {
+            margin-top: 10px;
+        }
+        
+        .common-value {
+            display: inline-block;
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            margin-top: 30px;
+        }
+        
+        .scroll-table {
+            overflow-x: auto;
+        }
+        
+        .task-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            color: #333;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>材料科学数据提取报告</h1>
+            <p class="task-id">任务ID: 84b0d5c9-e36e-43dd-8530-af4a9ce6b327</p>
+            <p class="timestamp">生成时间: 2025-08-16 16:01:08</p>
+        </header>
+        
+        
+        <div class="section">
+            <h2>任务信息</h2>
+            <div class="task-info">
+                <div class="info-item">
+                    <div class="info-label">任务名称</div>
+                    <div class="info-value">extract_s41598-025-11331-0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">创建时间</div>
+                    <div class="info-value">2025-08-16T15:57:45.581959</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">任务状态</div>
+                    <div class="info-value">cleaning_text</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">PDF数量</div>
+                    <div class="info-value">1</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">DOI</div>
+                    <div class="info-value">10.1016/j.ssi.2020.115399</div>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="section">
+            <h2>统计信息</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">总记录数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">10</div>
+                    <div class="stat-label">总字段数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">100.0%</div>
+                    <div class="stat-label">整体完整性</div>
+                </div>
+            </div>
+            
+            <h3>字段完整性分析</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>字段名</th>
+                        <th>已填充</th>
+                        <th>总数</th>
+                        <th>完整性</th>
+                        <th>进度条</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                <tr>
+                    <td>electrolyte_composition</td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td>100.0%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100.0%"></div>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td>synthesis_conditions</td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td>100.0%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100.0%"></div>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td>initial_discharge_capacity</td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td>100.0%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100.0%"></div>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td>source</td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td>100.0%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100.0%"></div>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td>test_temperature</td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td>100.0%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100.0%"></div>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td>discharge_rate</td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td>100.0%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100.0%"></div>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td>discharge_voltage_range</td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td>100.0%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100.0%"></div>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td>composition</td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td>100.0%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100.0%"></div>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td>material_name</td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td>100.0%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100.0%"></div>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td>notes</td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td>100.0%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100.0%"></div>
+                        </div>
+                    </td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+        
+        <div class="section">
+            <h2>提取数据 (4 条记录)</h2>
+            <div class="scroll-table">
+                <table>
+                    <thead>
+                        <tr><th>composition</th><th>discharge_rate</th><th>discharge_voltage_range</th><th>electrolyte_composition</th><th>initial_discharge_capacity</th><th>material_name</th><th>notes</th><th>source</th><th>synthesis_conditions</th><th>test_temperature</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Li₁.₅Al₀.₅Ti₁.₅(PO₄)₃</td><td>0.1C</td><td>2.0–4.8 V at 25°C</td><td>nan</td><td>180.2 mAh/g at 0.1C and 25°C</td><td>LATP-05-0</td><td>Initial discharge capacity explicitly reported; no synthesis details provided</td><td>10.1016/j.ssi.2020.115399</td><td>nan</td><td>25°C</td></tr><tr><td>Li₁.₅Al₀.₅Ti₁.₅(PO₄)₃</td><td>0.1C</td><td>2.0–4.8 V at 25°C</td><td>nan</td><td>219 mAh/g at 0.1C and 25°C</td><td>LATP-05-1.5</td><td>Initial discharge capacity explicitly reported; no synthesis details provided</td><td>10.1016/j.ssi.2020.115399</td><td>nan</td><td>25°C</td></tr><tr><td>Li₁.₅Al₀.₅Ti₁.₅(PO₄)₃</td><td>0.1C</td><td>2.0–4.8 V at 25°C</td><td>nan</td><td>204.4 mAh/g at 0.1C and 25°C</td><td>LATP-05-3</td><td>Initial discharge capacity explicitly reported; no synthesis details provided</td><td>10.1016/j.ssi.2020.115399</td><td>nan</td><td>25°C</td></tr><tr><td>Li₁.₂Mn₀.₅₄Ni₀.₁₃Co₀.₁₃O₂ coated with 3 wt% Li₁.₅Al₀.₅Ti₁.₅(PO₄)₃</td><td>0.1C</td><td>nan</td><td>nan</td><td>219 mAh/g at 0.1C</td><td>Li₁.₂Mn₀.₅₄Ni₀.₁₃Co₀.₁₃O₂@Li₁.₅Al₀.₅Ti₁.₅(PO₄)₃</td><td>Synthesis conditions partially specified: sol-gel and calcination mentioned, but no precursor det...</td><td>10.1016/j.ssi.2020.115399</td><td>Sol-gel method followed by high-temperature calcination. No further details provided.</td><td>nan</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        
+        <div class="section">
+            <h2>字段分析</h2>
+            <div class="field-analysis">
+                
+                <div class="field-card">
+                    <div class="field-name">composition</div>
+                    <div><strong>数据类型:</strong> string</div>
+                    <div class="common-values">
+                        <strong>常见值:</strong><br>
+                        <span class="common-value">Li₁.₅Al₀.₅Ti₁.₅(PO₄)₃ (3)</span><span class="common-value">Li₁.₂Mn₀.₅₄Ni₀.₁₃Co₀.₁₃O₂ coated with 3 wt% Li₁.₅Al₀.₅Ti₁.₅(PO₄)₃ (1)</span>
+                    </div>
+                </div>
+            
+                <div class="field-card">
+                    <div class="field-name">discharge_rate</div>
+                    <div><strong>数据类型:</strong> string</div>
+                    <div class="common-values">
+                        <strong>常见值:</strong><br>
+                        <span class="common-value">0.1C (4)</span>
+                    </div>
+                </div>
+            
+                <div class="field-card">
+                    <div class="field-name">discharge_voltage_range</div>
+                    <div><strong>数据类型:</strong> string, number</div>
+                    <div class="common-values">
+                        <strong>常见值:</strong><br>
+                        <span class="common-value">2.0–4.8 V at 25°C (3)</span><span class="common-value">nan (1)</span>
+                    </div>
+                </div>
+            
+                <div class="field-card">
+                    <div class="field-name">electrolyte_composition</div>
+                    <div><strong>数据类型:</strong> number</div>
+                    <div class="common-values">
+                        <strong>常见值:</strong><br>
+                        <span class="common-value">nan (1)</span><span class="common-value">nan (1)</span><span class="common-value">nan (1)</span>
+                    </div>
+                </div>
+            
+                <div class="field-card">
+                    <div class="field-name">initial_discharge_capacity</div>
+                    <div><strong>数据类型:</strong> string</div>
+                    <div class="common-values">
+                        <strong>常见值:</strong><br>
+                        <span class="common-value">180.2 mAh/g at 0.1C and 25°C (1)</span><span class="common-value">219 mAh/g at 0.1C and 25°C (1)</span><span class="common-value">204.4 mAh/g at 0.1C and 25°C (1)</span>
+                    </div>
+                </div>
+            
+                <div class="field-card">
+                    <div class="field-name">material_name</div>
+                    <div><strong>数据类型:</strong> string</div>
+                    <div class="common-values">
+                        <strong>常见值:</strong><br>
+                        <span class="common-value">LATP-05-0 (1)</span><span class="common-value">LATP-05-1.5 (1)</span><span class="common-value">LATP-05-3 (1)</span>
+                    </div>
+                </div>
+            
+                <div class="field-card">
+                    <div class="field-name">notes</div>
+                    <div><strong>数据类型:</strong> string</div>
+                    <div class="common-values">
+                        <strong>常见值:</strong><br>
+                        <span class="common-value">Initial discharge capacity explicitly reported; no synthesis details provided (3)</span><span class="common-value">Synthesis conditions partially specified: sol-gel and calcination mentioned, but no precursor details, temperatures, or times provided. (1)</span>
+                    </div>
+                </div>
+            
+                <div class="field-card">
+                    <div class="field-name">source</div>
+                    <div><strong>数据类型:</strong> string</div>
+                    <div class="common-values">
+                        <strong>常见值:</strong><br>
+                        <span class="common-value">10.1016/j.ssi.2020.115399 (4)</span>
+                    </div>
+                </div>
+            
+                <div class="field-card">
+                    <div class="field-name">synthesis_conditions</div>
+                    <div><strong>数据类型:</strong> number, string</div>
+                    <div class="common-values">
+                        <strong>常见值:</strong><br>
+                        <span class="common-value">nan (3)</span><span class="common-value">Sol-gel method followed by high-temperature calcination. No further details provided. (1)</span>
+                    </div>
+                </div>
+            
+                <div class="field-card">
+                    <div class="field-name">test_temperature</div>
+                    <div><strong>数据类型:</strong> string, number</div>
+                    <div class="common-values">
+                        <strong>常见值:</strong><br>
+                        <span class="common-value">25°C (3)</span><span class="common-value">nan (1)</span>
+                    </div>
+                </div>
+            
+            </div>
+        </div>
+        
+        
+        <footer>
+            <p>报告由材料科学数据提取系统生成</p>
+        </footer>
+    </div>
+</body>
+</html>

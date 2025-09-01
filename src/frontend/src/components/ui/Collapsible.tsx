@@ -17,6 +17,7 @@ interface CollapsibleProps {
   className?: string;
   titleClassName?: string;
   contentClassName?: string;
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 /**
@@ -29,13 +30,20 @@ export function Collapsible({
   className,
   titleClassName,
   contentClassName,
+  onOpenChange,
 }: CollapsibleProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  const handleToggle = () => {
+    const newIsOpen = !isOpen;
+    setIsOpen(newIsOpen);
+    onOpenChange?.(newIsOpen);
+  };
 
   return (
     <div className={cn('border rounded-lg', className)}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggle}
         className={cn(
           'flex items-center justify-between w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors',
           titleClassName

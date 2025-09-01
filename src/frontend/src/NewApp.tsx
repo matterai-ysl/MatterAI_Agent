@@ -10,6 +10,7 @@ import { useResponsive } from './hooks/useResponsive';
 import { NewSidebar } from './components/sidebar/NewSidebar';
 import { NewMessageList } from './components/chat/NewMessageList';
 import { NewChatInput } from './components/chat/NewChatInput';
+import { HtmlViewer } from './components/viewer/HtmlViewer';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { cn } from './utils/cn';
 
@@ -55,6 +56,12 @@ function ErrorToast({ error, onClose }: { error: string; onClose: () => void }) 
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [errorDismissed, setErrorDismissed] = useState(false);
+  const [splitViewOpen, setSplitViewOpen] = useState(false);
+  const [htmlViewerData, setHtmlViewerData] = useState<{
+    htmlPath: string;
+    title: string;
+  } | null>(null);
+  const [highlightedToolId, setHighlightedToolId] = useState<string | null>(null);
   const { isMobile, isDesktop } = useResponsive();
   
   // 使用聊天 Hook
@@ -78,9 +85,8 @@ function AppContent() {
    * 处理会话选择
    */
   const handleSessionSelect = async (sessionId: string | null) => {
-    if (isMobile) {
-      setSidebarOpen(false); // 移动端自动关闭侧边栏
-    }
+    // 像 Claude 一样，点击历史记录后自动隐藏侧边栏
+    setSidebarOpen(false);
     await switchSession(sessionId);
   };
 
@@ -88,9 +94,8 @@ function AppContent() {
    * 处理新建会话
    */
   const handleNewSession = () => {
-    if (isMobile) {
-      setSidebarOpen(false); // 移动端自动关闭侧边栏
-    }
+    // 像 Claude 一样，新建会话后也自动隐藏侧边栏
+    setSidebarOpen(false);
     createNewSession();
   };
 
@@ -108,7 +113,31 @@ function AppContent() {
     setErrorDismissed(true);
   };
 
-  // 响应式侧边栏控制
+  /**
+   * 处理 HTML 查看
+   */
+  const handleViewHtml = (htmlPath: string, title?: string) => {
+    setHtmlViewerData({
+      htmlPath,
+      title: title || 'HTML 预览'
+    });
+    setSplitViewOpen(true);
+    
+    // 高亮相关的工具调用（这里需要根据实际情况设置）
+    // 由于无法直接知道是哪个工具调用触发的，我们可以通过其他方式来识别
+    setHighlightedToolId(null); // 暂时设为 null，后续可以优化
+  };
+
+  /**
+   * 关闭 HTML 查看器
+   */
+  const handleCloseHtmlViewer = () => {
+    setSplitViewOpen(false);
+    setHtmlViewerData(null);
+    setHighlightedToolId(null);
+  };
+
+  // 响应式侧边栏控制 - 只在初始化时设置，之后由用户控制
   React.useEffect(() => {
     if (isDesktop) {
       setSidebarOpen(true);
@@ -133,13 +162,15 @@ function AppContent() {
       </AnimatePresence>
 
       {/* 主内容区域 */}
-      <motion.div
-        layout
-        className={cn(
-          'flex-1 flex flex-col min-w-0 h-screen',
-          'lg:ml-0', // 大屏幕时不需要左边距（侧边栏是 fixed 定位）
-        )}
-      >
+      <div className="flex-1 flex min-w-0 h-screen">
+        {/* 聊天区域 */}
+        <motion.div
+          layout
+          className={cn(
+            'flex flex-col min-w-0 h-screen transition-all duration-300',
+            splitViewOpen ? 'flex-1' : 'w-full'
+          )}
+        >
         {/* 会话标题栏 */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -147,6 +178,24 @@ function AppContent() {
           className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b bg-background/80 backdrop-blur-sm"
         >
           <div className="flex items-center gap-4">
+            {/* 侧边栏切换按钮 */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleSidebar}
+              className="p-2 hover:bg-accent rounded-lg transition-colors group"
+              title={sidebarOpen ? "隐藏侧边栏" : "显示侧边栏"}
+            >
+              <svg 
+                className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </motion.button>
+            
             {/* 会话图标 */}
             <div className="p-2 bg-primary/10 rounded-lg">
               <svg className="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,6 +247,8 @@ function AppContent() {
               messages={currentMessages} 
               isLoading={state.isLoading}
               className="h-full"
+              onViewHtml={handleViewHtml}
+              highlightedToolId={highlightedToolId || undefined}
             />
           ) : (
             <div className="h-full overflow-y-auto">
@@ -310,7 +361,21 @@ function AppContent() {
             }
           />
         </motion.div>
-      </motion.div>
+        </motion.div>
+
+        {/* HTML 查看器 - 分屏右侧 */}
+        <AnimatePresence>
+          {splitViewOpen && htmlViewerData && (
+            <div className="w-1/2 border-l">
+              <HtmlViewer
+                htmlPath={htmlViewerData.htmlPath}
+                title={htmlViewerData.title}
+                onClose={handleCloseHtmlViewer}
+              />
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* 错误提示 */}
       <AnimatePresence>

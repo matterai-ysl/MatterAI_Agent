@@ -300,30 +300,32 @@ export function NewSidebar({
 
   return (
     <>
-      {/* 移动端遮罩层 */}
+      {/* 遮罩层 - Claude 风格，桌面端也有遮罩 */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black/20 dark:bg-black/50 z-40"
             onClick={onToggle}
           />
         )}
       </AnimatePresence>
 
       {/* 侧边栏主体 */}
-      <motion.div
-        initial={{ x: -320 }}
-        animate={{ x: isOpen ? 0 : -320 }}
-        transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className={cn(
-          'fixed left-0 top-0 h-full w-80 bg-sidebar border-r z-50',
-          'lg:relative lg:translate-x-0',
-          className
-        )}
-      >
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ x: -320, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -320, opacity: 0 }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className={cn(
+              'fixed left-0 top-0 h-full w-80 bg-sidebar border-r z-50 shadow-xl',
+              className
+            )}
+          >
         <div className="flex flex-col h-full">
           {/* 头部 */}
           <div className="p-4 border-b">
@@ -336,12 +338,13 @@ export function NewSidebar({
                 MatterAI
               </motion.h1>
               
-              {/* 移动端关闭按钮 */}
+              {/* 关闭按钮 - Claude 风格 */}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onToggle}
-                className="h-8 w-8 lg:hidden"
+                className="h-8 w-8"
+                title="隐藏侧边栏"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -434,22 +437,25 @@ export function NewSidebar({
             </div>
           </div>
         </div>
-      </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* 移动端切换按钮 */}
+      {/* 显示侧边栏按钮 - 当侧边栏隐藏时显示 */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed top-4 left-4 z-30 lg:hidden"
+            className="fixed top-4 left-4 z-30"
           >
             <Button
               variant="default"
               size="icon"
               onClick={onToggle}
               className="h-10 w-10 shadow-lg"
+              title="显示侧边栏"
             >
               <Menu className="h-5 w-5" />
             </Button>
