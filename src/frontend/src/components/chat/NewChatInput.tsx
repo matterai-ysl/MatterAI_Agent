@@ -17,15 +17,18 @@ import {
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
 import { FileUpload } from './FileUpload';
+import { ToolSelector } from '../tools/ToolSelector';
 
 /**
  * 聊天输入组件属性接口
  */
 interface ChatInputProps {
-  onSendMessage: (message: string, files?: FileList) => void;
+  onSendMessage: (message: string, files?: FileList, selectedTools?: string[]) => void;
   disabled?: boolean;
   placeholder?: string;
   className?: string;
+  selectedTools?: string[];
+  onToolsChange?: (tools: string[]) => void;
 }
 
 /**
@@ -174,7 +177,9 @@ export function NewChatInput({
   onSendMessage, 
   disabled = false, 
   placeholder = "向 MatterAI 发送消息...",
-  className 
+  className,
+  selectedTools = [],
+  onToolsChange
 }: ChatInputProps) {
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
@@ -216,7 +221,7 @@ export function NewChatInput({
     }
 
     // 发送消息
-    onSendMessage(trimmedMessage, files || undefined);
+    onSendMessage(trimmedMessage, files || undefined, selectedTools);
 
     // 重置状态
     setMessage('');
@@ -227,7 +232,7 @@ export function NewChatInput({
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
-  }, [message, files, onSendMessage]);
+  }, [message, files, selectedTools, onSendMessage]);
 
   /**
    * 处理键盘事件
@@ -346,13 +351,23 @@ export function NewChatInput({
         )}
       </AnimatePresence>
 
+      {/* 工具选择器 */}
+      {onToolsChange && (
+        <div className="px-4 pt-2 pb-1 bg-background/95 backdrop-blur-sm">
+          <ToolSelector
+            selectedTools={selectedTools}
+            onToolsChange={onToolsChange}
+          />
+        </div>
+      )}
+
       {/* 文件预览 */}
       {files && files.length > 0 && (
         <FilePreview files={files} onRemove={handleRemoveFile} />
       )}
 
       {/* 输入区域 */}
-      <div className="p-4">
+      <div className="px-4 pt-1 pb-4">
         <div
           className={cn(
             "flex items-end gap-3 p-3 rounded-2xl border border-border bg-background",
@@ -410,7 +425,7 @@ export function NewChatInput({
                 已选择 {files.length} 个文件
               </span>
             ) : (
-              <span>支持文本、图片、文档等多种格式</span>
+              <span>支持材料数据、研究报告、图片等多种格式</span>
             )}
           </div>
           

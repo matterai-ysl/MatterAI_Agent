@@ -108,7 +108,7 @@ def test_html(format: str = "html") -> dict:
     Returns:
         dict: 包含html_path的字典
     """
-    return {"report_html_path": "/Users/ysl/Desktop/Code/MatterAI_Agent/test_report.html"}
+    return {"html_path": "/Users/ysl/Desktop/Code/MatterAI_Agent/test_report.html"}
 
 ############################
 # MCP 工具与 Agent 定义

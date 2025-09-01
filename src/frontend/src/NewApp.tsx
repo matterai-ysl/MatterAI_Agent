@@ -62,6 +62,7 @@ function AppContent() {
     title: string;
   } | null>(null);
   const [highlightedToolId, setHighlightedToolId] = useState<string | null>(null);
+  const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const { isMobile, isDesktop } = useResponsive();
   
   // 使用聊天 Hook
@@ -102,8 +103,17 @@ function AppContent() {
   /**
    * 处理发送消息
    */
-  const handleSendMessage = async (message: string, files?: FileList) => {
+  const handleSendMessage = async (message: string, files?: FileList, tools?: string[]) => {
     await sendMessage(message, files);
+    // TODO: 将 selectedTools 传递给后端
+    console.log('Selected tools:', tools);
+  };
+
+  /**
+   * 处理工具选择变化
+   */
+  const handleToolsChange = (tools: string[]) => {
+    setSelectedTools(tools);
   };
 
   /**
@@ -175,7 +185,7 @@ function AppContent() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b bg-background/80 backdrop-blur-sm"
+          className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b bg-background"
         >
           <div className="flex items-center gap-4">
             {/* 侧边栏切换按钮 */}
@@ -252,49 +262,49 @@ function AppContent() {
             />
           ) : (
             <div className="h-full overflow-y-auto">
-              <div className="h-full flex items-center justify-center p-8">
-                <div className="max-w-4xl mx-auto text-center space-y-8">
+              <div className="p-8 pt-4">
+                <div className="max-w-4xl mx-auto text-center space-y-6">
                   {/* 主标题区域 */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="space-y-6"
+                    className="space-y-4"
                   >
                     {/* Logo 图标 */}
                     <motion.div
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ delay: 0.2, duration: 0.5 }}
-                      className="relative mx-auto w-20 h-20"
+                      className="relative mx-auto w-16 h-16"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80 rounded-2xl rotate-3 opacity-20" />
-                      <div className="relative bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center w-full h-full shadow-lg">
-                        <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80 rounded-xl rotate-3 opacity-20" />
+                      <div className="relative bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center w-full h-full shadow-lg">
+                        <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                       </div>
                     </motion.div>
 
                     {/* 标题 */}
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <motion.h1
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3, duration: 0.5 }}
-                        className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent"
+                        className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent"
                       >
-                        你好！我是 MatterAI
+                        你好！我是 MatterAI，您可靠的科研伙伴
                       </motion.h1>
                       
                       <motion.p
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
-                        className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+                        className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed"
                       >
-                        我是您的智能旅游规划助手，可以帮您规划行程、查询景点、获取天气信息等。
-                        让我们开始一段美妙的旅程吧！
+                        专注于材料研发领域。我能协助您进行材料设计、性能分析、工艺优化、机器学习建模、理论计算等研究工作。
+                        让我们一起探索材料科学的无限可能！
                       </motion.p>
                     </div>
                   </motion.div>
@@ -304,20 +314,25 @@ function AppContent() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5, duration: 0.6 }}
-                    className="space-y-6"
+                    className="space-y-4"
                   >
-                    <h2 className="text-xl font-semibold text-foreground">
-                      您可以尝试以下问题
+                    <h2 className="text-lg font-semibold text-foreground">
+                      您可以尝试以下材料研发问题
                     </h2>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* 根据工具选择器状态动态调整间距 */}
+                    <div className={cn(
+                      "transition-all duration-200",
+                      "pb-20" // 工具选择器展开时增加底部间距，避免遮挡
+                    )}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        { title: "规划旅游行程", desc: "帮我规划一次3天2夜的北京旅游行程" },
-                        { title: "查询天气信息", desc: "查询上海未来一周的天气预报" },
-                        { title: "推荐热门景点", desc: "推荐杭州最值得游览的热门景点" },
-                        { title: "旅行建议咨询", desc: "为初次出国旅行提供实用建议" },
-                        { title: "交通路线查询", desc: "查询从北京到上海的最佳交通方式" },
-                        { title: "美食推荐", desc: "推荐成都必吃的特色美食" }
+                        { title: "锂电池材料合成", desc: "如何合成高性能的硅纳米线负极材料？" },
+                        { title: "合金性能分析", desc: "分析Ti-6Al-4V钛合金的力学性能特征" },
+                        { title: "陶瓷材料优化", desc: "利用主动学习算法优化氧化铝陶瓷的烧结工艺参数" },
+                        { title: "材料数据收集", desc: "从文献中收集和整理锂电池材料的结构化数据" },
+                        { title: "材料表征方法", desc: "使用VASP计算NiO纳米粒子的DOS特性" },
+                        { title: "材料组成与性能关系", desc: "利用机器学习方法研究材料组成与性能关系" }
                       ].map((example, index) => (
                         <motion.div
                           key={example.title}
@@ -326,16 +341,17 @@ function AppContent() {
                           transition={{ delay: 0.6 + index * 0.1, duration: 0.5 }}
                           whileHover={{ scale: 1.02, y: -4 }}
                           onClick={() => handleSendMessage(example.desc)}
-                          className="p-6 bg-card border border-border rounded-xl cursor-pointer transition-all duration-200 hover:border-primary/30 hover:bg-card/80 shadow-sm hover:shadow-md"
+                          className="p-3 bg-card border border-border rounded-lg cursor-pointer transition-all duration-200 hover:border-primary/30 hover:bg-card/80 shadow-sm hover:shadow-md"
                         >
-                          <h3 className="font-medium text-sm text-foreground mb-2">
+                          <h3 className="font-medium text-sm text-foreground mb-1">
                             {example.title}
                           </h3>
-                          <p className="text-xs text-muted-foreground leading-relaxed">
+                          <p className="text-xs text-muted-foreground leading-tight">
                             {example.desc}
                           </p>
                         </motion.div>
                       ))}
+                      </div>
                     </div>
                   </motion.div>
                 </div>
@@ -359,6 +375,8 @@ function AppContent() {
                 ? '正在处理中，请稍候...' 
                 : '向 MatterAI 发送消息...'
             }
+            selectedTools={selectedTools}
+            onToolsChange={handleToolsChange}
           />
         </motion.div>
         </motion.div>
