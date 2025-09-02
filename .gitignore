@@ -1,1 +1,28 @@
 src/frontend/node_modules/.cache/
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+.venv/
+.virtualenv/
+
+# Node.js
+node_modules/
+npm-debug.log
+.yarn-integrity
+.cache/
+dist/
+build/
+
+# IDE and OS
+.DS_Store
+.pytest_cache
+.idea/
+.vscode/
+*.swp
+*~
+
+# Large files
+*.pack
+*.log
