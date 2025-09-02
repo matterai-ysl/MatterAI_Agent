@@ -12,8 +12,8 @@ export type PresetToolType = 'material-knowledge' | 'xgboost' | 'material-extrac
  */
 export interface BaseTool {
   id: string;
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
   icon?: string;
   enabled: boolean;
 }
@@ -24,6 +24,8 @@ export interface BaseTool {
 export interface PresetTool extends BaseTool {
   type: 'preset';
   toolType: PresetToolType;
+  name: string;
+  description: string;
 }
 
 /**

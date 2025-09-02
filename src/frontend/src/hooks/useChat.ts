@@ -25,7 +25,7 @@ interface UseChatReturn {
   isConnected: boolean;
   
   // 操作方法
-  sendMessage: (content: string, files?: FileList) => Promise<void>;
+  sendMessage: (content: string, files?: FileList, selectedTools?: string[], customTools?: any[]) => Promise<void>;
   switchSession: (sessionId: string | null) => Promise<void>;
   createNewSession: () => void;
   loadSessions: () => Promise<void>;
@@ -287,7 +287,7 @@ export function useChat(userId: string): UseChatReturn {
   /**
    * 发送消息
    */
-  const sendMessage = useCallback(async (content: string, files?: FileList) => {
+  const sendMessage = useCallback(async (content: string, files?: FileList, selectedTools?: string[], customTools?: any[]) => {
     console.log('🚀 sendMessage 被调用:', { content, hasFiles: !!files?.length });
     
     if (!content.trim() && !files?.length) {
@@ -356,6 +356,12 @@ export function useChat(userId: string): UseChatReturn {
       
       currentMessageRef.current = assistantMessage;
 
+      // 转换自定义工具格式以匹配后端期望
+      const convertedCustomTools = (customTools || []).map(tool => ({
+        url: tool.mcpUrl,
+        transport: tool.transportType,
+      }));
+
       // 开始 SSE 连接
       console.log('🔌 准备建立SSE连接...');
       setIsConnected(true);
@@ -364,6 +370,8 @@ export function useChat(userId: string): UseChatReturn {
           user_id: userId,
           query: content,
           session_id: state.currentSessionId || undefined,
+          selected_tools: selectedTools || [],
+          custom_tools: convertedCustomTools,
         },
         handleSSEMessage,
         handleSSEError,

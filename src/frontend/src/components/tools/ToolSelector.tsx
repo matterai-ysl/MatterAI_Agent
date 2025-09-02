@@ -23,8 +23,9 @@ import { CustomToolForm } from './CustomToolForm';
  */
 interface ToolSelectorProps {
   selectedTools: string[];
-  onToolsChange: (tools: string[]) => void;
+  onToolsChange: (tools: string[], customTools: CustomTool[]) => void;
   className?: string;
+  shouldCollapse?: boolean; // 外部控制是否应该折叠
 }
 
 /**
@@ -33,12 +34,20 @@ interface ToolSelectorProps {
 export function ToolSelector({
   selectedTools,
   onToolsChange,
-  className
+  className,
+  shouldCollapse = false
 }: ToolSelectorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [customTools, setCustomTools] = useState<CustomTool[]>([]);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [editingTool, setEditingTool] = useState<CustomTool | null>(null);
+
+  // 处理外部控制的折叠
+  React.useEffect(() => {
+    if (shouldCollapse) {
+      setIsExpanded(false);
+    }
+  }, [shouldCollapse]);
 
   // 生成预设工具实例
   const presetTools: PresetTool[] = PRESET_TOOLS.map((tool, index) => ({
@@ -58,7 +67,7 @@ export function ToolSelector({
     const newSelectedTools = selectedTools.includes(toolId)
       ? selectedTools.filter(id => id !== toolId)
       : [...selectedTools, toolId];
-    onToolsChange(newSelectedTools);
+    onToolsChange(newSelectedTools, customTools);
   };
 
   // 添加自定义工具
@@ -66,10 +75,13 @@ export function ToolSelector({
     const newTool: CustomTool = {
       ...tool,
       id: `custom-${Date.now()}`,
-      enabled: false,
+      enabled: true, // 默认选中新添加的工具
     };
-    setCustomTools(prev => [...prev, newTool]);
+    const newCustomTools = [...customTools, newTool];
+    const newSelectedTools = [...selectedTools, newTool.id]; // 自动选中新工具
+    setCustomTools(newCustomTools);
     setShowCustomForm(false);
+    onToolsChange(newSelectedTools, newCustomTools);
   };
 
   // 编辑自定义工具
@@ -82,19 +94,22 @@ export function ToolSelector({
   const handleUpdateCustomTool = (updatedTool: Omit<CustomTool, 'id' | 'enabled'>) => {
     if (!editingTool) return;
     
-    setCustomTools(prev => prev.map(tool => 
+    const newCustomTools = customTools.map(tool => 
       tool.id === editingTool.id 
         ? { ...updatedTool, id: editingTool.id, enabled: tool.enabled }
         : tool
-    ));
+    );
+    setCustomTools(newCustomTools);
     setEditingTool(null);
     setShowCustomForm(false);
+    onToolsChange(selectedTools, newCustomTools);
   };
 
   // 删除自定义工具
   const handleDeleteCustomTool = (toolId: string) => {
-    setCustomTools(prev => prev.filter(tool => tool.id !== toolId));
-    onToolsChange(selectedTools.filter(id => id !== toolId));
+    const newCustomTools = customTools.filter(tool => tool.id !== toolId);
+    setCustomTools(newCustomTools);
+    onToolsChange(selectedTools.filter(id => id !== toolId), newCustomTools);
   };
 
   return (
@@ -186,6 +201,20 @@ export function ToolSelector({
                   点击 + 按钮添加自定义工具
                 </div>
               )}
+
+              {/* 底部添加按钮 */}
+              <div className="pt-2 border-t mt-2">
+                <button
+                  onClick={() => {
+                    setEditingTool(null);
+                    setShowCustomForm(true);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 p-2 border border-dashed border-muted-foreground/30 rounded-lg text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="text-sm">添加自定义工具</span>
+                </button>
+              </div>
             </div>
           </motion.div>
         )}

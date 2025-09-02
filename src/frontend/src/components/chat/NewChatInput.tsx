@@ -18,17 +18,18 @@ import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
 import { FileUpload } from './FileUpload';
 import { ToolSelector } from '../tools/ToolSelector';
+import { CustomTool } from '../../types/tools';
 
 /**
  * 聊天输入组件属性接口
  */
 interface ChatInputProps {
-  onSendMessage: (message: string, files?: FileList, selectedTools?: string[]) => void;
+  onSendMessage: (message: string, files?: FileList, selectedTools?: string[], customTools?: CustomTool[]) => void;
   disabled?: boolean;
   placeholder?: string;
   className?: string;
   selectedTools?: string[];
-  onToolsChange?: (tools: string[]) => void;
+  onToolsChange?: (tools: string[], customTools: CustomTool[]) => void;
 }
 
 /**
@@ -185,6 +186,8 @@ export function NewChatInput({
   const [files, setFiles] = useState<FileList | null>(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [isRecording, setIsRecording] = useState(false); // TODO: 实现语音录制功能
+  const [customTools, setCustomTools] = useState<CustomTool[]>([]);
+  const [shouldCollapseTools, setShouldCollapseTools] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -221,18 +224,32 @@ export function NewChatInput({
     }
 
     // 发送消息
-    onSendMessage(trimmedMessage, files || undefined, selectedTools);
+    onSendMessage(trimmedMessage, files || undefined, selectedTools, customTools);
 
+    // 触发工具选择器折叠
+    setShouldCollapseTools(true);
+    
     // 重置状态
     setMessage('');
     setFiles(null);
     setShowFileUpload(false);
+    
+    // 重置工具折叠状态
+    setTimeout(() => setShouldCollapseTools(false), 100);
 
     // 重置文本框高度
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
-  }, [message, files, selectedTools, onSendMessage]);
+  }, [message, files, selectedTools, customTools, onSendMessage]);
+
+  /**
+   * 处理工具变更
+   */
+  const handleToolsChange = useCallback((tools: string[], newCustomTools: CustomTool[]) => {
+    setCustomTools(newCustomTools);
+    onToolsChange?.(tools, newCustomTools);
+  }, [onToolsChange]);
 
   /**
    * 处理键盘事件
@@ -356,7 +373,8 @@ export function NewChatInput({
         <div className="px-4 pt-2 pb-1 bg-background/95 backdrop-blur-sm">
           <ToolSelector
             selectedTools={selectedTools}
-            onToolsChange={onToolsChange}
+            onToolsChange={handleToolsChange}
+            shouldCollapse={shouldCollapseTools}
           />
         </div>
       )}

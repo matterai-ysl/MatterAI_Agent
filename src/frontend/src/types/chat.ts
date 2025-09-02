@@ -93,10 +93,17 @@ export interface SSEEvent {
 /**
  * 聊天请求参数
  */
+export interface CustomToolConfig {
+  url: string;
+  transport: string; // "http" 或 "sse"
+}
+
 export interface ChatRequest {
   user_id: string;
   query: string;
   session_id?: string;
+  selected_tools?: string[];
+  custom_tools?: CustomToolConfig[];
 }
 
 /**

@@ -63,7 +63,7 @@ export function ToolItem({
         ) : (
           <div className="w-6 h-6 bg-muted rounded flex items-center justify-center">
             <span className="text-xs text-muted-foreground">
-              {tool.name.charAt(0)}
+              {tool.name?.charAt(0) || '?'}
             </span>
           </div>
         )}
@@ -72,13 +72,13 @@ export function ToolItem({
       {/* 工具信息 */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h4 className="text-sm font-medium truncate">{tool.name}</h4>
+          <h4 className="text-sm font-medium truncate">{tool.name || '未命名工具'}</h4>
           {tool.type === 'custom' && (
             <ExternalLink className="h-3 w-3 text-muted-foreground flex-shrink-0" />
           )}
         </div>
         <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-          {tool.description}
+          {tool.description || '无描述'}
         </p>
         
         {/* 自定义工具额外信息 */}

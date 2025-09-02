@@ -63,6 +63,7 @@ function AppContent() {
   } | null>(null);
   const [highlightedToolId, setHighlightedToolId] = useState<string | null>(null);
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
+  const [customTools, setCustomTools] = useState<any[]>([]);
   const { isMobile, isDesktop } = useResponsive();
   
   // 使用聊天 Hook
@@ -103,17 +104,18 @@ function AppContent() {
   /**
    * 处理发送消息
    */
-  const handleSendMessage = async (message: string, files?: FileList, tools?: string[]) => {
-    await sendMessage(message, files);
-    // TODO: 将 selectedTools 传递给后端
+  const handleSendMessage = async (message: string, files?: FileList, tools?: string[], customToolsData?: any[]) => {
+    await sendMessage(message, files, tools, customToolsData);
     console.log('Selected tools:', tools);
+    console.log('Custom tools:', customToolsData);
   };
 
   /**
    * 处理工具选择变化
    */
-  const handleToolsChange = (tools: string[]) => {
+  const handleToolsChange = (tools: string[], customToolsData: any[]) => {
     setSelectedTools(tools);
+    setCustomTools(customToolsData);
   };
 
   /**

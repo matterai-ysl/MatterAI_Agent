@@ -53,8 +53,8 @@ export function CustomToolForm({
   useEffect(() => {
     if (initialData) {
       setFormData({
-        name: initialData.name,
-        description: initialData.description,
+        name: initialData.name || '',
+        description: initialData.description || '',
         mcpUrl: initialData.mcpUrl,
         transportType: initialData.transportType,
         icon: initialData.icon || '🔧',
@@ -75,13 +75,14 @@ export function CustomToolForm({
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = '工具名称不能为空';
-    }
+    // name 和 description 现在是可选的
+    // if (!formData.name.trim()) {
+    //   newErrors.name = '工具名称不能为空';
+    // }
 
-    if (!formData.description.trim()) {
-      newErrors.description = '工具描述不能为空';
-    }
+    // if (!formData.description.trim()) {
+    //   newErrors.description = '工具描述不能为空';
+    // }
 
     if (!formData.mcpUrl.trim()) {
       newErrors.mcpUrl = 'MCP URL不能为空';
@@ -115,8 +116,8 @@ export function CustomToolForm({
     try {
       await onSubmit({
         type: 'custom',
-        name: formData.name.trim(),
-        description: formData.description.trim(),
+        name: formData.name.trim() || undefined,
+        description: formData.description.trim() || undefined,
         mcpUrl: formData.mcpUrl.trim(),
         transportType: formData.transportType,
         icon: formData.icon,
@@ -136,7 +137,7 @@ export function CustomToolForm({
       {/* 工具名称 */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium mb-1">
-          工具名称 *
+          工具名称 (可选)
         </label>
         <input
           id="name"
@@ -158,7 +159,7 @@ export function CustomToolForm({
       {/* 工具描述 */}
       <div>
         <label htmlFor="description" className="block text-sm font-medium mb-1">
-          工具描述 *
+          工具描述 (可选)
         </label>
         <textarea
           id="description"
