@@ -127,18 +127,6 @@ export function ToolSelector({
         </div>
         
         <div className="flex items-center gap-2">
-          {/* 添加自定义工具按钮 */}
-          <button
-            onClick={() => {
-              setEditingTool(null);
-              setShowCustomForm(true);
-            }}
-            className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
-            title="添加自定义工具"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-          
           {/* 展开/折叠按钮 */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
@@ -227,7 +215,7 @@ export function ToolSelector({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 py-4 overflow-y-auto"
             onClick={() => {
               setShowCustomForm(false);
               setEditingTool(null);
@@ -237,10 +225,10 @@ export function ToolSelector({
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-background border rounded-lg p-6 w-full max-w-md mx-4"
+              className="bg-background border rounded-lg w-full max-w-md mx-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 p-6 pb-4">
                 <h3 className="text-lg font-semibold">
                   {editingTool ? '编辑工具' : '添加自定义工具'}
                 </h3>
@@ -255,14 +243,16 @@ export function ToolSelector({
                 </button>
               </div>
               
-              <CustomToolForm
-                initialData={editingTool}
-                onSubmit={editingTool ? handleUpdateCustomTool : handleAddCustomTool}
-                onCancel={() => {
-                  setShowCustomForm(false);
-                  setEditingTool(null);
-                }}
-              />
+              <div className="px-6 pb-6">
+                <CustomToolForm
+                  initialData={editingTool}
+                  onSubmit={editingTool ? handleUpdateCustomTool : handleAddCustomTool}
+                  onCancel={() => {
+                    setShowCustomForm(false);
+                    setEditingTool(null);
+                  }}
+                />
+              </div>
             </motion.div>
           </motion.div>
         )}

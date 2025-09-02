@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, Menu } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { ChatInput } from '../chat/ChatInput';
 
@@ -21,6 +21,7 @@ interface MindsWelcomeProps {
   onModuleSelect: (module: MindsModule) => void;
   selectedModules: MindsModule[];
   onSendMessage?: (message: string, files?: FileList) => void;
+  onSidebarToggle?: () => void;
 }
 
 interface ModuleChipProps {
@@ -91,12 +92,24 @@ function ModuleChip({ module, isSelected, onToggle }: ModuleChipProps) {
   );
 }
 
-export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendMessage }: MindsWelcomeProps) {
+export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendMessage, onSidebarToggle }: MindsWelcomeProps) {
 
   return (
     <div className="flex-1 flex flex-col">
       {/* 顶部导航栏 */}
       <div className="flex items-center justify-between p-4 border-b border-border/50">
+        <div className="flex items-center space-x-3">
+          {/* 历史记录按钮 */}
+          {onSidebarToggle && (
+            <button 
+              onClick={onSidebarToggle}
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              title="历史记录"
+            >
+              <Menu className="w-5 h-5 text-muted-foreground" />
+            </button>
+          )}
+        </div>
         <div className="flex-1 flex justify-center">
           <div className="flex items-center space-x-3">
             <div>

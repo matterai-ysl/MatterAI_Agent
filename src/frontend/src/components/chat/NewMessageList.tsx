@@ -330,12 +330,14 @@ const MessageItem = React.memo(function MessageItem({
   message, 
   isLast,
   onViewHtml,
-  highlightedToolId
+  highlightedToolId,
+  botName = 'MatterAI'
 }: { 
   message: ChatMessage;
   isLast?: boolean;
   onViewHtml?: (htmlPath: string, title?: string) => void;
   highlightedToolId?: string;
+  botName?: string;
 }) {
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
@@ -366,7 +368,8 @@ const MessageItem = React.memo(function MessageItem({
       exit={{ opacity: 0, y: -20 }}
       transition={message.isStreaming ? { duration: 0 } : { duration: 0.3 }}
       className={cn(
-        'group flex gap-4 px-6 py-6',
+        'group flex gap-4 px-6 py-4',
+        !isLast && 'border-b border-border/20',
         isUser && 'bg-muted/30',
         'hover:bg-muted/50 transition-colors'
       )}
@@ -395,7 +398,7 @@ const MessageItem = React.memo(function MessageItem({
         {/* 角色标识 */}
         <div className="flex items-center gap-2">
           <span className="font-medium text-sm">
-            {isUser ? '你' : 'MatterAI'}
+            {isUser ? '你' : botName}
           </span>
           <span className="text-xs text-muted-foreground">
             {formatDateTime(message.timestamp)}
@@ -478,6 +481,7 @@ interface MessageListProps {
   className?: string;
   onViewHtml?: (htmlPath: string, title?: string) => void;
   highlightedToolId?: string;
+  botName?: string; // 添加bot名称参数
 }
 
 /**
@@ -488,7 +492,8 @@ export function NewMessageList({
   isLoading = false, 
   className,
   onViewHtml,
-  highlightedToolId
+  highlightedToolId,
+  botName = 'MatterAI'
 }: MessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -541,6 +546,7 @@ export function NewMessageList({
       ref={scrollRef}
       className={cn(
         'overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border hover:scrollbar-thumb-muted-foreground',
+        'h-full', // 确保有高度约束
         className
       )}
     >
@@ -553,6 +559,7 @@ export function NewMessageList({
               isLast={index === messages.length - 1}
               onViewHtml={onViewHtml}
               highlightedToolId={highlightedToolId}
+              botName={botName}
             />
         ))}
         

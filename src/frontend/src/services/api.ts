@@ -178,17 +178,18 @@ export class ChatApiService {
   /**
    * 获取用户会话列表
    */
-  async getSessions(userId: string): Promise<SessionListResponse> {
-    return this.httpClient.get('/sessions', { user_id: userId });
+  async getSessions(userId: string, appName: string = 'default'): Promise<SessionListResponse> {
+    return this.httpClient.get('/sessions', { user_id: userId, app_name: appName });
   }
 
   /**
    * 获取会话历史记录
    */
-  async getHistory(userId: string, sessionId: string): Promise<HistoryResponse> {
+  async getHistory(userId: string, sessionId: string, appName: string = 'default'): Promise<HistoryResponse> {
     return this.httpClient.get('/history', { 
       user_id: userId, 
-      session_id: sessionId 
+      session_id: sessionId,
+      app_name: appName
     });
   }
 

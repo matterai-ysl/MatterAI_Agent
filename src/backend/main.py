@@ -87,11 +87,12 @@ async def create_or_get_session(runner, user_id, session_id=None):
     
     print(f"✅ 会话创建成功并保存到数据库，Session ID: {new_session.id}")
     return new_session.id  # 返回实际的 session_id
-async def list_existing_sessions(session_service, user_id):
-    """列出用户的所有会话"""
+async def list_existing_sessions(session_service, user_id, app_name: str):
+    """列出用户在指定 app 下的所有会话"""
     try:
+        full_app_name = f"{APP_NAME}_{app_name}"
         sessions_response = await session_service.list_sessions(
-            app_name=APP_NAME,
+            app_name=full_app_name,
             user_id=user_id
         )
         
@@ -567,8 +568,8 @@ async def get_cache_status() -> Dict[str, Any]:
 
 
 @app.get("/sessions")
-async def list_sessions(user_id: str = Query(..., description="用户ID")) -> Dict[str, List[str]]:
-    print(f"📋 收到获取会话列表请求 - user_id: {user_id}")
+async def list_sessions(user_id: str = Query(..., description="用户ID"), app_name: str = Query("default", description="应用名称")) -> Dict[str, List[str]]:
+    print(f"📋 收到获取会话列表请求 - user_id: {user_id}, app_name: {app_name}")
     print(f"📊 session_service 状态: {session_service is not None}")
     
     if session_service is None:
@@ -576,7 +577,7 @@ async def list_sessions(user_id: str = Query(..., description="用户ID")) -> Di
         raise HTTPException(status_code=503, detail="Service not ready")
     
     try:
-        ids = await list_existing_sessions(session_service, user_id)
+        ids = await list_existing_sessions(session_service, user_id, app_name)
         print(f"✅ 成功获取会话列表: {ids}")
         return {"sessions": ids}
     except Exception as e:
@@ -585,10 +586,11 @@ async def list_sessions(user_id: str = Query(..., description="用户ID")) -> Di
 
 
 @app.get("/history")
-async def get_history(user_id: str = Query(...), session_id: str = Query(...)) -> JSONResponse:
+async def get_history(user_id: str = Query(...), session_id: str = Query(...), app_name: str = Query("default")) -> JSONResponse:
     if session_service is None:
         raise HTTPException(status_code=503, detail="Service not ready")
-    session = await session_service.get_session(app_name=APP_NAME, user_id=user_id, session_id=session_id)
+    full_app_name = f"{APP_NAME}_{app_name}"
+    session = await session_service.get_session(app_name=full_app_name, user_id=user_id, session_id=session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
@@ -750,27 +752,17 @@ async def chat_stream(payload: ChatRequest) -> StreamingResponse:
     print(f"   自定义工具: {payload.custom_tools}")
     print(f"   app: {payload.app_name}")
     
-    # 确定实际的会话ID（如果有的话）
-    actual_session_id = payload.session_id
-    
-    # 根据选中的工具获取或创建会话级智能体
-    if payload.selected_tools or payload.custom_tools:
-        print(f"🔧 获取或创建会话级智能体...")
-        if actual_session_id:
-            local_runner = await get_or_create_session_agent(
-                payload.user_id,
-                actual_session_id, 
-                payload.selected_tools, 
-                payload.custom_tools,
-                payload.app_name or "default"
-            )
-        else:
-            # 如果没有会话ID，仍然创建临时智能体（但这种情况很少见）
-            print(f"⚠️ 没有会话ID，创建临时智能体")
-            dynamic_agent = create_dynamic_agent(payload.selected_tools, payload.custom_tools, payload.app_name or "default")
-            local_runner = Runner(agent=dynamic_agent, app_name=f"{APP_NAME}_{payload.app_name or 'default'}", session_service=session_service)  # type: ignore
-    else:
-        local_runner: Runner = cast(Runner, runner)
+    # 确定实际的会话ID（如果没有则生成一个）
+    actual_session_id = payload.session_id or str(uuid.uuid4())
+    # 始终按 app_name 和工具配置获取/创建“会话级智能体”
+    print("🔧 获取或创建会话级智能体（允许无工具）...")
+    local_runner = await get_or_create_session_agent(
+        payload.user_id,
+        actual_session_id,
+        payload.selected_tools,
+        payload.custom_tools,
+        payload.app_name or "default"
+    )
     
     user_id = payload.user_id
     requested_session_id = payload.session_id
@@ -781,9 +773,8 @@ async def chat_stream(payload: ChatRequest) -> StreamingResponse:
         try:
             print(f"🔄 开始处理流式响应...")
             
-            # 只有在没有会话ID且创建了临时智能体时才需要清理
-            if local_runner != runner and not actual_session_id:
-                should_close_runner = True
+            # 这里始终使用会话级智能体，无需在结束时清理
+            should_close_runner = False
             
             # 确保会话存在
             print(f"🔄 创建或获取会话...")

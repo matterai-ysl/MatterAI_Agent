@@ -39,7 +39,7 @@ interface UseChatReturn {
 /**
  * 聊天功能主 Hook
  */
-export function useChat(userId: string): UseChatReturn {
+export function useChat(userId: string, appName: string = 'default'): UseChatReturn {
   // 核心状态
   const [state, setState] = useState<AppState>({
     currentSessionId: null,
@@ -439,7 +439,7 @@ export function useChat(userId: string): UseChatReturn {
    */
   const loadSessions = useCallback(async () => {
     try {
-      const response = await chatApiService.getSessions(userId);
+      const response = await chatApiService.getSessions(userId, appName);
       
       // 转换为 ChatSession 格式，并为每个会话获取第一条用户消息作为标题
       const sessions: ChatSession[] = [];
@@ -447,7 +447,7 @@ export function useChat(userId: string): UseChatReturn {
       for (const id of response.sessions) {
         try {
           // 获取会话的第一条消息作为标题
-          const historyResponse = await chatApiService.getHistory(userId, id);
+          const historyResponse = await chatApiService.getHistory(userId, id, appName);
           let title = `会话 ${id.slice(-8)}`; // 默认标题
           
           // 查找第一条用户消息
@@ -505,14 +505,14 @@ export function useChat(userId: string): UseChatReturn {
         error: error instanceof Error ? error.message : '加载会话列表失败' 
       }));
     }
-  }, [userId, updateState]);
+  }, [userId, appName, updateState]);
 
   /**
    * 加载会话历史
    */
   const loadHistory = useCallback(async (sessionId: string) => {
     try {
-      const response = await chatApiService.getHistory(userId, sessionId);
+      const response = await chatApiService.getHistory(userId, sessionId, appName);
       console.log('📚 加载历史记录:', response);
       
       // 转换历史消息格式
@@ -548,7 +548,7 @@ export function useChat(userId: string): UseChatReturn {
         isLoading: false 
       }));
     }
-  }, [userId, updateState]);
+  }, [userId, appName, updateState]);
 
   /**
    * 上传文件

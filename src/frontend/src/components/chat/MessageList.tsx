@@ -5,6 +5,9 @@
 
 import React, { useEffect, useRef } from 'react';
 import { User, Bot, File, Image, Download } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 import { ChatMessage, MessageContent } from '../../types/chat';
 import { formatDateTime, getFileIconType } from '../../utils/format';
 import { cn } from '../../utils/cn';
@@ -19,30 +22,141 @@ function MessageContentRenderer({ content }: { content: MessageContent }) {
   switch (content.type) {
     case 'text':
       return (
-        <div className="prose prose-sm max-w-none">
-          <div className="whitespace-pre-wrap break-words">
-            {content.text}
-          </div>
+        <div className="prose prose-sm max-w-none dark:prose-invert markdown-content">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+            components={{
+              // 自定义组件样式
+              h1: ({ children }) => (
+                <h1 className="text-xl font-bold mb-3 mt-4 text-foreground border-b pb-2">
+                  {children}
+                </h1>
+              ),
+              h2: ({ children }) => (
+                <h2 className="text-lg font-semibold mb-2 mt-3 text-foreground">
+                  {children}
+                </h2>
+              ),
+              h3: ({ children }) => (
+                <h3 className="text-base font-medium mb-2 mt-2 text-foreground">
+                  {children}
+                </h3>
+              ),
+              p: ({ children }) => (
+                <p className="mb-2 last:mb-0 text-foreground leading-relaxed">
+                  {children}
+                </p>
+              ),
+              ul: ({ children }) => (
+                <ul className="list-disc pl-6 mb-2 space-y-1">
+                  {children}
+                </ul>
+              ),
+              ol: ({ children }) => (
+                <ol className="list-decimal pl-6 mb-2 space-y-1">
+                  {children}
+                </ol>
+              ),
+              li: ({ children }) => (
+                <li className="text-foreground">
+                  {children}
+                </li>
+              ),
+              strong: ({ children }) => (
+                <strong className="font-semibold text-foreground">
+                  {children}
+                </strong>
+              ),
+              em: ({ children }) => (
+                <em className="italic text-foreground">
+                  {children}
+                </em>
+              ),
+              code: ({ children, className, ...props }) => {
+                const isBlock = className?.includes('language-');
+                if (isBlock) {
+                  return (
+                    <code className={cn(
+                      "block bg-muted p-4 rounded-lg overflow-x-auto text-sm",
+                      className
+                    )} {...props}>
+                      {children}
+                    </code>
+                  );
+                }
+                return (
+                  <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">
+                    {children}
+                  </code>
+                );
+              },
+              pre: ({ children }) => (
+                <pre className="bg-muted border rounded-lg p-4 overflow-x-auto mb-4">
+                  {children}
+                </pre>
+              ),
+              blockquote: ({ children }) => (
+                <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground mb-4">
+                  {children}
+                </blockquote>
+              ),
+              table: ({ children }) => (
+                <div className="overflow-x-auto mb-4">
+                  <table className="min-w-full border border-border rounded-lg">
+                    {children}
+                  </table>
+                </div>
+              ),
+              thead: ({ children }) => (
+                <thead className="bg-muted">
+                  {children}
+                </thead>
+              ),
+              th: ({ children }) => (
+                <th className="border border-border px-4 py-2 text-left font-semibold">
+                  {children}
+                </th>
+              ),
+              td: ({ children }) => (
+                <td className="border border-border px-4 py-2">
+                  {children}
+                </td>
+              ),
+              a: ({ href, children }) => (
+                <a 
+                  href={href} 
+                  className="text-primary hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {children}
+                </a>
+              ),
+            }}
+          >
+            {content.text || ''}
+          </ReactMarkdown>
         </div>
       );
 
     case 'image':
       return (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {content.text && (
-            <div className="whitespace-pre-wrap break-words text-sm">
+            <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
               {content.text}
             </div>
           )}
-          <div className="border rounded-lg overflow-hidden">
+          <div className="border rounded-xl overflow-hidden bg-background shadow-sm">
             <img
               src={content.fileUrl}
               alt={content.fileName || '图片'}
-              className="max-w-full h-auto"
+              className="max-w-full h-auto max-h-96 object-cover"
               loading="lazy"
             />
             {content.fileName && (
-              <div className="p-2 bg-muted/50 text-xs text-muted-foreground">
+              <div className="p-3 bg-muted/50 text-xs text-muted-foreground border-t">
                 {content.fileName}
               </div>
             )}
@@ -55,15 +169,17 @@ function MessageContentRenderer({ content }: { content: MessageContent }) {
       const FileIconComponent = iconType === 'image' ? Image : File;
 
       return (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {content.text && (
-            <div className="whitespace-pre-wrap break-words text-sm">
+            <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
               {content.text}
             </div>
           )}
-          <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
-            <FileIconComponent className="h-8 w-8 text-blue-500 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-4 p-4 border rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <FileIconComponent className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0 space-y-1">
               <div className="font-medium text-sm truncate">
                 {content.fileName}
               </div>
@@ -77,7 +193,7 @@ function MessageContentRenderer({ content }: { content: MessageContent }) {
               variant="ghost"
               size="icon"
               asChild
-              className="h-8 w-8"
+              className="h-8 w-8 hover:bg-background"
             >
               <a
                 href={content.fileUrl}
@@ -100,19 +216,23 @@ function MessageContentRenderer({ content }: { content: MessageContent }) {
 /**
  * 单条消息组件
  */
-function MessageItem({ message }: { message: ChatMessage }) {
+function MessageItem({ message, isLast }: { message: ChatMessage; isLast?: boolean }) {
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
 
   return (
     <div className={cn(
-      'flex gap-4 p-4',
-      isUser && 'flex-row-reverse'
+      'group flex gap-4 px-6 py-6',
+      !isLast && 'border-b border-border/20',
+      isUser && 'bg-muted/30',
+      'hover:bg-muted/50 transition-colors'
     )}>
       {/* 头像 */}
       <div className={cn(
-        'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-        isUser ? 'bg-primary text-primary-foreground' : 'bg-secondary'
+        'flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center shadow-sm',
+        isUser 
+          ? 'bg-primary text-primary-foreground' 
+          : 'bg-gradient-to-br from-primary/80 to-primary text-primary-foreground'
       )}>
         {isUser ? (
           <User className="h-4 w-4" />
@@ -122,17 +242,19 @@ function MessageItem({ message }: { message: ChatMessage }) {
       </div>
 
       {/* 消息内容 */}
-      <div className={cn(
-        'flex-1 space-y-3',
-        isUser && 'flex flex-col items-end'
-      )}>
-        {/* 消息气泡 */}
-        <div className={cn(
-          'max-w-[80%] rounded-lg p-4',
-          isUser 
-            ? 'bg-primary text-primary-foreground ml-auto' 
-            : 'bg-muted'
-        )}>
+      <div className="flex-1 space-y-3 min-w-0">
+        {/* 角色标识 */}
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-sm">
+            {isUser ? '你' : 'MINDS'}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {formatDateTime(message.timestamp)}
+          </span>
+        </div>
+
+        {/* 消息内容 */}
+        <div className="space-y-3">
           {/* 渲染消息内容 */}
           <div className="space-y-3">
             {message.content.map((content, index) => (
@@ -142,20 +264,20 @@ function MessageItem({ message }: { message: ChatMessage }) {
 
           {/* 流式输出指示器 */}
           {message.isStreaming && isAssistant && (
-            <div className="flex items-center gap-1 mt-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 mt-3 text-muted-foreground">
               <div className="flex space-x-1">
-                <div className="w-1 h-1 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-1 h-1 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-1 h-1 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
-              <span>正在回复...</span>
+              <span className="text-sm">AI 正在输入...</span>
             </div>
           )}
         </div>
 
         {/* 工具调用展示 */}
         {isAssistant && (message.toolCalls || message.toolResults) && (
-          <div className="max-w-[80%]">
+          <div>
             <ToolDisplay
               toolCalls={message.toolCalls}
               toolResults={message.toolResults}
@@ -164,18 +286,13 @@ function MessageItem({ message }: { message: ChatMessage }) {
           </div>
         )}
 
-        {/* 时间戳 */}
-        <div className={cn(
-          'text-xs text-muted-foreground',
-          isUser && 'text-right'
-        )}>
-          {formatDateTime(message.timestamp)}
-        </div>
-
         {/* 错误信息 */}
         {message.error && (
-          <div className="max-w-[80%] p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-            <div className="text-destructive text-sm">
+          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <div className="text-destructive text-sm font-medium">
+              ⚠️ 发生错误
+            </div>
+            <div className="text-destructive text-sm mt-1">
               {message.error}
             </div>
           </div>
@@ -247,8 +364,12 @@ export function MessageList({
   return (
     <ScrollArea className={cn('flex-1', className)}>
       <div ref={scrollRef} className="min-h-full">
-        {messages.map((message) => (
-          <MessageItem key={message.id} message={message} />
+        {messages.map((message, index) => (
+          <MessageItem 
+            key={message.id} 
+            message={message} 
+            isLast={index === messages.length - 1}
+          />
         ))}
         
         {/* 加载指示器 */}

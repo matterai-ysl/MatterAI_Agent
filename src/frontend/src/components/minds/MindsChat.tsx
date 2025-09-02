@@ -3,11 +3,10 @@
  * 复用现有聊天组件，添加模块选择功能
  */
 
-import { useState } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, Menu } from 'lucide-react';
 import { ChatMessage } from '../../types/chat';
-import { MessageList } from '../chat/MessageList';
-import { ChatInput } from '../chat/ChatInput';
+import { NewMessageList } from '../chat/NewMessageList';
+import { NewChatInput } from '../chat/NewChatInput';
 import { cn } from '../../utils/cn';
 
 interface MindsModule {
@@ -20,12 +19,15 @@ interface MindsModule {
 
 interface MindsChatProps {
   messages: ChatMessage[];
-  onSendMessage: (message: string, files?: FileList) => Promise<void>;
+  onSendMessage: (message: string, files?: FileList, selectedTools?: string[], customTools?: any[]) => Promise<void>;
   isLoading: boolean;
   isConnected: boolean;
   selectedModules: MindsModule[];
   onModuleSelect: (module: MindsModule) => void;
   modules: MindsModule[];
+  onSidebarToggle?: () => void;
+  onViewHtml?: (htmlPath: string, title?: string) => void;
+  highlightedToolId?: string;
 }
 
 export function MindsChat({ 
@@ -35,15 +37,27 @@ export function MindsChat({
   isConnected,
   selectedModules,
   onModuleSelect,
-  modules 
+  modules,
+  onSidebarToggle,
+  onViewHtml,
+  highlightedToolId
 }: MindsChatProps) {
-  const [showModuleSelector, setShowModuleSelector] = useState(false);
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col h-full">
       {/* 顶部导航栏 */}
-      <div className="flex items-center justify-between p-4 border-b border-border/50 bg-background/80 backdrop-blur-sm">
+      <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-border/50 bg-background/80 backdrop-blur-sm">
         <div className="flex items-center space-x-3">
+          {/* 侧边栏切换按钮 */}
+          {onSidebarToggle && (
+            <button 
+              onClick={onSidebarToggle}
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              title="历史记录"
+            >
+              <Menu className="w-4 h-4 text-muted-foreground" />
+            </button>
+          )}
           <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
             <span className="text-lg">⭐</span>
           </div>
@@ -77,76 +91,70 @@ export function MindsChat({
         )}
 
         <div className="flex items-center space-x-2">
-          <button 
-            onClick={() => setShowModuleSelector(!showModuleSelector)}
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
-            title="切换模块"
-          >
-            <span className="text-sm">🧠</span>
-          </button>
           <button className="p-2 hover:bg-muted rounded-lg transition-colors">
             <Settings className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
       </div>
 
-      {/* 模块选择器 */}
-      {showModuleSelector && (
-        <div className="p-4 bg-muted/30 border-b border-border/50">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {modules.map((module) => (
-              <button
-                key={module.id}
-                onClick={() => {
-                  onModuleSelect(module);
-                  setShowModuleSelector(false);
-                }}
-                className={cn(
-                  'p-3 rounded-lg border text-left transition-all hover:shadow-sm',
-                  selectedModules.some(m => m.id === module.id)
-                    ? 'border-primary/50 bg-primary/5'
-                    : 'border-border hover:border-border/80 hover:bg-background/50'
-                )}
-              >
-                <div className="flex items-center space-x-2">
-                  <div className={cn(
-                    'w-8 h-8 rounded-lg flex items-center justify-center',
-                    `bg-gradient-to-br ${getColorForModule(module.id)}`
-                  )}>
-                    <span className="text-sm">{getIconForModule(module.id)}</span>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-foreground">
-                      {module.name}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {module.description}
-                    </div>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* 消息列表 */}
-      <div className="flex-1 overflow-hidden">
-        <MessageList 
+      {/* 消息列表：min-h-0 让内部 overflow-y-auto 正常计算高度并显示滚动条 */}
+      <div className="flex-1 min-h-0">
+        <NewMessageList 
           messages={messages}
           isLoading={isLoading}
+          className="h-full"
+          botName="MINDS"
+          onViewHtml={onViewHtml}
+          highlightedToolId={highlightedToolId}
         />
       </div>
 
-      {/* 输入区域 */}
-      <div className="border-t border-border/50 bg-background/80 backdrop-blur-sm">
-        <ChatInput
-          onSendMessage={onSendMessage}
-          disabled={isLoading || !isConnected}
+      {/* 模块选择器 - 放置在输入框上方 */}
+      <div className="flex-shrink-0 p-4 bg-muted/20 border-t border-border/30">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          {modules.map((module) => (
+            <button
+              key={module.id}
+              onClick={() => onModuleSelect(module)}
+              className={cn(
+                'p-2 rounded-lg border text-left transition-all hover:shadow-sm text-xs',
+                selectedModules.some(m => m.id === module.id)
+                  ? 'border-primary/50 bg-primary/5'
+                  : 'border-border hover:border-border/80 hover:bg-background/50'
+              )}
+            >
+              <div className="flex items-center space-x-2">
+                <div className={cn(
+                  'w-6 h-6 rounded-md flex items-center justify-center',
+                  `bg-gradient-to-br ${getColorForModule(module.id)}`
+                )}>
+                  <span className="text-xs">{getIconForModule(module.id)}</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-medium text-foreground truncate">
+                    {module.name}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    {module.description}
+                  </div>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 输入区域（与 MatterAI 一致：不收缩，生成/连接中禁用） */}
+      <div className="flex-shrink-0 bg-background/80 backdrop-blur-sm">
+        <NewChatInput
+          onSendMessage={(msg, files, selectedTools, customTools) => onSendMessage(msg, files, selectedTools, customTools)}
+          disabled={isLoading || isConnected}
           placeholder={selectedModules.length > 0
             ? `Ask ${selectedModules.map(m => m.name).join(', ')} about materials research...`
             : "Describe your materials research challenge or ask about composite design..."
           }
+          selectedTools={[]}
         />
       </div>
     </div>

@@ -4,10 +4,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useChat } from '../../hooks/useChat';
 import { Sidebar } from '../sidebar/Sidebar';
 import { MindsWelcome } from './MindsWelcome';
 import { MindsChat } from './MindsChat';
+import { HtmlViewer } from '../viewer/HtmlViewer';
 import { cn } from '../../utils/cn';
 
 interface MindsModule {
@@ -54,6 +56,12 @@ const USER_ID = 'minds_user';
 export function MindsApp() {
   const [sidebarOpen, setSidebarOpen] = useState(false); // MINDS默认收起侧边栏
   const [selectedModules, setSelectedModules] = useState<MindsModule[]>([]);
+  const [splitViewOpen, setSplitViewOpen] = useState(false);
+  const [htmlViewerData, setHtmlViewerData] = useState<{
+    htmlPath: string;
+    title: string;
+  } | null>(null);
+  const [highlightedToolId, setHighlightedToolId] = useState<string | null>(null);
   
   // 设置MINDS的动态标题
   useEffect(() => {
@@ -67,7 +75,7 @@ export function MindsApp() {
     sendMessage,
     switchSession,
     createNewSession,
-  } = useChat(USER_ID);
+  } = useChat(USER_ID, 'minds');
 
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
@@ -102,10 +110,32 @@ export function MindsApp() {
     }
   };
 
-  const handleSendMessage = async (message: string, files?: FileList) => {
-    // 根据选择的模块自动选择对应的工具
+  const handleSendMessage = async (message: string, files?: FileList, selectedTools?: string[], customTools?: any[]) => {
+    // 根据选择的模块自动选择对应的工具，合并传入的工具选择
     const moduleTools = selectedModules.map(module => `preset-${module.id}`);
-    await sendMessage(message, files, moduleTools, undefined, "minds");
+    const finalTools = [...moduleTools, ...(selectedTools || [])];
+    await sendMessage(message, files, finalTools, customTools, "minds");
+  };
+
+  /**
+   * 处理 HTML 查看
+   */
+  const handleViewHtml = (htmlPath: string, title?: string) => {
+    setHtmlViewerData({
+      htmlPath,
+      title: title || 'HTML 预览'
+    });
+    setSplitViewOpen(true);
+    setHighlightedToolId(null); // 暂时设为 null，后续可以优化
+  };
+
+  /**
+   * 关闭 HTML 查看器
+   */
+  const handleCloseHtmlViewer = () => {
+    setSplitViewOpen(false);
+    setHtmlViewerData(null);
+    setHighlightedToolId(null);
   };
 
   // 判断是否显示欢迎页面
@@ -122,43 +152,65 @@ export function MindsApp() {
         isOpen={sidebarOpen}
         onToggle={toggleSidebar}
         isLoading={state.isLoading && !state.currentSessionId}
+        hideToggleButton={true}
       />
 
       {/* 主内容区域 */}
       <div className={cn(
-        'flex-1 flex flex-col',
-        'lg:ml-0',
-        sidebarOpen && 'lg:ml-80'
+        'flex-1 flex'
       )}>
-        {showWelcome ? (
-          <MindsWelcome 
-            modules={MINDS_MODULES}
-            onModuleSelect={handleModuleSelect}
-            selectedModules={selectedModules}
-            onSendMessage={handleSendMessage}
-          />
-        ) : (
-          <MindsChat
-            messages={currentMessages}
-            onSendMessage={handleSendMessage}
-            isLoading={state.isLoading}
-            isConnected={isConnected}
-            selectedModules={selectedModules}
-            onModuleSelect={handleModuleSelect}
-            modules={MINDS_MODULES}
-          />
-        )}
+        {/* 聊天区域 */}
+        <div className={cn(
+          'flex flex-col',
+          splitViewOpen ? 'w-1/2' : 'flex-1'
+        )}>
+          {showWelcome ? (
+            <MindsWelcome 
+              modules={MINDS_MODULES}
+              onModuleSelect={handleModuleSelect}
+              selectedModules={selectedModules}
+              onSendMessage={handleSendMessage}
+              onSidebarToggle={toggleSidebar}
+            />
+          ) : (
+            <MindsChat
+              messages={currentMessages}
+              onSendMessage={handleSendMessage}
+              isLoading={state.isLoading}
+              isConnected={isConnected}
+              selectedModules={selectedModules}
+              onModuleSelect={handleModuleSelect}
+              modules={MINDS_MODULES}
+              onSidebarToggle={toggleSidebar}
+              onViewHtml={handleViewHtml}
+              highlightedToolId={highlightedToolId || undefined}
+            />
+          )}
+        </div>
 
-        {/* 错误提示 */}
-        {state.error && (
-          <div className="absolute top-4 right-4 z-50">
-            <div className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg shadow-lg max-w-md">
-              <div className="font-medium text-sm">连接错误</div>
-              <div className="text-sm mt-1">{state.error}</div>
+        {/* HTML 查看器 - 分屏右侧 */}
+        <AnimatePresence>
+          {splitViewOpen && htmlViewerData && (
+            <div className="w-1/2 border-l">
+              <HtmlViewer
+                htmlPath={htmlViewerData.htmlPath}
+                title={htmlViewerData.title}
+                onClose={handleCloseHtmlViewer}
+              />
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
       </div>
+
+      {/* 错误提示 */}
+      {state.error && (
+        <div className="absolute top-4 right-4 z-50">
+          <div className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg shadow-lg max-w-md">
+            <div className="font-medium text-sm">连接错误</div>
+            <div className="text-sm mt-1">{state.error}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

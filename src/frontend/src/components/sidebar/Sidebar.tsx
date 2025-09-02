@@ -22,6 +22,7 @@ interface SidebarProps {
   onToggle: () => void;
   isLoading?: boolean;
   className?: string;
+  hideToggleButton?: boolean;
 }
 
 /**
@@ -36,6 +37,7 @@ export function Sidebar({
   onToggle,
   isLoading = false,
   className,
+  hideToggleButton = false,
 }: SidebarProps) {
   return (
     <>
@@ -93,17 +95,19 @@ export function Sidebar({
       </div>
 
       {/* 切换按钮 */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onToggle}
-        className={cn(
-          'fixed top-4 left-4 z-30',
-          isOpen && 'hidden'
-        )}
-      >
-        <Menu className="h-5 w-5" />
-      </Button>
+      {!hideToggleButton && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggle}
+          className={cn(
+            'fixed top-4 left-4 z-30',
+            isOpen && 'hidden'
+          )}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+      )}
     </>
   );
 }
