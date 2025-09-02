@@ -26,3 +26,11 @@ build/
 # Large files
 *.pack
 *.log
+
+# 忽略前端缓存
+src/frontend/node_modules/.cache/
+.cache/
+*.pack
+node_modules/
+dist/
+build/
