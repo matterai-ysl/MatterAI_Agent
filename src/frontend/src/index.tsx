@@ -1,12 +1,14 @@
 /**
  * 应用入口文件
- * 渲染主应用组件到 DOM
+ * 渲染主应用组件到 DOM，支持多智能体路由
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 import NewApp from './NewApp';
+import { MindsApp } from './components/minds/MindsApp';
 
 // 获取根元素
 const root = ReactDOM.createRoot(
@@ -16,6 +18,17 @@ const root = ReactDOM.createRoot(
 // 渲染应用
 root.render(
   <React.StrictMode>
-    <NewApp />
+    <BrowserRouter>
+      <Routes>
+        {/* 默认路由 - 通用智能体 */}
+        <Route path="/" element={<NewApp />} />
+        
+        {/* MINDS 智能体路由 */}
+        <Route path="/minds" element={<MindsApp />} />
+        
+        {/* 未匹配的路由重定向到首页 */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>
 );

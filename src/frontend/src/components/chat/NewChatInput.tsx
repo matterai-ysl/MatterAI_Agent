@@ -11,7 +11,6 @@ import {
   Smile, 
   Mic, 
   Square,
-  ArrowUp,
   Image as ImageIcon
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -164,7 +163,7 @@ function SendButton({
             <Square className="h-4 w-4" />
           </motion.div>
         ) : (
-          <ArrowUp className="h-4 w-4" />
+          <span className="text-lg">🚀</span>
         )}
       </Button>
     </motion.div>

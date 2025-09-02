@@ -3,7 +3,7 @@
  * 整合侧边栏和聊天面板，提供完整的现代化聊天界面
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChat } from './hooks/useChat';
 import { useResponsive } from './hooks/useResponsive';
@@ -56,6 +56,11 @@ function ErrorToast({ error, onClose }: { error: string; onClose: () => void }) 
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [errorDismissed, setErrorDismissed] = useState(false);
+  
+  // 设置动态标题
+  useEffect(() => {
+    document.title = 'MatterAI Agent - 您可靠的科研伙伴';
+  }, []);
   const [splitViewOpen, setSplitViewOpen] = useState(false);
   const [htmlViewerData, setHtmlViewerData] = useState<{
     htmlPath: string;
@@ -64,7 +69,7 @@ function AppContent() {
   const [highlightedToolId, setHighlightedToolId] = useState<string | null>(null);
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [customTools, setCustomTools] = useState<any[]>([]);
-  const { isMobile, isDesktop } = useResponsive();
+  const { isDesktop } = useResponsive();
   
   // 使用聊天 Hook
   const {

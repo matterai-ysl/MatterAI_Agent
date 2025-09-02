@@ -62,7 +62,7 @@ function SessionItem({
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>{formatRelativeTime(session.updatedAt)}</span>
             {session.messageCount > 0 && (
-              <span>{session.messageCount} 条消息</span>
+              <span>{session.messageCount} messages</span>
             )}
           </div>
         </div>
@@ -91,7 +91,7 @@ export function SessionList({
           variant="outline"
         >
           <Plus className="h-4 w-4" />
-          新建对话
+          New Chat
         </Button>
       </div>
 
@@ -115,8 +115,8 @@ export function SessionList({
             // 空状态
             <div className="text-center py-8 text-muted-foreground">
               <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-sm">还没有历史对话</p>
-              <p className="text-xs mt-1">点击"新建对话"开始聊天</p>
+              <p className="text-sm">No chat history yet</p>
+              <p className="text-xs mt-1">Click "New Chat" to start</p>
             </div>
           ) : (
             // 会话列表

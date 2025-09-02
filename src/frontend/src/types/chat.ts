@@ -104,6 +104,7 @@ export interface ChatRequest {
   session_id?: string;
   selected_tools?: string[];
   custom_tools?: CustomToolConfig[];
+  app_name?: string;
 }
 
 /**

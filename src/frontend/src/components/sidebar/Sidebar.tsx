@@ -51,15 +51,14 @@ export function Sidebar({
       <div
         className={cn(
           'fixed left-0 top-0 h-full w-80 bg-background border-r z-50 transition-transform duration-300 ease-in-out',
-          'lg:relative lg:translate-x-0',
-          isOpen ? 'translate-x-0' : '-translate-x-full',
+          isOpen ? 'translate-x-0 lg:relative' : '-translate-x-full',
           className
         )}
       >
         <div className="flex flex-col h-full">
           {/* 头部 */}
           <div className="flex items-center justify-between p-4 border-b">
-            <h1 className="font-semibold text-lg">对话历史</h1>
+            <h1 className="font-semibold text-lg">Chat History</h1>
             <div className="flex items-center gap-1">
               {/* 设置按钮 */}
               <Button
@@ -70,12 +69,12 @@ export function Sidebar({
                 <Settings className="h-4 w-4" />
               </Button>
               
-              {/* 移动端关闭按钮 */}
+              {/* 关闭按钮 */}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onToggle}
-                className="h-8 w-8 lg:hidden"
+                className="h-8 w-8"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -93,13 +92,13 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* 移动端切换按钮 */}
+      {/* 切换按钮 */}
       <Button
         variant="ghost"
         size="icon"
         onClick={onToggle}
         className={cn(
-          'fixed top-4 left-4 z-30 lg:hidden',
+          'fixed top-4 left-4 z-30',
           isOpen && 'hidden'
         )}
       >

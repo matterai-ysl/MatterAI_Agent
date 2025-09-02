@@ -30,6 +30,8 @@ sys.path.append('.')
 from importlib import import_module
 config_module = import_module('Config')  # 注意文件名带空格
 PRESET_TOOLS_CONFIG = config_module.PRESET_TOOLS_CONFIG
+MINDS_TOOLS_CONFIG = config_module.MINDS_TOOLS_CONFIG
+AGENT_CONFIGS = config_module.AGENT_CONFIGS
 load_dotenv(override=True)
 
 
@@ -149,17 +151,17 @@ def create_mcp_tool_from_config(tool_config):
         print(f"❌ 创建工具失败 {tool_config['url']}: {str(e)}")
         return None
 
-def get_session_config_key(selected_tools, custom_tools):
+def get_session_config_key(selected_tools, custom_tools, app_name="default"):
     """生成会话工具配置的唯一键"""
     selected_key = tuple(sorted(selected_tools)) if selected_tools else ()
     custom_key = tuple((tool.url, tool.transport) for tool in custom_tools) if custom_tools else ()
-    return (selected_key, custom_key)
+    return (selected_key, custom_key, app_name)
 
 def configs_match(config1, config2):
     """检查两个配置是否匹配"""
     return config1 == config2
 
-async def get_or_create_session_agent(user_id: str, session_id: str, selected_tools=None, custom_tools=None) -> Runner:
+async def get_or_create_session_agent(user_id: str, session_id: str, selected_tools=None, custom_tools=None, app_name="default") -> Runner:
     """获取或创建会话级智能体"""
     global session_agents, session_agent_configs, session_last_access
     
@@ -170,7 +172,7 @@ async def get_or_create_session_agent(user_id: str, session_id: str, selected_to
     session_last_access[session_key] = time.time()
     
     # 生成当前请求的配置键
-    current_config = get_session_config_key(selected_tools, custom_tools)
+    current_config = get_session_config_key(selected_tools, custom_tools, app_name)
     
     # 检查是否已有该会话的智能体且配置匹配
     if session_key in session_agents and session_key in session_agent_configs:
@@ -189,9 +191,9 @@ async def get_or_create_session_agent(user_id: str, session_id: str, selected_to
                 print(f"⚠️ 关闭旧智能体时出错: {str(e)}")
     
     # 创建新的智能体
-    print(f"🔧 为用户 {user_id} 会话 {session_id} 创建新智能体...")
-    dynamic_agent = create_dynamic_agent(selected_tools, custom_tools)
-    new_runner = Runner(agent=dynamic_agent, app_name=APP_NAME, session_service=session_service)  # type: ignore
+    print(f"🔧 为用户 {user_id} 会话 {session_id} 创建新智能体 (应用: {app_name})...")
+    dynamic_agent = create_dynamic_agent(selected_tools, custom_tools, app_name)
+    new_runner = Runner(agent=dynamic_agent, app_name=f"{APP_NAME}_{app_name}", session_service=session_service)  # type: ignore
     
     # 缓存新智能体和配置
     session_agents[session_key] = new_runner
@@ -200,23 +202,40 @@ async def get_or_create_session_agent(user_id: str, session_id: str, selected_to
     print(f"✅ 用户 {user_id} 会话 {session_id} 的新智能体创建完成并已缓存")
     return new_runner
 
-def create_dynamic_agent(selected_tools=None, custom_tools=None):
+def create_dynamic_agent(selected_tools=None, custom_tools=None, app_name="default"):
     """根据选中的工具动态创建智能体"""
     tools = [test_html]  # 默认包含测试工具
+    
+    # 根据应用名称选择工具配置
+    agent_config = AGENT_CONFIGS.get(app_name, AGENT_CONFIGS["default"])
+    tools_config = agent_config["tools_config"]
+    system_prompt = agent_config["system_prompt"]
+    
     if selected_tools:
-        print(f"🔧 正在加载选中的工具: {selected_tools}")
+        print(f"🔧 正在为应用 {app_name} 加载选中的工具: {selected_tools}")
         
         for tool_id in selected_tools:
             if tool_id.startswith("preset-"):
-                # 预设工具
-                if tool_id in PRESET_TOOLS_CONFIG:
+                # 预设工具 - 优先从当前应用的工具配置查找
+                if tool_id in tools_config:
+                    config = tools_config[tool_id]
+                    tool = create_mcp_tool_from_config(config)
+                    if tool:
+                        tools.append(tool)  # type: ignore
+                        print(f"✅ 加载应用 {app_name} 的预设工具: {config['name']}")
+                    else:
+                        print(f"❌ 应用 {app_name} 的预设工具加载失败: {config['name']}")
+                # 如果当前应用没有，再从通用配置查找
+                elif tool_id in PRESET_TOOLS_CONFIG:
                     config = PRESET_TOOLS_CONFIG[tool_id]
                     tool = create_mcp_tool_from_config(config)
                     if tool:
                         tools.append(tool)  # type: ignore
-                        print(f"✅ 加载预设工具: {config['name']}")
+                        print(f"✅ 加载通用预设工具: {config['name']}")
                     else:
-                        print(f"❌ 预设工具加载失败: {config['name']}")
+                        print(f"❌ 通用预设工具加载失败: {config['name']}")
+                else:
+                    print(f"⚠️ 工具 {tool_id} 在应用 {app_name} 中未找到配置")
             elif tool_id.startswith("custom-"):
                 # 自定义工具 - 通过索引从 custom_tools 参数中获取
                 if custom_tools:
@@ -254,54 +273,9 @@ def create_dynamic_agent(selected_tools=None, custom_tools=None):
     
     # 创建Agent
     agent = LlmAgent(
-        name="matter_ai_agent",
+        name=f"{app_name}_agent",
         model=model,
-        instruction = """
-    ## 角色
-    你是"MatterAI 材料研发助手"，专注于材料科学领域的研究与开发。你能够协助用户进行材料合成、性能分析、工艺优化、机器学习建模、理论计算等研究工作，并可调用相关的专业工具来解决材料科学问题。
-
-    ## 工具调用决策 (STRICT)
-    若用户请求包含下列任一关键词 ➜ **必须先调用相应工具**，不得直接回答：
-    - 材料合成、性能分析、结构化数据提取、机器学习建模、第一性原理计算、材料表征、工艺优化等具体涉及工具调用的关键词
-    若用户询问需要特定工具支持但当前未选择相关工具，请礼貌告知"请选择相关工具后再试"。
-
-    ## 工具使用指南
-    - **材料领域知识**：回答材料科学基础理论、文献调研、实验方法等问题时调用。
-    - **XGBoost**：进行机器学习建模、性能预测、数据分析时调用。
-    - **材料结构化数据提取**：从文献、报告中提取结构化材料数据时调用。
-    - **自定义工具**：根据用户配置的MCP服务器，调用特定的计算或分析工具。
-
-    ## 工作流程
-    1. **理解需求**：用中文确认研究目标、材料类型、分析方法和预期结果。
-    2. **选择工具**：根据问题类型选择最适合的工具组合。
-    3. **数据处理**：调用相关工具获取或处理材料数据。
-    4. **分析计算**：使用专业工具进行计算、建模或分析。
-    5. **结果解释**：将工具输出结果转化为专业的材料科学解释。
-    6. **建议方案**：基于分析结果提供实验设计、工艺改进或进一步研究的建议。
-
-    ## 回答格式
-    - **理论解答**：无需工具时，提供专业的材料科学知识。
-    - **实验方案**：使用 Markdown 列表，包含：
-      - **材料准备**：原料、设备、条件
-      - **实验步骤**：详细的操作流程
-      - **表征方法**：推荐的测试和分析手段
-      - **预期结果**：可能的结果和解释
-    - **数据表格**：使用 Markdown 表格展示材料性能数据：`材料 | 性能参数 | 数值 | 单位 | 备注`。
-    - **计算结果**：展示建模或计算的详细结果，包括图表说明。
-
-    ## 专业领域
-    - **材料合成**：无机材料、有机材料、复合材料、纳米材料
-    - **性能表征**：力学性能、电学性能、热学性能、光学性能
-    - **计算模拟**：分子动力学、第一性原理、有限元分析
-    - **数据分析**：机器学习、统计分析、数据挖掘
-    - **工艺优化**：制备工艺、热处理、表面处理
-
-    ## 交互风格
-    - 使用简体中文，语气专业且严谨。
-    - 提供基于科学文献和实验数据的建议。
-    - 遇到复杂问题时先分析问题本质，再选择合适的工具和方法。
-    - 始终强调实验安全和数据可靠性。
-    """,
+        instruction=system_prompt,
         tools=tools,  # type: ignore
     )
     
@@ -491,6 +465,7 @@ class ChatRequest(BaseModel):
     session_id: Optional[str] = None
     selected_tools: Optional[List[str]] = None
     custom_tools: Optional[List[CustomToolConfig]] = None
+    app_name: Optional[str] = "default"  # 智能体应用名称
 
 
 def _sse_pack(payload: Dict[str, Any]) -> str:
@@ -770,8 +745,10 @@ async def chat_stream(payload: ChatRequest) -> StreamingResponse:
     print(f"   用户ID: {payload.user_id}")
     print(f"   查询: {payload.query}")
     print(f"   会话ID: {payload.session_id}")
+    print(f"   应用名称: {payload.app_name}")
     print(f"   选中工具: {payload.selected_tools}")
     print(f"   自定义工具: {payload.custom_tools}")
+    print(f"   app: {payload.app_name}")
     
     # 确定实际的会话ID（如果有的话）
     actual_session_id = payload.session_id
@@ -784,13 +761,14 @@ async def chat_stream(payload: ChatRequest) -> StreamingResponse:
                 payload.user_id,
                 actual_session_id, 
                 payload.selected_tools, 
-                payload.custom_tools
+                payload.custom_tools,
+                payload.app_name or "default"
             )
         else:
             # 如果没有会话ID，仍然创建临时智能体（但这种情况很少见）
             print(f"⚠️ 没有会话ID，创建临时智能体")
-            dynamic_agent = create_dynamic_agent(payload.selected_tools, payload.custom_tools)
-            local_runner = Runner(agent=dynamic_agent, app_name=APP_NAME, session_service=session_service)  # type: ignore
+            dynamic_agent = create_dynamic_agent(payload.selected_tools, payload.custom_tools, payload.app_name or "default")
+            local_runner = Runner(agent=dynamic_agent, app_name=f"{APP_NAME}_{payload.app_name or 'default'}", session_service=session_service)  # type: ignore
     else:
         local_runner: Runner = cast(Runner, runner)
     

@@ -25,7 +25,7 @@ interface UseChatReturn {
   isConnected: boolean;
   
   // 操作方法
-  sendMessage: (content: string, files?: FileList, selectedTools?: string[], customTools?: any[]) => Promise<void>;
+  sendMessage: (content: string, files?: FileList, selectedTools?: string[], customTools?: any[], appName?: string) => Promise<void>;
   switchSession: (sessionId: string | null) => Promise<void>;
   createNewSession: () => void;
   loadSessions: () => Promise<void>;
@@ -287,7 +287,7 @@ export function useChat(userId: string): UseChatReturn {
   /**
    * 发送消息
    */
-  const sendMessage = useCallback(async (content: string, files?: FileList, selectedTools?: string[], customTools?: any[]) => {
+  const sendMessage = useCallback(async (content: string, files?: FileList, selectedTools?: string[], customTools?: any[], appName?: string) => {
     console.log('🚀 sendMessage 被调用:', { content, hasFiles: !!files?.length });
     
     if (!content.trim() && !files?.length) {
@@ -372,6 +372,7 @@ export function useChat(userId: string): UseChatReturn {
           session_id: state.currentSessionId || undefined,
           selected_tools: selectedTools || [],
           custom_tools: convertedCustomTools,
+          app_name: appName,
         },
         handleSSEMessage,
         handleSSEError,

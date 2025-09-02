@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef, useCallback, KeyboardEvent } from 'react';
-import { Send, Paperclip, X } from 'lucide-react';
+import { Paperclip, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
 import { FileUpload } from './FileUpload';
@@ -192,7 +192,7 @@ export function ChatInput({
             size="icon"
             className="flex-shrink-0 h-10 w-10"
           >
-            <Send className="h-4 w-4" />
+            <span className="text-lg">🚀</span>
           </Button>
         </div>
 

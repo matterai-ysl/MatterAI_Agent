@@ -1,0 +1,180 @@
+/**
+ * MINDS 智能体欢迎页面
+ * 展示品牌信息和专业模块选择
+ */
+
+import React from 'react';
+import { Settings } from 'lucide-react';
+import { cn } from '../../utils/cn';
+import { ChatInput } from '../chat/ChatInput';
+
+interface MindsModule {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+}
+
+interface MindsWelcomeProps {
+  modules: MindsModule[];
+  onModuleSelect: (module: MindsModule) => void;
+  selectedModules: MindsModule[];
+  onSendMessage?: (message: string, files?: FileList) => void;
+}
+
+interface ModuleChipProps {
+  module: MindsModule;
+  isSelected: boolean;
+  onToggle: () => void;
+}
+
+function ModuleChip({ module, isSelected, onToggle }: ModuleChipProps) {
+  const getIconForModule = (moduleId: string) => {
+    switch (moduleId) {
+      case 'active-learning':
+        return '🎯';
+      case 'shap-analysis':
+        return '📊';
+      case 'neural-network':
+        return '🧠';
+      case 'llm-rag':
+        return '📚';
+      default:
+        return '⚡';
+    }
+  };
+
+  const getColorForModule = (moduleId: string) => {
+    switch (moduleId) {
+      case 'active-learning':
+        return 'from-green-500 to-emerald-600';
+      case 'shap-analysis':
+        return 'from-blue-500 to-indigo-600';
+      case 'neural-network':
+        return 'from-purple-500 to-violet-600';
+      case 'llm-rag':
+        return 'from-orange-500 to-red-600';
+      default:
+        return 'from-gray-500 to-slate-600';
+    }
+  };
+
+  return (
+    <button
+      onClick={onToggle}
+      className={cn(
+        'inline-flex items-center space-x-3 px-4 py-3 rounded-lg border transition-all duration-200',
+        'hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20',
+        isSelected
+          ? 'border-primary/50 bg-primary/10 shadow-sm text-primary'
+          : 'border-border hover:border-border/80 hover:bg-muted/30 text-muted-foreground'
+      )}
+    >
+      <div className={cn(
+        'w-6 h-6 rounded-md flex items-center justify-center text-sm flex-shrink-0',
+        `bg-gradient-to-br ${getColorForModule(module.id)}`
+      )}>
+        <span className="text-white text-xs">
+          {getIconForModule(module.id)}
+        </span>
+      </div>
+      <div className="flex flex-col items-start">
+        <span className="text-sm font-medium">
+          {module.name}
+        </span>
+        <span className="text-xs opacity-70">
+          {module.description}
+        </span>
+      </div>
+    </button>
+  );
+}
+
+export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendMessage }: MindsWelcomeProps) {
+
+  return (
+    <div className="flex-1 flex flex-col">
+      {/* 顶部导航栏 */}
+      <div className="flex items-center justify-between p-4 border-b border-border/50">
+        <div className="flex-1 flex justify-center">
+          <div className="flex items-center space-x-3">
+            <div>
+              <h1 className="text-xl font-semibold text-foreground">MINDS</h1>
+              <p className="text-sm text-muted-foreground">
+                Material Interaction Decoupling & Scientific insight extraction
+              </p>
+            </div>
+            <div className="w-3 h-3 bg-green-500 rounded-full ml-2"></div>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <span className="text-2xl">⭐</span>
+          </div>
+          <button className="p-2 hover:bg-muted rounded-lg transition-colors">
+            <Settings className="w-5 h-5 text-muted-foreground" />
+          </button>
+        </div>
+      </div>
+
+      {/* 主内容区域 */}
+      <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
+          {/* 欢迎消息 */}
+          <div className="p-6">
+            <div className="flex items-start space-x-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0 mt-1">
+                <span className="text-xl">🔬</span>
+              </div>
+              <div className="flex-1 bg-muted/30 rounded-2xl p-6 border border-border/50">
+                <div className="text-base text-foreground leading-relaxed">
+                  Welcome to MINDS (Material Interaction Decoupling and Scientific 
+                  insight extraction)! I am your knowledge-mining agent designed to 
+                  bridge data-driven modeling with interpretable materials science. Please 
+                  select a specialized module or ask me directly about materials research.
+                </div>
+                <div className="text-xs text-muted-foreground mt-3">
+                  11:58 AM
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 中间留白区域 */}
+          <div className="flex-1"></div>
+
+          {/* 底部输入区域 */}
+          <div className="mt-auto">
+            {/* 模块选择器 - 紧贴输入框上方 */}
+            <div className="px-6 pb-2">
+              <div className="flex flex-wrap gap-2 justify-center">
+                {modules.map((module) => (
+                  <ModuleChip
+                    key={module.id}
+                    module={module}
+                    isSelected={selectedModules.some(m => m.id === module.id)}
+                    onToggle={() => onModuleSelect(module)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* 输入框区域 */}
+            <div>
+              <ChatInput
+                onSendMessage={(message, files) => {
+                  if (onSendMessage) {
+                    onSendMessage(message, files);
+                  }
+                }}
+                placeholder="Describe your materials research challenge or ask about composite design..."
+                className="border-none bg-transparent"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
