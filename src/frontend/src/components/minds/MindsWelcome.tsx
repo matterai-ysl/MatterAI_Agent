@@ -6,7 +6,7 @@
 import React from 'react';
 import { Settings, Menu } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { ChatInput } from '../chat/ChatInput';
+import { NewChatInput } from '../chat/NewChatInput';
 
 interface MindsModule {
   id: string;
@@ -175,7 +175,7 @@ export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendM
 
             {/* 输入框区域 */}
             <div>
-              <ChatInput
+              <NewChatInput
                 onSendMessage={(message, files) => {
                   if (onSendMessage) {
                     onSendMessage(message, files);
@@ -183,6 +183,7 @@ export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendM
                 }}
                 placeholder="Describe your materials research challenge or ask about composite design..."
                 className="border-none bg-transparent"
+                selectedTools={[]}
               />
             </div>
           </div>
