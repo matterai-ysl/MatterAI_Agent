@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
-import { FileUpload } from './FileUpload';
 import { ToolSelector } from '../tools/ToolSelector';
 import { CustomTool } from '../../types/tools';
 
@@ -183,10 +182,10 @@ export function NewChatInput({
 }: ChatInputProps) {
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
-  const [showFileUpload, setShowFileUpload] = useState(false);
   const [isRecording, setIsRecording] = useState(false); // TODO: 实现语音录制功能
   const [customTools, setCustomTools] = useState<CustomTool[]>([]);
   const [shouldCollapseTools, setShouldCollapseTools] = useState(false);
+  const [isComposing, setIsComposing] = useState(false); // IME组合状态
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -231,7 +230,6 @@ export function NewChatInput({
     // 重置状态
     setMessage('');
     setFiles(null);
-    setShowFileUpload(false);
     
     // 重置工具折叠状态
     setTimeout(() => setShouldCollapseTools(false), 100);
@@ -254,11 +252,28 @@ export function NewChatInput({
    * 处理键盘事件
    */
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
+    // 禁用Enter发送，只允许Shift+Enter换行
+    // Enter键不再发送消息，只能点击发送按钮
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+      // 不阻止默认行为，允许Enter换行
+      // e.preventDefault();
+      // handleSend();
     }
-  }, [handleSend]);
+  }, [handleSend, isComposing]);
+
+  /**
+   * 处理IME输入开始
+   */
+  const handleCompositionStart = useCallback(() => {
+    setIsComposing(true);
+  }, []);
+
+  /**
+   * 处理IME输入结束
+   */
+  const handleCompositionEnd = useCallback(() => {
+    setIsComposing(false);
+  }, []);
 
   /**
    * 处理文件选择
@@ -274,7 +289,6 @@ export function NewChatInput({
     const selectedFiles = e.target.files;
     if (selectedFiles && selectedFiles.length > 0) {
       setFiles(selectedFiles);
-      setShowFileUpload(false);
     }
   }, []);
 
@@ -293,12 +307,6 @@ export function NewChatInput({
     }
   }, [files]);
 
-  /**
-   * 切换文件上传面板
-   */
-  const toggleFileUpload = useCallback(() => {
-    setShowFileUpload(prev => !prev);
-  }, []);
 
   /**
    * 处理语音录制
@@ -326,46 +334,6 @@ export function NewChatInput({
         className="hidden"
       />
 
-      {/* 文件上传面板 */}
-      <AnimatePresence>
-        {showFileUpload && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="p-4 border-b bg-muted/30"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium text-sm">文件上传</h4>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleFileUpload}
-                className="h-6 w-6"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <FileUpload
-              onFilesChange={(newFiles) => setFiles(newFiles)}
-              acceptedTypes={[
-                'image/*',
-                'application/pdf',
-                'text/*',
-                '.doc',
-                '.docx',
-                '.xls',
-                '.xlsx',
-                '.ppt',
-                '.pptx'
-              ]}
-              maxFiles={5}
-              maxFileSize={10 * 1024 * 1024} // 10MB
-              disabled={disabled}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* 工具选择器 */}
       {onToolsChange && (
@@ -407,6 +375,8 @@ export function NewChatInput({
               value={message}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
+              onCompositionStart={handleCompositionStart}
+              onCompositionEnd={handleCompositionEnd}
               placeholder={placeholder}
               disabled={disabled}
               rows={1}
@@ -447,10 +417,8 @@ export function NewChatInput({
           </div>
           
           <div className="text-xs text-muted-foreground flex items-center gap-2">
-            <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Shift</kbd>
-            <span>+</span>
             <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd>
-            <span>换行</span>
+            <span>换行，点击🚀发送</span>
           </div>
         </motion.div>
       </div>

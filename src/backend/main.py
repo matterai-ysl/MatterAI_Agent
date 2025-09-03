@@ -126,6 +126,7 @@ def test_html(format: str = "html") -> dict:
 
 def create_mcp_tool_from_config(tool_config):
     """根据配置创建MCP工具"""
+    print(f"🔧 创建MCP工具: {tool_config}")
     try:
         if tool_config["transport"] == "http":
             connection_params = StreamableHTTPServerParams(

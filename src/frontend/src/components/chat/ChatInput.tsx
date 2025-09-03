@@ -31,6 +31,7 @@ export function ChatInput({
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
+  const [isComposing, setIsComposing] = useState(false); // IME组合状态
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   /**
@@ -83,11 +84,28 @@ export function ChatInput({
    * 处理键盘事件
    */
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
+    // 禁用Enter发送，只允许Shift+Enter换行
+    // Enter键不再发送消息，只能点击发送按钮
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+      // 不阻止默认行为，允许Enter换行
+      // e.preventDefault();
+      // handleSend();
     }
-  }, [handleSend]);
+  }, [handleSend, isComposing]);
+
+  /**
+   * 处理IME输入开始
+   */
+  const handleCompositionStart = useCallback(() => {
+    setIsComposing(true);
+  }, []);
+
+  /**
+   * 处理IME输入结束
+   */
+  const handleCompositionEnd = useCallback(() => {
+    setIsComposing(false);
+  }, []);
 
   /**
    * 处理文件变化
@@ -165,6 +183,8 @@ export function ChatInput({
               value={message}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
+              onCompositionStart={handleCompositionStart}
+              onCompositionEnd={handleCompositionEnd}
               placeholder={placeholder}
               disabled={disabled}
               rows={1}

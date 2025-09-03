@@ -3,9 +3,9 @@
  * 显示聊天消息，支持流式更新和现代化设计
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Bot, File, Image, Download, Copy, RotateCcw, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { User, Bot, File, Image, Download, Copy, RotateCcw, ThumbsUp, ThumbsDown, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -229,12 +229,14 @@ function MessageActions({
   message, 
   onCopy, 
   onRegenerate,
-  onRating 
+  onRating,
+  copied = false
 }: { 
   message: ChatMessage;
   onCopy?: () => void;
   onRegenerate?: () => void;
   onRating?: (rating: 'up' | 'down') => void;
+  copied?: boolean;
 }) {
   const isAssistant = message.role === 'assistant';
 
@@ -250,8 +252,17 @@ function MessageActions({
         onClick={onCopy}
         className="h-7 px-2 text-xs"
       >
-        <Copy className="h-3 w-3 mr-1" />
-        复制
+        {copied ? (
+          <>
+            <Check className="h-3 w-3 mr-1 text-green-600" />
+            已复制
+          </>
+        ) : (
+          <>
+            <Copy className="h-3 w-3 mr-1" />
+            复制
+          </>
+        )}
       </Button>
 
       {isAssistant && (
@@ -341,6 +352,7 @@ const MessageItem = React.memo(function MessageItem({
 }) {
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
+  const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
     const textContent = message.content
@@ -348,6 +360,11 @@ const MessageItem = React.memo(function MessageItem({
       .map(c => c.text)
       .join('\n');
     navigator.clipboard.writeText(textContent);
+    
+    // 显示复制成功状态
+    setCopied(true);
+    // 2秒后恢复原状态
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleRegenerate = () => {
@@ -449,6 +466,7 @@ const MessageItem = React.memo(function MessageItem({
             onCopy={handleCopy}
             onRegenerate={handleRegenerate}
             onRating={handleRating}
+            copied={copied}
           />
         )}
 

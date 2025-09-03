@@ -171,6 +171,34 @@ Test files are located in `src/backend/`:
 - Tools should return `*_html_path` or `*_url` in results
 - Local files served via `/html-content` endpoint
 - External URLs loaded directly in iframe
+- Both MatterAI and MINDS support split-screen HTML viewing
+
+### UI/UX Best Practices
+- **Input Method Support**: Enter key is disabled for message sending to prevent IME conflicts
+  - Users must click the send button (🚀) to send messages
+  - Enter key is used for line breaks only
+  - IME composition events are handled to prevent premature sending
+- **Dialog Scrolling**: Custom tool dialogs support page-level scrolling when content overflows
+- **Agent-Specific Branding**: Each agent displays its own name in chat messages (MINDS vs MatterAI)
+
+## Recent Updates (v2.1.0)
+
+### MINDS Interface Improvements
+- Removed tool selection bar from chat interface for cleaner design
+- Fixed bot name display to show "MINDS" instead of "MatterAI"
+- Moved module selector from popup to fixed position above input
+- Added history buttons to both welcome and chat pages
+- Integrated HTML split-screen functionality from MatterAI
+
+### Input Experience Enhancements
+- Completely disabled Enter key for message sending
+- Fixed Chinese IME input conflicts
+- Updated UI hints to reflect new keyboard behavior
+
+### Dialog and Component Fixes
+- Fixed custom tool dialog scrolling issues
+- Simplified tool selector by removing redundant add buttons
+- Enhanced component reusability between agents
 
 ## Deployment Notes
 

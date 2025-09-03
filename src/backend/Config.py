@@ -27,25 +27,25 @@ MINDS_TOOLS_CONFIG = {
     "preset-active-learning": {
         "name": "Active Learning",
         "type": "mcp",
-        "url": "http://127.0.0.1:8004/mcp",
+        "url": "http://localhost:8080/mcp",
         "transport": "http"
     },
     "preset-shap-analysis": {
         "name": "SHAP Analysis", 
         "type": "mcp",
-        "url": "http://127.0.0.1:8005/mcp",
+        "url": "http://127.0.0.1:8000/mcp",
         "transport": "http"
     },
     "preset-neural-network": {
         "name": "Neural Network",
         "type": "mcp",
-        "url": "http://127.0.0.1:8006/mcp",
+        "url": "http://127.0.0.1:8000/mcp",
         "transport": "http"
     },
     "preset-llm-rag": {
         "name": "LLM-RAG",
         "type": "mcp", 
-        "url": "http://127.0.0.1:8007/mcp",
+        "url": "http://127.0.0.1:8000/mcp",
         "transport": "http"
     }
 }
