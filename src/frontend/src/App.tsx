@@ -87,6 +87,7 @@ function App() {
           isConnected={isConnected}
           currentSessionId={state.currentSessionId}
           className="flex-1"
+          uploadStatus={state.uploadStatus}
         />
 
         {/* 错误提示 */}

@@ -55,17 +55,66 @@ function extractHtmlContent(result: any): { htmlPaths: Array<{ key: string; path
   const htmlPaths: Array<{ key: string; path: string }> = [];
   const htmlUrls: Array<{ key: string; url: string }> = [];
   
-  if (typeof result === 'object' && result) {
-    Object.entries(result).forEach(([key, value]) => {
-      if (key.endsWith('html_path') && typeof value === 'string') {
-        htmlPaths.push({ key, path: value });
-      }
-      if ((key.endsWith('url') || key.endsWith('html_url') || key.endsWith('report_url')) && typeof value === 'string') {
-        htmlUrls.push({ key, url: value });
+  // 🔍 Google ADK 结果处理：优先检查 structuredContent
+  let targetContent = result;
+  
+  // 检查嵌套的 result.result.structuredContent (Google ADK 格式)
+  if (result && result.result && result.result.structuredContent && typeof result.result.structuredContent === 'object') {
+    console.log('🔍 检测到 Google ADK result.result.structuredContent，使用结构化内容');
+    targetContent = result.result.structuredContent;
+  }
+  // 检查直接的 result.structuredContent (兼容其他格式)
+  else if (result && result.structuredContent && typeof result.structuredContent === 'object') {
+    console.log('🔍 检测到 result.structuredContent，使用结构化内容');
+    targetContent = result.structuredContent;
+  }
+  
+  if (typeof targetContent === 'object' && targetContent) {
+    Object.entries(targetContent).forEach(([key, value]) => {
+      if (typeof value === 'string') {
+        // 首先检查值是否为HTTP(S) URL
+        const isHttpUrl = /^https?:\/\//i.test(value);
+        
+        // HTML相关键名检测（支持描述性前缀）
+        const isHtmlKey = key.endsWith('html_path') || 
+                         key.endsWith('_url') || 
+                         key.endsWith('html_url') || 
+                         key.endsWith('report_url') ||
+                         key.endsWith('url');
+        
+        if (isHtmlKey) {
+          if (isHttpUrl) {
+            // 检查是否为HTML URL：必须以.html结尾，且不是下载链接
+            const isHtmlUrl = value.toLowerCase().endsWith('.html') && 
+                             !value.toLowerCase().includes('/download/');
+            if (isHtmlUrl) {
+              // 如果值是HTTP URL且以.html结尾（非下载链接），归类为HTML URL
+              htmlUrls.push({ key, url: value });
+              console.log(`✅ 检测到HTML URL: ${key} -> ${value}`);
+            } else {
+              console.log(`🔍 跳过非HTML URL或下载链接: ${key} -> ${value}`);
+            }
+          } else if (key.endsWith('html_path')) {
+            // 如果键名以html_path结尾且值不是URL，归类为本地路径
+            htmlPaths.push({ key, path: value });
+            console.log(`✅ 检测到HTML路径: ${key} -> ${value}`);
+          } else {
+            // 其他URL相关键名但值不是HTTP URL，检查是否为HTML文件且不是下载链接
+            const isHtmlUrl = value.toLowerCase().endsWith('.html') && 
+                             !value.toLowerCase().includes('/download/');
+            if (isHtmlUrl) {
+              htmlUrls.push({ key, url: value });
+              console.log(`✅ 检测到其他HTML URL: ${key} -> ${value}`);
+            } else {
+              console.log(`🔍 跳过非HTML相对路径或下载链接: ${key} -> ${value}`);
+            }
+          }
+        }
       }
     });
   }
   
+  console.log(`🔍 HTML内容提取完成: ${htmlUrls.length}个URL, ${htmlPaths.length}个本地路径`);
   return { htmlPaths, htmlUrls };
 }
 
@@ -135,10 +184,22 @@ function ResultDisplay({
   // 检查是否包含 html_path 键和 URL
   const { htmlPaths, htmlUrls } = extractHtmlContent(result);
 
+  // 🔍 Google ADK 结果处理：优先显示 structuredContent
+  let displayContent = result;
+  
+  // 检查嵌套的 result.result.structuredContent (Google ADK 格式)
+  if (result && result.result && result.result.structuredContent && typeof result.result.structuredContent === 'object') {
+    displayContent = result.result.structuredContent;
+  }
+  // 检查直接的 result.structuredContent (兼容其他格式)
+  else if (result && result.structuredContent && typeof result.structuredContent === 'object') {
+    displayContent = result.structuredContent;
+  }
+
   // 处理成功结果
-  const displayResult = typeof result === 'object' 
-    ? JSON.stringify(result, null, 2)
-    : String(result);
+  const displayResult = typeof displayContent === 'object' 
+    ? JSON.stringify(displayContent, null, 2)
+    : String(displayContent);
 
   return (
     <div className="space-y-3">

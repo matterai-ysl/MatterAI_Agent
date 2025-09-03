@@ -17,6 +17,11 @@ interface ChatInputProps {
   disabled?: boolean;
   placeholder?: string;
   className?: string;
+  uploadStatus?: {
+    isUploading: boolean;
+    message: string;
+    type: 'info' | 'success' | 'error';
+  };
 }
 
 /**
@@ -26,7 +31,8 @@ export function ChatInput({
   onSendMessage, 
   disabled = false, 
   placeholder = "输入消息...",
-  className 
+  className,
+  uploadStatus
 }: ChatInputProps) {
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
@@ -215,6 +221,29 @@ export function ChatInput({
             <span className="text-lg">🚀</span>
           </Button>
         </div>
+
+        {/* 上传状态显示 */}
+        {uploadStatus && (
+          <div className={cn(
+            'mt-2 px-3 py-2 rounded-md text-sm font-medium',
+            uploadStatus.type === 'info' && 'bg-blue-50 text-blue-700 border border-blue-200',
+            uploadStatus.type === 'success' && 'bg-green-50 text-green-700 border border-green-200',
+            uploadStatus.type === 'error' && 'bg-red-50 text-red-700 border border-red-200'
+          )}>
+            <div className="flex items-center gap-2">
+              {uploadStatus.isUploading && (
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              )}
+              {!uploadStatus.isUploading && uploadStatus.type === 'success' && (
+                <span className="text-green-600">✓</span>
+              )}
+              {uploadStatus.type === 'error' && (
+                <span className="text-red-600">✗</span>
+              )}
+              <span>{uploadStatus.message}</span>
+            </div>
+          </div>
+        )}
 
         {/* 输入提示 */}
         <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">

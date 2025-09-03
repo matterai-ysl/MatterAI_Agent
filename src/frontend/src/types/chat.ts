@@ -105,6 +105,7 @@ export interface ChatRequest {
   selected_tools?: string[];
   custom_tools?: CustomToolConfig[];
   app_name?: string;
+  file_urls?: string[]; // 文件地址列表
 }
 
 /**
@@ -153,6 +154,11 @@ export interface AppState {
   isLoading: boolean;
   error: string | null;
   userId: string;
+  uploadStatus?: {
+    isUploading: boolean;
+    message: string;
+    type: 'info' | 'success' | 'error';
+  };
 }
 
 /**

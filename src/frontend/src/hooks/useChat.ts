@@ -302,7 +302,35 @@ export function useChat(userId: string, appName: string = 'default'): UseChatRet
       // 处理文件上传
       let fileUrls: string[] = [];
       if (files?.length) {
+        console.log('📂 开始上传文件...', Array.from(files).map(f => f.name));
+        
+        // 显示上传中状态
+        updateState(prev => ({ 
+          ...prev, 
+          uploadStatus: {
+            isUploading: true,
+            message: `正在上传 ${files.length} 个文件...`,
+            type: 'info'
+          }
+        }));
+        
         fileUrls = await chatApiService.uploadFiles(files);
+        console.log('✅ 文件上传成功，获得URL:', fileUrls);
+        
+        // 显示上传成功状态
+        updateState(prev => ({ 
+          ...prev, 
+          uploadStatus: {
+            isUploading: false,
+            message: `文件上传完成 (${files.length}个)`,
+            type: 'success'
+          }
+        }));
+        
+        // 短暂显示成功消息后清除
+        setTimeout(() => {
+          updateState(prev => ({ ...prev, uploadStatus: undefined }));
+        }, 2000);
       }
 
       // 构建消息内容
@@ -373,6 +401,7 @@ export function useChat(userId: string, appName: string = 'default'): UseChatRet
           selected_tools: selectedTools || [],
           custom_tools: convertedCustomTools,
           app_name: appName,
+          file_urls: fileUrls.length > 0 ? fileUrls : undefined, // 添加文件地址参数
         },
         handleSSEMessage,
         handleSSEError,
@@ -496,6 +525,9 @@ export function useChat(userId: string, appName: string = 'default'): UseChatRet
           });
         }
       }
+
+      // 按 updatedAt 降序排序（最新的在前）
+      sessions.sort((a, b) => b.updatedAt - a.updatedAt);
 
       updateState(prev => ({ ...prev, sessions }));
     } catch (error) {

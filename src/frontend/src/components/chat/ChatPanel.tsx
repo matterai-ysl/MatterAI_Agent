@@ -19,6 +19,11 @@ interface ChatPanelProps {
   isConnected?: boolean;
   currentSessionId?: string | null;
   className?: string;
+  uploadStatus?: {
+    isUploading: boolean;
+    message: string;
+    type: 'info' | 'success' | 'error';
+  };
 }
 
 /**
@@ -76,6 +81,7 @@ export function ChatPanel({
   isConnected = false,
   currentSessionId = null,
   className,
+  uploadStatus,
 }: ChatPanelProps) {
   const isInputDisabled = isLoading || isConnected;
 
@@ -106,6 +112,7 @@ export function ChatPanel({
             ? '正在处理中，请稍候...' 
             : '向 MatterAI 发送消息...'
         }
+        uploadStatus={uploadStatus}
       />
     </div>
   );

@@ -117,8 +117,128 @@ def test_html(format: str = "html") -> dict:
     Returns:
         dict: 包含html_path的字典
     """
-    return {"html_path": "/Users/ysl/Desktop/Code/MatterAI_Agent/test_report.html"}
-
+    # return {"html_path": "/Users/ysl/Desktop/Code/MatterAI_Agent/test_report.html"}
+    # return {"test_html_path": "http://localhost:8080/static/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/seed_selection_report.html"}
+    return {
+  "result": {
+    "content": [
+      {
+        "text": "{\"session_id\":\"47a07f3a-1465-46c9-9a18-13094de01ddd\",\"timestamp\":\"20250903_154013\",\"optimal_k\":8,\"total_candidates\":10000,\"selected_seeds_count\":8,\"seeds\":[{\"A\":6.4,\"B\":17.8,\"C\":2.32,\"D\":10.8,\"E\":2.42,\"cluster_id\":0.0,\"distance_to_centroid\":1.4538946333052678},{\"A\":8.5,\"B\":29.5,\"C\":1.82,\"D\":15.2,\"E\":4.0,\"cluster_id\":1.0,\"distance_to_centroid\":1.4742807260834505},{\"A\":2.2,\"B\":33.9,\"C\":1.02,\"D\":18.7,\"E\":4.86,\"cluster_id\":2.0,\"distance_to_centroid\":1.9602466490236132},{\"A\":0.5,\"B\":1.9,\"C\":2.06,\"D\":10.0,\"E\":3.96,\"cluster_id\":3.0,\"distance_to_centroid\":2.0769497745169354},{\"A\":8.1,\"B\":23.5,\"C\":1.04,\"D\":14.5,\"E\":4.36,\"cluster_id\":4.0,\"distance_to_centroid\":1.224148591144482},{\"A\":1.1,\"B\":1.9,\"C\":2.64,\"D\":19.5,\"E\":3.92,\"cluster_id\":5.0,\"distance_to_centroid\":1.6358312357461648},{\"A\":7.4,\"B\":27.0,\"C\":2.42,\"D\":10.3,\"E\":4.46,\"cluster_id\":6.0,\"distance_to_centroid\":1.4596048491249867},{\"A\":9.7,\"B\":9.5,\"C\":1.92,\"D\":18.9,\"E\":2.66,\"cluster_id\":7.0,\"distance_to_centroid\":1.5313627257093076}],\"clustering_info\":{\"k_range\":[2,20],\"optimization_method\":\"elbow\",\"scaling_method\":\"standard\",\"selection_method\":\"random\"},\"cluster_distribution\":{\"0\":1319,\"1\":1190,\"2\":1204,\"3\":1194,\"4\":1292,\"5\":1232,\"6\":1322,\"7\":1247},\"seeds_csv_path\":\"trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/selected_seeds.csv\",\"results_json_path\":\"trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/seed_selection_results.json\",\"candidates_with_clusters_path\":\"trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/candidates_with_clusters.csv\",\"visualization_path\":\"trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/clustering_visualization.png\",\"sse_plot_path\":\"trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/sse_plot.png\",\"seed_selection_report_summary_html_path\":\"http://localhost:8080/static/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/seed_selection_report.html\",\"archive_details_zip_path\":\"http://localhost:8080/download/file/seed_selection/archives/seed_selection_47a07f3a-1465-46c9-9a18-13094de01ddd_20250903_154014.zip\",\"archive_path\":\"trained_models/seed_selection/archives/seed_selection_47a07f3a-1465-46c9-9a18-13094de01ddd_20250903_154014.zip\",\"download_url\":\"/download/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd\"}",
+        "type": "text"
+      }
+    ],
+    "isError": False,
+    "structuredContent": {
+      "seeds": [
+        {
+          "A": 6.4,
+          "B": 17.8,
+          "C": 2.32,
+          "D": 10.8,
+          "E": 2.42,
+          "cluster_id": 0,
+          "distance_to_centroid": 1.4538946333052678
+        },
+        {
+          "A": 8.5,
+          "B": 29.5,
+          "C": 1.82,
+          "D": 15.2,
+          "E": 4,
+          "cluster_id": 1,
+          "distance_to_centroid": 1.4742807260834505
+        },
+        {
+          "A": 2.2,
+          "B": 33.9,
+          "C": 1.02,
+          "D": 18.7,
+          "E": 4.86,
+          "cluster_id": 2,
+          "distance_to_centroid": 1.9602466490236132
+        },
+        {
+          "A": 0.5,
+          "B": 1.9,
+          "C": 2.06,
+          "D": 10,
+          "E": 3.96,
+          "cluster_id": 3,
+          "distance_to_centroid": 2.0769497745169354
+        },
+        {
+          "A": 8.1,
+          "B": 23.5,
+          "C": 1.04,
+          "D": 14.5,
+          "E": 4.36,
+          "cluster_id": 4,
+          "distance_to_centroid": 1.224148591144482
+        },
+        {
+          "A": 1.1,
+          "B": 1.9,
+          "C": 2.64,
+          "D": 19.5,
+          "E": 3.92,
+          "cluster_id": 5,
+          "distance_to_centroid": 1.6358312357461648
+        },
+        {
+          "A": 7.4,
+          "B": 27,
+          "C": 2.42,
+          "D": 10.3,
+          "E": 4.46,
+          "cluster_id": 6,
+          "distance_to_centroid": 1.4596048491249867
+        },
+        {
+          "A": 9.7,
+          "B": 9.5,
+          "C": 1.92,
+          "D": 18.9,
+          "E": 2.66,
+          "cluster_id": 7,
+          "distance_to_centroid": 1.5313627257093076
+        }
+      ],
+      "optimal_k": 8,
+      "timestamp": "20250903_154013",
+      "session_id": "47a07f3a-1465-46c9-9a18-13094de01ddd",
+      "archive_path": "trained_models/seed_selection/archives/seed_selection_47a07f3a-1465-46c9-9a18-13094de01ddd_20250903_154014.zip",
+      "download_url": "/download/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd",
+      "sse_plot_path": "trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/sse_plot.png",
+      "seeds_csv_path": "trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/selected_seeds.csv",
+      "clustering_info": {
+        "k_range": [
+          2,
+          20
+        ],
+        "scaling_method": "standard",
+        "selection_method": "random",
+        "optimization_method": "elbow"
+      },
+      "total_candidates": 10000,
+      "results_json_path": "trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/seed_selection_results.json",
+      "visualization_path": "trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/clustering_visualization.png",
+      "cluster_distribution": {
+        "0": 1319,
+        "1": 1190,
+        "2": 1204,
+        "3": 1194,
+        "4": 1292,
+        "5": 1232,
+        "6": 1322,
+        "7": 1247
+      },
+      "selected_seeds_count": 8,
+      "archive_details_zip_path": "http://localhost:8080/download/file/seed_selection/archives/seed_selection_47a07f3a-1465-46c9-9a18-13094de01ddd_20250903_154014.zip",
+      "candidates_with_clusters_path": "trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/candidates_with_clusters.csv",
+      "seed_selection_report_summary_html_path": "http://localhost:8080/static/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/seed_selection_report.html"
+    }
+  }
+}
 ############################
 # MCP 工具与 Agent 定义
 ############################
@@ -468,6 +588,7 @@ class ChatRequest(BaseModel):
     selected_tools: Optional[List[str]] = None
     custom_tools: Optional[List[CustomToolConfig]] = None
     app_name: Optional[str] = "default"  # 智能体应用名称
+    file_urls: Optional[List[str]] = None  # 文件地址列表
 
 
 def _sse_pack(payload: Dict[str, Any]) -> str:
@@ -751,6 +872,7 @@ async def chat_stream(payload: ChatRequest) -> StreamingResponse:
     print(f"   应用名称: {payload.app_name}")
     print(f"   选中工具: {payload.selected_tools}")
     print(f"   自定义工具: {payload.custom_tools}")
+    print(f"   文件地址: {payload.file_urls}")
     print(f"   app: {payload.app_name}")
     
     # 确定实际的会话ID（如果没有则生成一个）
@@ -790,7 +912,21 @@ async def chat_stream(payload: ChatRequest) -> StreamingResponse:
             print(f"📤 发送meta数据: {meta_data}")
             yield _sse_pack(meta_data)
 
-            content = types.Content(role='user', parts=[types.Part(text=query_text)])
+            # 构建消息内容，包含文本和文件
+            parts = []
+            if query_text.strip():
+                parts.append(types.Part(text=query_text))
+            
+            # 添加文件信息到消息中（作为文本描述）
+            if payload.file_urls:
+                file_info = f"\n\n已上传文件({len(payload.file_urls)}个):\n"
+                for i, url in enumerate(payload.file_urls, 1):
+                    file_name = url.split('/')[-1] if '/' in url else url
+                    file_info += f"{i}. {file_name} ({url})\n"
+                parts.append(types.Part(text=file_info))
+                print(f"📎 包含文件信息: {len(payload.file_urls)}个文件")
+                
+            content = types.Content(role='user', parts=parts)
             run_config = RunConfig(streaming_mode=StreamingMode.SSE)
             accumulated_text = ""
             
@@ -957,14 +1093,30 @@ async def upload_files(request: Request, files: List[UploadFile] = File(...)) ->
     urls: List[str] = []
     for f in files:
         orig_name = f.filename or "file"
+        name_without_ext = os.path.splitext(orig_name)[0]
         suffix = os.path.splitext(orig_name)[1]
-        unique_name = f"{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}_{uuid.uuid4().hex}{suffix}"
-        dest_path = os.path.join(UPLOAD_DIR, unique_name)
+        
+        # 检查文件是否已存在，如果存在则添加数字后缀
+        counter = 1
+        final_name = orig_name
+        dest_path = os.path.join(UPLOAD_DIR, final_name)
+        
+        while os.path.exists(dest_path):
+            final_name = f"{name_without_ext}({counter}){suffix}"
+            dest_path = os.path.join(UPLOAD_DIR, final_name)
+            counter += 1
+        
+        # 保存文件
         content = await f.read()
         with open(dest_path, 'wb') as out:
             out.write(content)
-        file_url = str(request.base_url) + "uploads/" + unique_name
+        
+        file_url = str(request.base_url) + "uploads/" + final_name
+        print(f"🔍 文件URL: {file_url}")
         urls.append(file_url)
+        print(f"📁 文件上传成功: {orig_name} -> {final_name}")
+    
+    print(f"✅ 总共上传了 {len(urls)} 个文件")
     return urls
 
 
