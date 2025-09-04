@@ -36,6 +36,7 @@ interface SidebarProps {
   onToggle: () => void;
   isLoading?: boolean;
   className?: string;
+  appTitle?: string;
 }
 
 /**
@@ -231,6 +232,7 @@ export function NewSidebar({
   onToggle,
   isLoading = false,
   className,
+  appTitle = "MatterAI",
 }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -335,7 +337,7 @@ export function NewSidebar({
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                MatterAI
+                {appTitle}
               </motion.h1>
               
               {/* 关闭按钮 - Claude 风格 */}

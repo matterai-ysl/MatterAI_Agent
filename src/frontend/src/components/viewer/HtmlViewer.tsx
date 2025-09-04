@@ -138,7 +138,7 @@ export function HtmlViewer({
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
       className={cn(
-        'flex flex-col bg-background border-l h-full',
+        'flex flex-col bg-background border-l h-full min-h-0',
         isFullscreen && 'fixed inset-0 z-50 border-0',
         className
       )}
@@ -212,7 +212,7 @@ export function HtmlViewer({
       </div>
 
       {/* 内容区域 */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-h-0">
         {loading ? (
           <div className="h-full flex items-center justify-center">
             <div className="flex items-center gap-3 text-muted-foreground">

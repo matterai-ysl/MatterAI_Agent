@@ -6,10 +6,11 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useChat } from '../../hooks/useChat';
-import { Sidebar } from '../sidebar/Sidebar';
+import { NewSidebar } from '../sidebar/NewSidebar';
 import { MindsWelcome } from './MindsWelcome';
 import { MindsChat } from './MindsChat';
 import { HtmlViewer } from '../viewer/HtmlViewer';
+import { ThemeProvider } from '../../contexts/ThemeContext';
 import { cn } from '../../utils/cn';
 
 interface MindsModule {
@@ -53,7 +54,10 @@ const MINDS_MODULES: MindsModule[] = [
 
 const USER_ID = 'minds_user';
 
-export function MindsApp() {
+/**
+ * MINDS 应用内容组件
+ */
+function MindsAppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false); // MINDS默认收起侧边栏
   const [selectedModules, setSelectedModules] = useState<MindsModule[]>([]);
   const [splitViewOpen, setSplitViewOpen] = useState(false);
@@ -144,7 +148,7 @@ export function MindsApp() {
   return (
     <div className="flex h-screen bg-background text-foreground">
       {/* 侧边栏 */}
-      <Sidebar
+      <NewSidebar
         sessions={state.sessions}
         currentSessionId={state.currentSessionId}
         onSessionSelect={handleSessionSelect}
@@ -152,17 +156,17 @@ export function MindsApp() {
         isOpen={sidebarOpen}
         onToggle={toggleSidebar}
         isLoading={state.isLoading && !state.currentSessionId}
-        hideToggleButton={true}
+        appTitle="MINDS"
       />
 
       {/* 主内容区域 */}
       <div className={cn(
-        'flex-1 flex'
+        'flex-1 flex h-full min-h-0'
       )}>
         {/* 聊天区域 */}
         <div className={cn(
-          'flex flex-col',
-          splitViewOpen ? 'w-1/2' : 'flex-1'
+          'flex flex-col h-full min-h-0 overflow-hidden',
+          splitViewOpen ? 'w-1/2 max-w-1/2' : 'flex-1'
         )}>
           {showWelcome ? (
             <MindsWelcome 
@@ -191,7 +195,7 @@ export function MindsApp() {
         {/* HTML 查看器 - 分屏右侧 */}
         <AnimatePresence>
           {splitViewOpen && htmlViewerData && (
-            <div className="w-1/2 border-l">
+            <div className="w-1/2 h-full border-l flex-shrink-0">
               <HtmlViewer
                 htmlPath={htmlViewerData.htmlPath}
                 title={htmlViewerData.title}
@@ -212,5 +216,16 @@ export function MindsApp() {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * MINDS 主应用组件，包含主题提供者
+ */
+export function MindsApp() {
+  return (
+    <ThemeProvider defaultTheme="light">
+      <MindsAppContent />
+    </ThemeProvider>
   );
 }

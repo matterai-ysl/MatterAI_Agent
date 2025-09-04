@@ -415,7 +415,7 @@ const MessageItem = React.memo(function MessageItem({
         {/* 角色标识 */}
         <div className="flex items-center gap-2">
           <span className="font-medium text-sm">
-            {isUser ? '你' : botName}
+            {isUser ? 'You' : botName}
           </span>
           <span className="text-xs text-muted-foreground">
             {formatDateTime(message.timestamp)}

@@ -27,7 +27,7 @@ MINDS_TOOLS_CONFIG = {
     "preset-active-learning": {
         "name": "Active Learning",
         "type": "mcp",
-        "url": "http://localhost:8080/mcp",
+        "url": "http://localhost:8080",
         "transport": "http"
     },
     "preset-shap-analysis": {
@@ -39,7 +39,7 @@ MINDS_TOOLS_CONFIG = {
     "preset-neural-network": {
         "name": "Neural Network",
         "type": "mcp",
-        "url": "http://127.0.0.1:8000/mcp",
+        "url": "matterai.a1.luyouxia.net:23607",
         "transport": "http"
     },
     "preset-llm-rag": {

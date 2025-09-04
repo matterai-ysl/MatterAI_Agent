@@ -179,13 +179,13 @@ function AppContent() {
       </AnimatePresence>
 
       {/* 主内容区域 */}
-      <div className="flex-1 flex min-w-0 h-screen">
+      <div className="flex-1 flex min-w-0 h-screen min-h-0">
         {/* 聊天区域 */}
         <motion.div
           layout
           className={cn(
-            'flex flex-col min-w-0 h-screen transition-all duration-300',
-            splitViewOpen ? 'flex-1' : 'w-full'
+            'flex flex-col min-w-0 h-screen transition-all duration-300 overflow-hidden',
+            splitViewOpen ? 'w-1/2 max-w-1/2' : 'w-full'
           )}
         >
         {/* 会话标题栏 */}
@@ -391,7 +391,7 @@ function AppContent() {
         {/* HTML 查看器 - 分屏右侧 */}
         <AnimatePresence>
           {splitViewOpen && htmlViewerData && (
-            <div className="w-1/2 border-l">
+            <div className="w-1/2 h-full border-l flex-shrink-0">
               <HtmlViewer
                 htmlPath={htmlViewerData.htmlPath}
                 title={htmlViewerData.title}
