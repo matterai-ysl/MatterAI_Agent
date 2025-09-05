@@ -33,13 +33,13 @@ MINDS_TOOLS_CONFIG = {
     "preset-shap-analysis": {
         "name": "SHAP Analysis", 
         "type": "mcp",
-        "url": "http://127.0.0.1:8000/mcp",
+        "url": "http://localhost:8100/mcp",
         "transport": "http"
     },
     "preset-neural-network": {
         "name": "Neural Network",
         "type": "mcp",
-        "url": "matterai.a1.luyouxia.net:23607",
+        "url": "http://127.0.0.1:8090/mcp",
         "transport": "http"
     },
     "preset-llm-rag": {

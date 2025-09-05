@@ -49,6 +49,22 @@ function getToolStatus(toolCall: ToolCall, toolResults: ToolResult[], isStreamin
 }
 
 /**
+ * 从文本中提取HTML URL的正则表达式
+ */
+function extractHtmlUrlsFromText(text: string): string[] {
+  // 匹配 http://localhost:端口号/static/路径/文件名.html 格式的URL
+  const htmlUrlRegex = /https?:\/\/(?:localhost|127\.0\.0\.1|[a-zA-Z0-9.-]+)(?::\d+)?\/[^\s]*\.html(?:\?[^\s]*)?/gi;
+  const matches = text.match(htmlUrlRegex);
+  
+  if (matches) {
+    // 过滤掉下载链接
+    return matches.filter(url => !url.toLowerCase().includes('/download/'));
+  }
+  
+  return [];
+}
+
+/**
  * 从结果中提取HTML内容信息
  */
 function extractHtmlContent(result: any): { htmlPaths: Array<{ key: string; path: string }>; htmlUrls: Array<{ key: string; url: string }> } {
@@ -83,21 +99,35 @@ function extractHtmlContent(result: any): { htmlPaths: Array<{ key: string; path
                          key.endsWith('url');
         
         if (isHtmlKey) {
+          // 🔧 修复：优先根据值的内容判断类型，而不是键名
           if (isHttpUrl) {
             // 检查是否为HTML URL：必须以.html结尾，且不是下载链接
             const isHtmlUrl = value.toLowerCase().endsWith('.html') && 
                              !value.toLowerCase().includes('/download/');
             if (isHtmlUrl) {
-              // 如果值是HTTP URL且以.html结尾（非下载链接），归类为HTML URL
+              // ✅ 值是HTTP URL且以.html结尾 → 归类为URL（无论键名如何）
               htmlUrls.push({ key, url: value });
-              console.log(`✅ 检测到HTML URL: ${key} -> ${value}`);
+              console.log(`✅ 检测到HTML URL (值优先): ${key} -> ${value}`);
             } else {
               console.log(`🔍 跳过非HTML URL或下载链接: ${key} -> ${value}`);
             }
           } else if (key.endsWith('html_path')) {
-            // 如果键名以html_path结尾且值不是URL，归类为本地路径
-            htmlPaths.push({ key, path: value });
-            console.log(`✅ 检测到HTML路径: ${key} -> ${value}`);
+            // 🔧 修复：即使键名是html_path，也要检查值中是否包含URL
+            const extractedUrls = extractHtmlUrlsFromText(value);
+            if (extractedUrls.length > 0) {
+              // 如果文本中包含URL，提取URL而不是把整个文本当作路径
+              extractedUrls.forEach((url, index) => {
+                htmlUrls.push({ 
+                  key: `${key}_extracted_${index + 1}`, 
+                  url: url 
+                });
+                console.log(`✅ 从html_path值中提取到HTML URL: ${key} -> ${url}`);
+              });
+            } else {
+              // 只有当值不包含URL时，才归类为本地路径
+              htmlPaths.push({ key, path: value });
+              console.log(`✅ 检测到HTML路径: ${key} -> ${value}`);
+            }
           } else {
             // 其他URL相关键名但值不是HTTP URL，检查是否为HTML文件且不是下载链接
             const isHtmlUrl = value.toLowerCase().endsWith('.html') && 
@@ -109,9 +139,35 @@ function extractHtmlContent(result: any): { htmlPaths: Array<{ key: string; path
               console.log(`🔍 跳过非HTML相对路径或下载链接: ${key} -> ${value}`);
             }
           }
+        } else {
+          // 🆕 对于非HTML键名的字符串值，使用正则表达式查找其中的HTML URL
+          const extractedUrls = extractHtmlUrlsFromText(value);
+          if (extractedUrls.length > 0) {
+            extractedUrls.forEach((url, index) => {
+              htmlUrls.push({ 
+                key: `${key}_extracted_${index + 1}`, 
+                url: url 
+              });
+              console.log(`✅ 从文本中提取到HTML URL: ${key} -> ${url}`);
+            });
+          }
         }
       }
     });
+  }
+  
+  // 🆕 如果targetContent是字符串，也尝试从中提取HTML URL
+  if (typeof targetContent === 'string') {
+    const extractedUrls = extractHtmlUrlsFromText(targetContent);
+    if (extractedUrls.length > 0) {
+      extractedUrls.forEach((url, index) => {
+        htmlUrls.push({ 
+          key: `text_extracted_${index + 1}`, 
+          url: url 
+        });
+        console.log(`✅ 从响应文本中提取到HTML URL: ${url}`);
+      });
+    }
   }
   
   console.log(`🔍 HTML内容提取完成: ${htmlUrls.length}个URL, ${htmlPaths.length}个本地路径`);
@@ -209,7 +265,10 @@ function ResultDisplay({
           {htmlUrls.map(({ key, url }) => (
             <button
               key={key}
-              onClick={() => onViewHtml?.(url, `${key} 预览`)}
+              onClick={() => {
+                console.log('🔍 [ToolDisplay] 点击URL按钮:', { url, key, title: `${key} 预览` });
+                onViewHtml?.(url, `${key} 预览`);
+              }}
               className="flex items-center gap-2 p-3 bg-green-50 hover:bg-green-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50 border border-green-200 dark:border-emerald-800 rounded-lg transition-colors w-full max-w-full text-left group overflow-hidden"
             >
               <div className="p-1.5 bg-emerald-500/10 rounded">
@@ -316,14 +375,17 @@ function ToolCallItem({
   // 处理工具展开时的自动HTML预览
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen && toolResult && onViewHtml) {
+      console.log('🔍 [ToolDisplay] handleOpenChange: 开始处理工具展开', { toolResult: toolResult.result });
       const { htmlPaths, htmlUrls } = extractHtmlContent(toolResult.result);
       
       // 优先使用URL，其次使用路径
       if (htmlUrls.length > 0) {
         const firstUrl = htmlUrls[0];
+        console.log('🔍 [ToolDisplay] 调用onViewHtml with URL:', { url: firstUrl.url, title: `${firstUrl.key} 预览` });
         onViewHtml(firstUrl.url, `${firstUrl.key} 预览`);
       } else if (htmlPaths.length > 0) {
         const firstPath = htmlPaths[0];
+        console.log('🔍 [ToolDisplay] 调用onViewHtml with Path:', { path: firstPath.path, title: `${firstPath.key} 预览` });
         onViewHtml(firstPath.path, `${firstPath.key} 预览`);
       }
     }

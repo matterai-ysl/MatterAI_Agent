@@ -252,7 +252,7 @@ def create_mcp_tool_from_config(tool_config):
             connection_params = StreamableHTTPServerParams(
                 url=tool_config["url"],
                 timeout=10,  # 减少超时时间
-                sse_read_timeout=300,  # 减少SSE读取超时
+                sse_read_timeout=1200,  # 减少SSE读取超时
                 terminate_on_close=True
             )
             return MCPToolset(
@@ -262,7 +262,7 @@ def create_mcp_tool_from_config(tool_config):
             connection_params = SseConnectionParams(
                 url=tool_config["url"],
                 timeout=10,  # 减少超时时间
-                sse_read_timeout=300  # 减少SSE读取超时
+                sse_read_timeout=1200  # 减少SSE读取超时
             )
             return MCPToolset(
                 connection_params=connection_params

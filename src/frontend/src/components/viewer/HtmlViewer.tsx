@@ -35,6 +35,8 @@ export function HtmlViewer({
 
   // 判定是否为URL
   const isHttpUrl = /^https?:\/\//i.test(htmlPath);
+  
+  console.log('🔍 [HtmlViewer] 初始化:', { htmlPath, isHttpUrl, title });
 
   // 加载 HTML 内容
   useEffect(() => {

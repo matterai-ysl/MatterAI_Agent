@@ -125,6 +125,7 @@ function MindsAppContent() {
    * 处理 HTML 查看
    */
   const handleViewHtml = (htmlPath: string, title?: string) => {
+    console.log('🔍 [MindsApp] handleViewHtml 接收到:', { htmlPath, title });
     setHtmlViewerData({
       htmlPath,
       title: title || 'HTML 预览'
