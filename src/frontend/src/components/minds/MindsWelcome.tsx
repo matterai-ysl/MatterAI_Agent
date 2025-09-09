@@ -8,6 +8,7 @@ import { Settings, Menu } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../utils/cn';
 import { NewChatInput } from '../chat/NewChatInput';
+import { LanguageToggle } from '../ui/LanguageToggle';
 
 interface MindsModule {
   id: string;
@@ -137,6 +138,10 @@ export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendM
         </div>
         
         <div className="flex items-center space-x-2">
+          {/* 语言切换按钮 */}
+          <div style={{ color: 'rgb(0, 103, 112)' }}>
+            <LanguageToggle variant="icon" size="sm" />
+          </div>
           <button className="p-2 hover:bg-teal-900/20 rounded-lg transition-colors" style={{ color: 'rgba(0, 103, 112, 0.8)' }}>
             <Settings className="w-5 h-5" />
           </button>

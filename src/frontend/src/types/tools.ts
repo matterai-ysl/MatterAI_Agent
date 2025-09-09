@@ -5,7 +5,7 @@
 /**
  * 预设工具类型
  */
-export type PresetToolType = 'material-knowledge' | 'xgboost' | 'material-extraction';
+export type PresetToolType = 'material-knowledge' | 'xgboost' | 'material-extraction' | 'neural-network' | 'random-forest' | 'support-vector-machine';
 
 /**
  * 工具基础接口
@@ -53,28 +53,49 @@ export interface ToolSelectorState {
 }
 
 /**
- * 预设工具配置
+ * 预设工具配置映射表 - 提供翻译键的映射
  */
-export const PRESET_TOOLS: Omit<PresetTool, 'id' | 'enabled'>[] = [
+export const PRESET_TOOL_TRANSLATION_KEYS: Record<PresetToolType, string> = {
+  'material-knowledge': 'materialKnowledge',
+  'xgboost': 'xgboost', 
+  'material-extraction': 'materialExtraction',
+  'neural-network': 'neuralNetwork',
+  'random-forest': 'randomForest',
+  'support-vector-machine': 'supportVectorMachine',
+};
+
+/**
+ * 预设工具配置 - 基础配置，名称和描述通过国际化获取
+ */
+export const PRESET_TOOLS: Omit<PresetTool, 'id' | 'enabled' | 'name' | 'description'>[] = [
   {
     type: 'preset',
     toolType: 'material-knowledge',
-    name: '材料领域知识',
-    description: '提供材料科学相关的专业知识和信息',
     icon: '🧪',
   },
   {
     type: 'preset',
     toolType: 'xgboost',
-    name: 'XGBoost',
-    description: '机器学习模型训练和预测工具',
     icon: '🤖',
   },
   {
     type: 'preset',
     toolType: 'material-extraction',
-    name: '材料结构化数据提取',
-    description: '从文本中提取材料相关的结构化数据',
-    icon: '📊',
+    icon: '📚',
+  },
+  {
+    type: 'preset',
+    toolType: 'neural-network',
+    icon: '🧠',
+  },
+  {
+    type: 'preset',
+    toolType: 'random-forest',
+    icon: '🌲🌲',
+  },
+  {
+    type: 'preset',
+    toolType: 'support-vector-machine',
+    icon: '⚖️',
   },
 ];

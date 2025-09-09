@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../utils/cn';
-import { Tool, PresetTool, CustomTool, PRESET_TOOLS, ToolSelectorState } from '../../types/tools';
+import { Tool, PresetTool, CustomTool, PRESET_TOOLS, PRESET_TOOL_TRANSLATION_KEYS, ToolSelectorState } from '../../types/tools';
 import { ToolItem } from './ToolItem';
 import { CustomToolForm } from './CustomToolForm';
 
@@ -51,12 +51,17 @@ export function ToolSelector({
     }
   }, [shouldCollapse]);
 
-  // 生成预设工具实例
-  const presetTools: PresetTool[] = PRESET_TOOLS.map((tool, index) => ({
-    ...tool,
-    id: `preset-${tool.toolType}`,
-    enabled: selectedTools.includes(`preset-${tool.toolType}`)
-  }));
+  // 生成预设工具实例 - 使用国际化获取名称和描述
+  const presetTools: PresetTool[] = PRESET_TOOLS.map((tool, index) => {
+    const translationKey = PRESET_TOOL_TRANSLATION_KEYS[tool.toolType];
+    return {
+      ...tool,
+      id: `preset-${tool.toolType}`,
+      name: t(`tools.preset.${translationKey}.name`),
+      description: t(`tools.preset.${translationKey}.description`),
+      enabled: selectedTools.includes(`preset-${tool.toolType}`)
+    };
+  });
 
   // 所有工具列表
   const allTools: Tool[] = [...presetTools, ...customTools];

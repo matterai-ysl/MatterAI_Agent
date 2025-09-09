@@ -19,6 +19,30 @@ PRESET_TOOLS_CONFIG = {
         "type": "mcp",
         "url": "http://127.0.0.1:8003/mcp",
         "transport": "http"
+    },
+    "preset-literature-extraction": {
+        "name": "文献数据抽取",
+        "type": "mcp",
+        "url": "http://127.0.0.1:8004/mcp",
+        "transport": "http"
+    },
+    "preset-neural-network": {
+        "name": "神经网络",
+        "type": "mcp",
+        "url": "http://127.0.0.1:8090/mcp",
+        "transport": "http"
+    },
+    "preset-random-forest": {
+        "name": "随机森林",
+        "type": "mcp",
+        "url": "http://127.0.0.1:8101/mcp",
+        "transport": "http"
+    },
+    "preset-support-vector-machine": {
+        "name": "支持向量机",
+        "type": "mcp",
+        "url": "http://127.0.0.1:8102/mcp",
+        "transport": "http"
     }
 }
 

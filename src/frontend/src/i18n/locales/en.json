@@ -58,7 +58,33 @@
     "completionTime": "Completion time",
     "viewHtmlReport": "View HTML Report",
     "openReport": "Open Report (URL)",
-    "viewHtmlReportFile": "View HTML Report (File)"
+    "viewHtmlReportFile": "View HTML Report (File)",
+    "preset": {
+      "materialKnowledge": {
+        "name": "Material Knowledge",
+        "description": "Provide professional knowledge and information in materials science"
+      },
+      "xgboost": {
+        "name": "XGBoost",
+        "description": "Machine learning model training and prediction tool"
+      },
+      "materialExtraction": {
+        "name": "Material Data Extraction",
+        "description": "Extract structured material data from text"
+      },
+      "neuralNetwork": {
+        "name": "Neural Network",
+        "description": "Deep learning neural network model training and prediction"
+      },
+      "randomForest": {
+        "name": "Random Forest",
+        "description": "Random Forest algorithm for classification and regression tasks"
+      },
+      "supportVectorMachine": {
+        "name": "Support Vector Machine",
+        "description": "Support Vector Machine algorithm for classification and regression"
+      }
+    }
   },
   "minds": {
     "welcome": "Welcome to MINDS (Material Interaction Decoupling and Scientific insight extraction)! I am your knowledge-mining agent designed to bridge data-driven modeling with interpretable materials science. Please select a specialized module or ask me directly about materials research.",

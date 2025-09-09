@@ -58,7 +58,33 @@
     "completionTime": "完成时间",
     "viewHtmlReport": "查看 HTML 报告",
     "openReport": "打开报告（URL）",
-    "viewHtmlReportFile": "查看 HTML 报告（文件）"
+    "viewHtmlReportFile": "查看 HTML 报告（文件）",
+    "preset": {
+      "materialKnowledge": {
+        "name": "材料领域知识",
+        "description": "提供材料科学相关的专业知识和信息"
+      },
+      "xgboost": {
+        "name": "XGBoost",
+        "description": "机器学习模型训练和预测工具"
+      },
+      "materialExtraction": {
+        "name": "材料结构化数据提取", 
+        "description": "从文本中提取材料相关的结构化数据"
+      },
+      "neuralNetwork": {
+        "name": "神经网络",
+        "description": "深度学习神经网络模型训练和预测"
+      },
+      "randomForest": {
+        "name": "随机森林",
+        "description": "随机森林算法用于分类和回归任务"
+      },
+      "supportVectorMachine": {
+        "name": "支持向量机",
+        "description": "支持向量机算法用于分类和回归分析"
+      }
+    }
   },
   "minds": {
     "welcome": "欢迎来到 MINDS（材料相互作用解耦与科学洞察提取）！我是您的知识挖掘智能体，旨在连接数据驱动建模与可解释材料科学。请选择专业模块或直接向我咨询材料研究问题。",

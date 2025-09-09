@@ -345,6 +345,73 @@ To extend internationalization:
 - Simplified tool selector by removing redundant add buttons
 - Enhanced component reusability between agents
 
+## UI/UX Customization Updates (v2.2.0)
+
+### Background and Branding Implementation
+- **Custom Background Integration**: 
+  - Added `background.png` as main chat interface background using CSS classes `.chat-background`
+  - Applied to both MatterAI main application (`NewApp.tsx`) and MINDS application (`MindsApp.tsx`)
+  - Implemented fixed background attachment for consistent visual experience
+
+- **Header Background Styling**:
+  - Added `header.png` as header background using CSS class `.header-background`
+  - Applied to all top navigation bars across MatterAI and MINDS interfaces
+  - Covers main app title bar, MINDS chat header, and MINDS welcome page header
+
+- **Logo Integration**:
+  - Added institute logo (`institute-logo.png`) to center position of all header bars
+  - Responsive logo sizing: h-8 for main applications, h-7 for MINDS chat interface
+  - Proper image path configuration using public assets directory structure
+
+### Color Scheme Adaptation
+- **Text Color Adjustment**:
+  - Updated all header text colors from white to custom RGB(0, 103, 112) for better contrast
+  - Applied consistent color scheme across all navigation elements
+  - Used opacity variants for secondary text (0.7) and interactive elements (0.8)
+
+- **Interactive Element Updates**:
+  - Modified hover effects to use `bg-teal-900/20` instead of white transparencies
+  - Updated button states and icon colors to match new color scheme
+  - Maintained accessibility standards for contrast ratios
+
+### Component-Specific Changes
+- **MatterAI Main App** (`src/frontend/src/NewApp.tsx`):
+  - Applied chat background and header background
+  - Added centered logo in title bar
+  - Updated all text colors and interactive elements
+
+- **MINDS Chat Interface** (`src/frontend/src/components/minds/MindsChat.tsx`):
+  - Applied header background with institute logo
+  - Updated color scheme for all text elements
+  - Added language toggle functionality consistency
+
+- **MINDS Welcome Page** (`src/frontend/src/components/minds/MindsWelcome.tsx`):
+  - Applied header background with institute logo
+  - Added missing language toggle button for feature parity
+  - Updated color scheme to match other interfaces
+
+### Technical Implementation
+- **Asset Management**:
+  - Images stored in both `src/assets/images/` and `public/assets/images/`
+  - CSS background images use relative paths: `url('./assets/images/filename.png')`
+  - React img tags use absolute paths: `/assets/images/filename.png`
+
+- **CSS Enhancements**:
+  - Added new utility classes in `src/frontend/src/index.css`
+  - Implemented responsive background sizing and positioning
+  - Maintained cross-browser compatibility
+
+### Quality Assurance
+- **Code Cleanup**:
+  - Resolved ESLint warnings for unused variables
+  - Fixed TypeScript type issues
+  - Ensured consistent code formatting
+
+- **Testing and Validation**:
+  - Verified frontend compilation without errors
+  - Tested responsive design across different screen sizes
+  - Confirmed functionality across both MatterAI and MINDS interfaces
+
 ## Deployment Notes
 
 - Frontend builds to static files in `build/` directory
