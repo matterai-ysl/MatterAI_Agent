@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Wrench, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ToolCall, ToolResult } from '../../types/chat';
 import { formatDateTime } from '../../utils/format';
 import { cn } from '../../utils/cn';
@@ -65,11 +66,94 @@ function extractHtmlUrlsFromText(text: string): string[] {
 }
 
 /**
+ * 递归遍历对象并提取HTML相关信息
+ */
+function recursiveExtractHtml(obj: any, path: string = '', htmlPaths: Array<{ key: string; path: string }>, htmlUrls: Array<{ key: string; url: string }>) {
+  if (!obj || typeof obj !== 'object') return;
+  
+  Object.entries(obj).forEach(([key, value]) => {
+    const currentPath = path ? `${path}.${key}` : key;
+    
+    if (typeof value === 'string') {
+      // 首先检查值是否为HTTP(S) URL
+      const isHttpUrl = /^https?:\/\//i.test(value);
+      
+      // HTML相关键名检测（支持描述性前缀）
+      const isHtmlKey = key.endsWith('html_path') || 
+                       key.endsWith('_url') || 
+                       key.endsWith('html_url') || 
+                       key.endsWith('report_url') ||
+                       key.endsWith('url');
+      
+      if (isHtmlKey) {
+        // 🔧 修复：优先根据值的内容判断类型，而不是键名
+        if (isHttpUrl) {
+          // 检查是否为HTML URL：必须以.html结尾，且不是下载链接
+          const isHtmlUrl = value.toLowerCase().endsWith('.html') && 
+                           !value.toLowerCase().includes('/download/');
+          if (isHtmlUrl) {
+            // ✅ 值是HTTP URL且以.html结尾 → 归类为URL（无论键名如何）
+            htmlUrls.push({ key: currentPath, url: value });
+            console.log(`✅ 检测到HTML URL (递归): ${currentPath} -> ${value}`);
+          } else {
+            console.log(`🔍 跳过非HTML URL或下载链接 (递归): ${currentPath} -> ${value}`);
+          }
+        } else if (key.endsWith('html_path')) {
+          // 🔧 修复：即使键名是html_path，也要检查值中是否包含URL
+          const extractedUrls = extractHtmlUrlsFromText(value);
+          if (extractedUrls.length > 0) {
+            // 如果文本中包含URL，提取URL而不是把整个文本当作路径
+            extractedUrls.forEach((url, index) => {
+              htmlUrls.push({ 
+                key: `${currentPath}_extracted_${index + 1}`, 
+                url: url 
+              });
+              console.log(`✅ 从html_path值中提取到HTML URL (递归): ${currentPath} -> ${url}`);
+            });
+          } else {
+            // 只有当值不包含URL时，才归类为本地路径
+            htmlPaths.push({ key: currentPath, path: value });
+            console.log(`✅ 检测到HTML路径 (递归): ${currentPath} -> ${value}`);
+          }
+        } else {
+          // 其他URL相关键名但值不是HTTP URL，检查是否为HTML文件且不是下载链接
+          const isHtmlUrl = value.toLowerCase().endsWith('.html') && 
+                           !value.toLowerCase().includes('/download/');
+          if (isHtmlUrl) {
+            htmlUrls.push({ key: currentPath, url: value });
+            console.log(`✅ 检测到其他HTML URL (递归): ${currentPath} -> ${value}`);
+          } else {
+            console.log(`🔍 跳过非HTML相对路径或下载链接 (递归): ${currentPath} -> ${value}`);
+          }
+        }
+      } else {
+        // 🆕 对于非HTML键名的字符串值，使用正则表达式查找其中的HTML URL
+        const extractedUrls = extractHtmlUrlsFromText(value);
+        if (extractedUrls.length > 0) {
+          extractedUrls.forEach((url, index) => {
+            htmlUrls.push({ 
+              key: `${currentPath}_extracted_${index + 1}`, 
+              url: url 
+            });
+            console.log(`✅ 从文本中提取到HTML URL (递归): ${currentPath} -> ${url}`);
+          });
+        }
+      }
+    } else if (typeof value === 'object' && value !== null) {
+      // 递归处理嵌套对象
+      recursiveExtractHtml(value, currentPath, htmlPaths, htmlUrls);
+    }
+  });
+}
+
+/**
  * 从结果中提取HTML内容信息
  */
 function extractHtmlContent(result: any): { htmlPaths: Array<{ key: string; path: string }>; htmlUrls: Array<{ key: string; url: string }> } {
   const htmlPaths: Array<{ key: string; path: string }> = [];
   const htmlUrls: Array<{ key: string; url: string }> = [];
+  
+  console.log('🔍 开始HTML内容提取，原始结果:', result);
   
   // 🔍 Google ADK 结果处理：优先检查 structuredContent
   let targetContent = result;
@@ -85,75 +169,11 @@ function extractHtmlContent(result: any): { htmlPaths: Array<{ key: string; path
     targetContent = result.structuredContent;
   }
   
+  console.log('🔍 目标内容:', targetContent);
+  
+  // 🔧 修复：使用递归函数处理嵌套对象
   if (typeof targetContent === 'object' && targetContent) {
-    Object.entries(targetContent).forEach(([key, value]) => {
-      if (typeof value === 'string') {
-        // 首先检查值是否为HTTP(S) URL
-        const isHttpUrl = /^https?:\/\//i.test(value);
-        
-        // HTML相关键名检测（支持描述性前缀）
-        const isHtmlKey = key.endsWith('html_path') || 
-                         key.endsWith('_url') || 
-                         key.endsWith('html_url') || 
-                         key.endsWith('report_url') ||
-                         key.endsWith('url');
-        
-        if (isHtmlKey) {
-          // 🔧 修复：优先根据值的内容判断类型，而不是键名
-          if (isHttpUrl) {
-            // 检查是否为HTML URL：必须以.html结尾，且不是下载链接
-            const isHtmlUrl = value.toLowerCase().endsWith('.html') && 
-                             !value.toLowerCase().includes('/download/');
-            if (isHtmlUrl) {
-              // ✅ 值是HTTP URL且以.html结尾 → 归类为URL（无论键名如何）
-              htmlUrls.push({ key, url: value });
-              console.log(`✅ 检测到HTML URL (值优先): ${key} -> ${value}`);
-            } else {
-              console.log(`🔍 跳过非HTML URL或下载链接: ${key} -> ${value}`);
-            }
-          } else if (key.endsWith('html_path')) {
-            // 🔧 修复：即使键名是html_path，也要检查值中是否包含URL
-            const extractedUrls = extractHtmlUrlsFromText(value);
-            if (extractedUrls.length > 0) {
-              // 如果文本中包含URL，提取URL而不是把整个文本当作路径
-              extractedUrls.forEach((url, index) => {
-                htmlUrls.push({ 
-                  key: `${key}_extracted_${index + 1}`, 
-                  url: url 
-                });
-                console.log(`✅ 从html_path值中提取到HTML URL: ${key} -> ${url}`);
-              });
-            } else {
-              // 只有当值不包含URL时，才归类为本地路径
-              htmlPaths.push({ key, path: value });
-              console.log(`✅ 检测到HTML路径: ${key} -> ${value}`);
-            }
-          } else {
-            // 其他URL相关键名但值不是HTTP URL，检查是否为HTML文件且不是下载链接
-            const isHtmlUrl = value.toLowerCase().endsWith('.html') && 
-                             !value.toLowerCase().includes('/download/');
-            if (isHtmlUrl) {
-              htmlUrls.push({ key, url: value });
-              console.log(`✅ 检测到其他HTML URL: ${key} -> ${value}`);
-            } else {
-              console.log(`🔍 跳过非HTML相对路径或下载链接: ${key} -> ${value}`);
-            }
-          }
-        } else {
-          // 🆕 对于非HTML键名的字符串值，使用正则表达式查找其中的HTML URL
-          const extractedUrls = extractHtmlUrlsFromText(value);
-          if (extractedUrls.length > 0) {
-            extractedUrls.forEach((url, index) => {
-              htmlUrls.push({ 
-                key: `${key}_extracted_${index + 1}`, 
-                url: url 
-              });
-              console.log(`✅ 从文本中提取到HTML URL: ${key} -> ${url}`);
-            });
-          }
-        }
-      }
-    });
+    recursiveExtractHtml(targetContent, '', htmlPaths, htmlUrls);
   }
   
   // 🆕 如果targetContent是字符串，也尝试从中提取HTML URL
@@ -192,8 +212,9 @@ function StatusIcon({ status }: { status: ToolStatus }) {
  * 参数展示组件
  */
 function ParametersDisplay({ args }: { args: Record<string, any> }) {
+  const { t } = useTranslation();
   if (!args || Object.keys(args).length === 0) {
-    return <div className="text-muted-foreground text-sm">无参数</div>;
+    return <div className="text-muted-foreground text-sm">{t('tools.noParameters')}</div>;
   }
 
   return (
@@ -223,15 +244,16 @@ function ResultDisplay({
   result: any;
   onViewHtml?: (htmlPath: string, title?: string) => void;
 }) {
+  const { t } = useTranslation();
   if (result === null || result === undefined) {
-    return <div className="text-muted-foreground text-sm">无结果</div>;
+    return <div className="text-muted-foreground text-sm">{t('tools.noResult')}</div>;
   }
 
   // 处理错误结果
   if (typeof result === 'object' && result.error) {
     return (
       <div className="bg-destructive/10 border border-destructive/20 rounded p-3">
-        <div className="text-destructive text-sm font-medium mb-1">错误</div>
+        <div className="text-destructive text-sm font-medium mb-1">{t('tools.error')}</div>
         <div className="text-destructive text-sm">{result.error}</div>
       </div>
     );
@@ -278,7 +300,7 @@ function ResultDisplay({
               </div>
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="font-medium text-sm text-emerald-700 dark:text-emerald-300 group-hover:text-emerald-800 dark:group-hover:text-emerald-200">
-                  打开报告（URL）
+                  {t('tools.openReport')}
                 </div>
                 <div className="text-xs text-emerald-600/70 dark:text-emerald-400/70 break-all max-w-full overflow-hidden" 
                      style={{ 
@@ -314,7 +336,7 @@ function ResultDisplay({
               </div>
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="font-medium text-sm text-blue-700 dark:text-blue-300 group-hover:text-blue-800 dark:group-hover:text-blue-200">
-                  查看 HTML 报告（文件）
+                  {t('tools.viewHtmlReportFile')}
                 </div>
                 <div className="text-xs text-blue-600/70 dark:text-blue-400/70 break-all max-w-full overflow-hidden" 
                      style={{ 
@@ -360,10 +382,11 @@ function ToolCallItem({
   onViewHtml?: (htmlPath: string, title?: string) => void;
   isHighlighted?: boolean;
 }) {
+  const { t } = useTranslation();
   const statusText = {
-    calling: '执行中...',
-    completed: '已完成',
-    error: '执行失败',
+    calling: t('tools.executing'),
+    completed: t('tools.completed'),
+    error: t('tools.failed'),
   };
 
   const statusColor = {
@@ -414,25 +437,25 @@ function ToolCallItem({
       <div className="space-y-4 pt-3">
         {/* 调用时间 */}
         <div className="text-xs text-muted-foreground">
-          调用时间: {formatDateTime(toolCall.timestamp)}
+          {t('tools.callTime')}: {formatDateTime(toolCall.timestamp)}
         </div>
 
         {/* 参数 */}
         <div>
-          <h5 className="text-sm font-medium mb-2">参数</h5>
+          <h5 className="text-sm font-medium mb-2">{t('tools.parameters')}</h5>
           <ParametersDisplay args={toolCall.args} />
         </div>
 
         {/* 结果 */}
         {toolResult && (
           <div>
-            <h5 className="text-sm font-medium mb-2">结果</h5>
+            <h5 className="text-sm font-medium mb-2">{t('tools.result')}</h5>
             <ResultDisplay 
               result={toolResult.result} 
               onViewHtml={onViewHtml}
             />
             <div className="text-xs text-muted-foreground mt-2">
-              完成时间: {formatDateTime(toolResult.timestamp)}
+              {t('tools.completionTime')}: {formatDateTime(toolResult.timestamp)}
             </div>
           </div>
         )}
@@ -452,6 +475,7 @@ export function ToolDisplay({
   onViewHtml,
   highlightedToolId
 }: ToolDisplayProps) {
+  const { t } = useTranslation();
   if (toolCalls.length === 0) {
     return null;
   }
@@ -461,7 +485,7 @@ export function ToolDisplay({
       <div className="flex items-center gap-2 mb-3">
         <Wrench className="h-4 w-4 text-blue-500" />
         <span className="text-sm font-medium text-muted-foreground">
-          工具调用 ({toolCalls.length})
+          {t('tools.toolCalls', { count: toolCalls.length })}
         </span>
       </div>
 

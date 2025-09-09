@@ -5,6 +5,7 @@
 
 import React, { useState, useRef, useCallback, KeyboardEvent } from 'react';
 import { Paperclip, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
 import { FileUpload } from './FileUpload';
@@ -30,10 +31,11 @@ interface ChatInputProps {
 export function ChatInput({ 
   onSendMessage, 
   disabled = false, 
-  placeholder = "输入消息...",
+  placeholder,
   className,
   uploadStatus
 }: ChatInputProps) {
+  const { t } = useTranslation();
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
@@ -135,7 +137,7 @@ export function ChatInput({
       {showFileUpload && (
         <div className="p-4 border-b">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="font-medium text-sm">文件上传</h4>
+            <h4 className="font-medium text-sm">{t('chat.fileUpload')}</h4>
             <Button
               variant="ghost"
               size="icon"
@@ -191,7 +193,7 @@ export function ChatInput({
               onKeyDown={handleKeyDown}
               onCompositionStart={handleCompositionStart}
               onCompositionEnd={handleCompositionEnd}
-              placeholder={placeholder}
+              placeholder={placeholder || t('chat.inputPlaceholder')}
               disabled={disabled}
               rows={1}
               className={cn(
@@ -206,7 +208,7 @@ export function ChatInput({
             {/* 文件计数 */}
             {files && files.length > 0 && (
               <div className="absolute bottom-1 right-1 px-2 py-1 text-xs bg-primary text-primary-foreground rounded">
-                {files.length} 个文件
+                {t('chat.filesSelected', { count: files.length })}
               </div>
             )}
           </div>
@@ -249,11 +251,11 @@ export function ChatInput({
         <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
           <span>
             {files && files.length > 0 
-              ? `已选择 ${files.length} 个文件`
-              : '支持文本、图片、文档等多种格式'
+              ? t('chat.filesSelected', { count: files.length })
+              : t('chat.supportedFormats')
             }
           </span>
-          <span>Shift + Enter 换行，Enter 发送</span>
+          <span>{t('chat.enterNewline')}</span>
         </div>
       </div>
     </div>

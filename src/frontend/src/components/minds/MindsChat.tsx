@@ -4,9 +4,11 @@
  */
 
 import { Settings, Menu } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ChatMessage } from '../../types/chat';
 import { NewMessageList } from '../chat/NewMessageList';
 import { NewChatInput } from '../chat/NewChatInput';
+import { LanguageToggle } from '../ui/LanguageToggle';
 import { cn } from '../../utils/cn';
 
 interface MindsModule {
@@ -42,6 +44,7 @@ export function MindsChat({
   onViewHtml,
   highlightedToolId
 }: MindsChatProps) {
+  const { t } = useTranslation();
 
   return (
     <div className="flex-1 flex flex-col h-full">
@@ -53,7 +56,7 @@ export function MindsChat({
             <button 
               onClick={onSidebarToggle}
               className="p-2 hover:bg-muted rounded-lg transition-colors"
-              title="历史记录"
+              title={t('minds.history')}
             >
               <Menu className="w-4 h-4 text-muted-foreground" />
             </button>
@@ -91,7 +94,9 @@ export function MindsChat({
         )}
 
         <div className="flex items-center space-x-2">
-          <button className="p-2 hover:bg-muted rounded-lg transition-colors">
+          {/* 语言切换按钮 */}
+          <LanguageToggle variant="icon" size="sm" />
+          <button className="p-2 hover:bg-muted rounded-lg transition-colors" title={t('sidebar.settings')}>
             <Settings className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>

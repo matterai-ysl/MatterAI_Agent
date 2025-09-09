@@ -180,6 +180,151 @@ Test files are located in `src/backend/`:
   - IME composition events are handled to prevent premature sending
 - **Dialog Scrolling**: Custom tool dialogs support page-level scrolling when content overflows
 - **Agent-Specific Branding**: Each agent displays its own name in chat messages (MINDS vs MatterAI)
+- **Internationalization**: Full Chinese/English language switching support
+  - **Language Toggle Locations**:
+    - Main App: Top right corner of the title bar (next to AI status indicator)
+    - MINDS App: Top right corner of navigation bar (next to settings button)
+    - Sidebar: Header area (when sidebar is open)
+  - Language toggle displays current language: 中 (Chinese) or EN (English)
+  - Persists language preference in localStorage
+  - Translates UI elements: buttons, messages, tool states, etc.
+  - Default language: Chinese (zh)
+  - Hover tooltip shows target language
+
+## Internationalization (i18n) Guide
+
+The MatterAI Agent frontend supports full internationalization with Chinese and English language switching.
+
+### Architecture Overview
+
+The i18n system uses `react-i18next` library with the following structure:
+
+```
+src/i18n/
+├── index.ts              # Main i18n configuration
+└── locales/
+    ├── en.json          # English translations
+    └── zh.json          # Chinese translations
+```
+
+### Language Detection Rules
+
+- **Main App (/)**: Defaults to Chinese (zh)
+- **MINDS App (/minds)**: Defaults to English (en)
+- **Saved Preference**: localStorage takes priority over defaults
+- **Fallback**: Chinese (zh) if no preference is found
+
+### Adding New Translations
+
+#### 1. Add Translation Keys
+
+Update both language files with new keys:
+
+**zh.json (Chinese)**:
+```json
+{
+  "newSection": {
+    "newKey": "中文文本",
+    "withVariable": "包含 {{count}} 个变量"
+  }
+}
+```
+
+**en.json (English)**:
+```json
+{
+  "newSection": {
+    "newKey": "English text", 
+    "withVariable": "Contains {{count}} variables"
+  }
+}
+```
+
+#### 2. Use in Components
+
+```tsx
+import { useTranslation } from 'react-i18next';
+
+function MyComponent() {
+  const { t } = useTranslation();
+  
+  return (
+    <div>
+      <span>{t('newSection.newKey')}</span>
+      <span>{t('newSection.withVariable', { count: 5 })}</span>
+    </div>
+  );
+}
+```
+
+### Translation Key Naming Convention
+
+Use hierarchical keys with descriptive names:
+
+- `sidebar.*` - Sidebar related text
+- `chat.*` - Chat interface text  
+- `tools.*` - Tool system text
+- `minds.*` - MINDS agent specific text
+- `common.*` - Reusable common text
+- `theme.*` - Theme system text
+
+### Language Toggle Integration
+
+The language toggle component is available in multiple locations:
+
+```tsx
+import { LanguageToggle } from '../ui/LanguageToggle';
+
+// Icon variant (default)
+<LanguageToggle variant="icon" size="sm" />
+
+// Text variant  
+<LanguageToggle variant="text" size="md" />
+```
+
+### Best Practices
+
+1. **Always add both languages** - Never leave a translation key in only one language
+2. **Use descriptive keys** - `chat.inputPlaceholder` not `input1`  
+3. **Group related keys** - Use nested objects for organization
+4. **Handle pluralization** - Use interpolation for dynamic counts
+5. **Test both languages** - Switch languages during development
+6. **Consistent terminology** - Maintain consistent translations across the app
+
+### Existing Translation Coverage
+
+**Fully Translated Components**:
+- Sidebar (history, search, new chat, settings)
+- Chat interface (input, messages, actions)
+- Tool system (selection, execution, results)
+- MINDS welcome page and modules
+- Language toggle and theme selector
+- Message actions (copy, regenerate, ratings)
+
+**Partially Translated**:
+- Error messages and notifications
+- Loading states and indicators
+
+### Future Extension Points
+
+To extend internationalization:
+
+1. **Add new language**:
+   - Create `src/i18n/locales/[lang].json`
+   - Update `src/i18n/index.ts` resources
+   - Add language option to LanguageToggle
+
+2. **Add time/date localization**:
+   - Use `i18next-luxon` or similar for date formatting
+   - Configure locale-specific formats
+
+3. **Add RTL support**:
+   - Install `react-i18next` RTL plugins
+   - Update CSS for RTL layouts
+
+4. **Add context-based translations**:
+   - Use `i18next` context feature for situational text
+   - Implement role-based language variations
 
 ## Recent Updates (v2.1.0)
 

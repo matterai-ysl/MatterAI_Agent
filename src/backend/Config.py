@@ -5,13 +5,13 @@ PRESET_TOOLS_CONFIG = {
     "preset-material-knowledge": {
         "name": "材料领域知识",
         "type": "mcp", 
-        "url": "http://127.0.0.1:8001/mcp",
+        "url": "http://127.0.0.1:8110/mcp",
         "transport": "http"
     },
     "preset-xgboost": {
         "name": "XGBoost",
         "type": "mcp",
-        "url": "http://127.0.0.1:8002/mcp", 
+        "url": "http://localhost:8100/mcp", 
         "transport": "http"
     },
     "preset-material-extraction": {
@@ -45,7 +45,7 @@ MINDS_TOOLS_CONFIG = {
     "preset-llm-rag": {
         "name": "LLM-RAG",
         "type": "mcp", 
-        "url": "http://127.0.0.1:8000/mcp",
+        "url": "http://127.0.0.1:8110/mcp",
         "transport": "http"
     }
 }

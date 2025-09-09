@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   ChatMessage, 
   ChatSession, 
@@ -40,6 +41,8 @@ interface UseChatReturn {
  * 聊天功能主 Hook
  */
 export function useChat(userId: string, appName: string = 'default'): UseChatReturn {
+  const { i18n } = useTranslation();
+  
   // 核心状态
   const [state, setState] = useState<AppState>({
     currentSessionId: null,
@@ -402,6 +405,7 @@ export function useChat(userId: string, appName: string = 'default'): UseChatRet
           custom_tools: convertedCustomTools,
           app_name: appName,
           file_urls: fileUrls.length > 0 ? fileUrls : undefined, // 添加文件地址参数
+          language: i18n.language, // 添加语言参数
         },
         handleSSEMessage,
         handleSSEError,

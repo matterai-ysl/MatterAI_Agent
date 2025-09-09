@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Settings, Menu } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../utils/cn';
 import { NewChatInput } from '../chat/NewChatInput';
 
@@ -31,6 +32,7 @@ interface ModuleChipProps {
 }
 
 function ModuleChip({ module, isSelected, onToggle }: ModuleChipProps) {
+  const { t } = useTranslation();
   const getIconForModule = (moduleId: string) => {
     switch (moduleId) {
       case 'active-learning':
@@ -82,10 +84,10 @@ function ModuleChip({ module, isSelected, onToggle }: ModuleChipProps) {
       </div>
       <div className="flex flex-col items-start">
         <span className="text-sm font-medium">
-          {module.name}
+          {t(`minds.modules.${module.id.replace('-', '')}`)}
         </span>
         <span className="text-xs opacity-70">
-          {module.description}
+          {t(`minds.modules.${module.id.replace('-', '')}Desc`)}
         </span>
       </div>
     </button>
@@ -93,6 +95,7 @@ function ModuleChip({ module, isSelected, onToggle }: ModuleChipProps) {
 }
 
 export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendMessage, onSidebarToggle }: MindsWelcomeProps) {
+  const { t } = useTranslation();
 
   return (
     <div className="flex-1 flex flex-col">
@@ -104,7 +107,7 @@ export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendM
             <button 
               onClick={onSidebarToggle}
               className="p-2 hover:bg-muted rounded-lg transition-colors"
-              title="历史记录"
+              title={t('minds.history')}
             >
               <Menu className="w-5 h-5 text-muted-foreground" />
             </button>
@@ -142,10 +145,7 @@ export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendM
               </div>
               <div className="flex-1 bg-muted/30 rounded-2xl p-6 border border-border/50">
                 <div className="text-base text-foreground leading-relaxed">
-                  Welcome to MINDS (Material Interaction Decoupling and Scientific 
-                  insight extraction)! I am your knowledge-mining agent designed to 
-                  bridge data-driven modeling with interpretable materials science. Please 
-                  select a specialized module or ask me directly about materials research.
+                  {t('minds.welcome')}
                 </div>
                 <div className="text-xs text-muted-foreground mt-3">
                   11:58 AM
@@ -181,7 +181,7 @@ export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendM
                     onSendMessage(message, files);
                   }
                 }}
-                placeholder="Describe your materials research challenge or ask about composite design..."
+                placeholder={t('minds.placeholder')}
                 className="border-none bg-transparent"
                 selectedTools={[]}
               />

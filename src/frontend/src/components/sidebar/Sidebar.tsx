@@ -5,9 +5,11 @@
 
 import React from 'react';
 import { X, Settings, Menu } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ChatSession } from '../../types/chat';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
+import { LanguageToggle } from '../ui/LanguageToggle';
 import { SessionList } from './SessionList';
 
 /**
@@ -39,6 +41,7 @@ export function Sidebar({
   className,
   hideToggleButton = false,
 }: SidebarProps) {
+  const { t } = useTranslation();
   return (
     <>
       {/* 移动端遮罩层 */}
@@ -60,13 +63,17 @@ export function Sidebar({
         <div className="flex flex-col h-full">
           {/* 头部 */}
           <div className="flex items-center justify-between p-4 border-b">
-            <h1 className="font-semibold text-lg">Chat History</h1>
+            <h1 className="font-semibold text-lg">{t('sidebar.chatHistory')}</h1>
             <div className="flex items-center gap-1">
+              {/* 语言切换按钮 */}
+              <LanguageToggle size="sm" />
+              
               {/* 设置按钮 */}
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
+                title={t('sidebar.settings')}
               >
                 <Settings className="h-4 w-4" />
               </Button>
@@ -77,6 +84,7 @@ export function Sidebar({
                 size="icon"
                 onClick={onToggle}
                 className="h-8 w-8"
+                title={t('common.close')}
               >
                 <X className="h-4 w-4" />
               </Button>

@@ -7,6 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
+import './i18n'; // 初始化 i18n
 import NewApp from './NewApp';
 import { MindsApp } from './components/minds/MindsApp';
 

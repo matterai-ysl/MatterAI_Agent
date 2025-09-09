@@ -13,6 +13,7 @@ import {
   Check,
   X 
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../utils/cn';
 import { Tool, PresetTool, CustomTool, PRESET_TOOLS, ToolSelectorState } from '../../types/tools';
 import { ToolItem } from './ToolItem';
@@ -37,6 +38,7 @@ export function ToolSelector({
   className,
   shouldCollapse = false
 }: ToolSelectorProps) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [customTools, setCustomTools] = useState<CustomTool[]>([]);
   const [showCustomForm, setShowCustomForm] = useState(false);
@@ -118,7 +120,7 @@ export function ToolSelector({
       <div className="flex items-center justify-between p-3 border border-border rounded-t-lg bg-muted/30">
         <div className="flex items-center gap-2">
           <Settings className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">工具选择</span>
+          <span className="text-sm font-medium">{t('tools.toolSelection')}</span>
           {selectedCount > 0 && (
             <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full">
               {selectedCount}
@@ -154,7 +156,7 @@ export function ToolSelector({
             <div className="p-3 space-y-2 max-h-64 overflow-y-auto">
               {/* 预设工具 */}
               <div className="space-y-2">
-                <div className="text-xs text-muted-foreground font-medium">预设工具</div>
+                <div className="text-xs text-muted-foreground font-medium">{t('tools.presetTools')}</div>
                 {presetTools.map(tool => (
                   <ToolItem
                     key={tool.id}
@@ -168,7 +170,7 @@ export function ToolSelector({
               {/* 自定义工具 */}
               {customTools.length > 0 && (
                 <div className="space-y-2 pt-2 border-t">
-                  <div className="text-xs text-muted-foreground font-medium">自定义工具</div>
+                  <div className="text-xs text-muted-foreground font-medium">{t('tools.customTools')}</div>
                   {customTools.map(tool => (
                     <ToolItem
                       key={tool.id}
@@ -186,7 +188,7 @@ export function ToolSelector({
               {/* 空状态 */}
               {allTools.length === presetTools.length && (
                 <div className="text-center py-4 text-muted-foreground text-sm">
-                  点击 + 按钮添加自定义工具
+                  {t('common.add')} + 按钮添加自定义工具
                 </div>
               )}
 
@@ -200,7 +202,7 @@ export function ToolSelector({
                   className="w-full flex items-center justify-center gap-2 p-2 border border-dashed border-muted-foreground/30 rounded-lg text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
                 >
                   <Plus className="h-4 w-4" />
-                  <span className="text-sm">添加自定义工具</span>
+                  <span className="text-sm">{t('tools.addCustomTool')}</span>
                 </button>
               </div>
             </div>
@@ -230,7 +232,7 @@ export function ToolSelector({
             >
               <div className="flex items-center justify-between mb-4 p-6 pb-4">
                 <h3 className="text-lg font-semibold">
-                  {editingTool ? '编辑工具' : '添加自定义工具'}
+                  {editingTool ? t('tools.editTool') : t('tools.addCustomTool')}
                 </h3>
                 <button
                   onClick={() => {

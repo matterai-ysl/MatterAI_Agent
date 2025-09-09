@@ -5,6 +5,7 @@
 
 import React, { useRef, useState, useCallback } from 'react';
 import { Upload, X, File, Image, FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { formatFileSize, isValidFileType, getFileIconType } from '../../utils/format';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
@@ -107,6 +108,7 @@ export function FileUpload({
   disabled = false,
   className,
 }: FileUploadProps) {
+  const { t } = useTranslation();
   const [fileItems, setFileItems] = useState<FileItem[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -146,7 +148,7 @@ export function FileUpload({
           });
           fileItem.preview = preview;
         } catch (error) {
-          console.error('生成预览失败:', error);
+          console.error(t('chat.previewFailed'), error);
         }
       }
 
@@ -248,10 +250,10 @@ export function FileUpload({
         
         <div className="space-y-2">
           <p className="text-sm font-medium">
-            {isDragOver ? '释放文件到这里' : '点击上传或拖拽文件到这里'}
+            {isDragOver ? t('chat.dropFiles') : t('chat.dragOrClick')}
           </p>
           <p className="text-xs text-muted-foreground">
-            支持 {acceptedTypes.join(', ')}，最大 {formatFileSize(maxFileSize)}
+            {t('chat.supportedFormats')}，最大 {formatFileSize(maxFileSize)}
           </p>
         </div>
 
@@ -269,7 +271,7 @@ export function FileUpload({
       {/* 文件列表 */}
       {fileItems.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium">已选择文件 ({fileItems.length})</h4>
+          <h4 className="text-sm font-medium">{t('chat.selectedFiles', { count: fileItems.length })}</h4>
           <div className="space-y-2">
             {fileItems.map((fileItem) => (
               <FilePreview

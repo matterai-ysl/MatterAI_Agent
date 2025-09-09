@@ -19,9 +19,11 @@ import {
   Trash2,
   Clock
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ChatSession } from '../../types/chat';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
+import { LanguageToggle } from '../ui/LanguageToggle';
 import { useTheme } from '../../contexts/ThemeContext';
 
 /**
@@ -44,11 +46,12 @@ interface SidebarProps {
  */
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const { t } = useTranslation();
 
   const themes = [
-    { value: 'light', icon: Sun, label: '浅色' },
-    { value: 'dark', icon: Moon, label: '深色' },
-    { value: 'system', icon: Monitor, label: '系统' },
+    { value: 'light', icon: Sun, label: t('theme.light') },
+    { value: 'dark', icon: Moon, label: t('theme.dark') },
+    { value: 'system', icon: Monitor, label: t('theme.system') },
   ] as const;
 
   return (
@@ -88,6 +91,7 @@ function SessionItem({
   onDelete?: () => void;
   onRename?: () => void;
 }) {
+  const { t } = useTranslation();
   const [showActions, setShowActions] = useState(false);
 
   return (
@@ -126,7 +130,7 @@ function SessionItem({
               })}
             </span>
             <span className="text-xs opacity-70">
-              {session.messageCount} 条消息
+              {session.messageCount} {t('sidebar.messages')}
             </span>
           </div>
         </div>
@@ -175,12 +179,13 @@ function SessionItem({
 function SearchBox({ 
   value, 
   onChange, 
-  placeholder = "搜索对话..." 
+  placeholder 
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="relative">
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -188,7 +193,7 @@ function SearchBox({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={placeholder || t('sidebar.searchChats')}
         className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
       />
     </div>
@@ -199,6 +204,8 @@ function SearchBox({
  * 新建对话按钮
  */
 function NewChatButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
+  const { t } = useTranslation();
+  
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -214,7 +221,7 @@ function NewChatButton({ onClick, disabled }: { onClick: () => void; disabled?: 
         )}
       >
         <Plus className="h-4 w-4" />
-        新建对话
+        {t('sidebar.newChat')}
       </Button>
     </motion.div>
   );

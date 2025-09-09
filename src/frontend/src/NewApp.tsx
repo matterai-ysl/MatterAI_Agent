@@ -11,6 +11,7 @@ import { NewSidebar } from './components/sidebar/NewSidebar';
 import { NewMessageList } from './components/chat/NewMessageList';
 import { NewChatInput } from './components/chat/NewChatInput';
 import { HtmlViewer } from './components/viewer/HtmlViewer';
+import { LanguageToggle } from './components/ui/LanguageToggle';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { cn } from './utils/cn';
 
@@ -244,16 +245,22 @@ function AppContent() {
             </div>
           </div>
           
-          {/* 状态指示器 */}
-          <div className="flex items-center gap-2">
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-2 h-2 bg-emerald-500 rounded-full"
-            />
-            <span className="text-xs text-emerald-600 dark:text-emerald-400">
-              AI 助手在线
-            </span>
+          {/* 状态指示器和语言切换 */}
+          <div className="flex items-center gap-3">
+            {/* 语言切换按钮 */}
+            <LanguageToggle variant="icon" size="sm" />
+            
+            {/* 状态指示器 */}
+            <div className="flex items-center gap-2">
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-2 h-2 bg-emerald-500 rounded-full"
+              />
+              <span className="text-xs text-emerald-600 dark:text-emerald-400">
+                AI 助手在线
+              </span>
+            </div>
           </div>
         </motion.div>
 

@@ -589,7 +589,25 @@ class ChatRequest(BaseModel):
     custom_tools: Optional[List[CustomToolConfig]] = None
     app_name: Optional[str] = "default"  # 智能体应用名称
     file_urls: Optional[List[str]] = None  # 文件地址列表
+    language: Optional[str] = "zh"  # 语言设置，默认中文
 
+
+def _get_file_upload_text(file_urls: List[str], language: str = "zh") -> str:
+    """根据语言生成文件上传信息文本"""
+    file_count = len(file_urls)
+    
+    if language == "en":
+        file_info = f"\n\nUploaded files ({file_count}):\n"
+        for i, url in enumerate(file_urls, 1):
+            file_name = url.split('/')[-1] if '/' in url else url
+            file_info += f"{i}. {file_name} ({url})\n"
+    else:  # 默认中文
+        file_info = f"\n\n已上传文件({file_count}个):\n"
+        for i, url in enumerate(file_urls, 1):
+            file_name = url.split('/')[-1] if '/' in url else url
+            file_info += f"{i}. {file_name} ({url})\n"
+    
+    return file_info
 
 def _sse_pack(payload: Dict[str, Any]) -> str:
     """安全的 SSE 数据包装函数，处理不可序列化的对象"""
@@ -919,10 +937,7 @@ async def chat_stream(payload: ChatRequest) -> StreamingResponse:
             
             # 添加文件信息到消息中（作为文本描述）
             if payload.file_urls:
-                file_info = f"\n\n已上传文件({len(payload.file_urls)}个):\n"
-                for i, url in enumerate(payload.file_urls, 1):
-                    file_name = url.split('/')[-1] if '/' in url else url
-                    file_info += f"{i}. {file_name} ({url})\n"
+                file_info = _get_file_upload_text(payload.file_urls, payload.language or "zh")
                 parts.append(types.Part(text=file_info))
                 print(f"📎 包含文件信息: {len(payload.file_urls)}个文件")
                 

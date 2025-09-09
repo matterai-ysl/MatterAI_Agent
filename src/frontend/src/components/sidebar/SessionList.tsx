@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { MessageSquare, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ChatSession } from '../../types/chat';
 import { formatRelativeTime, truncateText } from '../../utils/format';
 import { cn } from '../../utils/cn';
@@ -34,6 +35,7 @@ function SessionItem({
   isActive: boolean;
   onClick: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <button
       onClick={onClick}
@@ -62,7 +64,7 @@ function SessionItem({
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>{formatRelativeTime(session.updatedAt)}</span>
             {session.messageCount > 0 && (
-              <span>{session.messageCount} messages</span>
+              <span>{session.messageCount} {t('sidebar.messages')}</span>
             )}
           </div>
         </div>
@@ -81,6 +83,7 @@ export function SessionList({
   onNewSession,
   isLoading = false,
 }: SessionListProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col h-full">
       {/* 新建会话按钮 */}
@@ -91,7 +94,7 @@ export function SessionList({
           variant="outline"
         >
           <Plus className="h-4 w-4" />
-          New Chat
+          {t('sidebar.newChat')}
         </Button>
       </div>
 
@@ -115,8 +118,8 @@ export function SessionList({
             // 空状态
             <div className="text-center py-8 text-muted-foreground">
               <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-sm">No chat history yet</p>
-              <p className="text-xs mt-1">Click "New Chat" to start</p>
+              <p className="text-sm">{t('sidebar.noHistoryYet')}</p>
+              <p className="text-xs mt-1">{t('sidebar.clickNewChat')}</p>
             </div>
           ) : (
             // 会话列表
@@ -135,7 +138,7 @@ export function SessionList({
       {/* 底部信息 */}
       <div className="p-4 border-t text-xs text-muted-foreground">
         <div className="flex items-center justify-between">
-          <span>共 {sessions.length} 个会话</span>
+          <span>{t('sidebar.totalSessions', { count: sessions.length })}</span>
           <span>MatterAI Agent</span>
         </div>
       </div>

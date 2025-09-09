@@ -106,6 +106,7 @@ export interface ChatRequest {
   custom_tools?: CustomToolConfig[];
   app_name?: string;
   file_urls?: string[]; // 文件地址列表
+  language?: string; // 语言设置
 }
 
 /**

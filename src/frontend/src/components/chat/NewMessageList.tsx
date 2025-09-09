@@ -5,7 +5,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Bot, File, Image, Download, Copy, RotateCcw, ThumbsUp, ThumbsDown, Check } from 'lucide-react';
+import { User, Bot, File, Image, Download } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -15,6 +16,7 @@ import { cn } from '../../utils/cn';
 // import { ScrollArea } from '../ui/ScrollArea'; // 不再使用，改为原生滚动
 import { Button } from '../ui/Button';
 import { ToolDisplay } from './ToolDisplay';
+import { MessageActions } from './MessageActions';
 
 /**
  * 消息内容渲染组件
@@ -223,89 +225,11 @@ function MessageContentRenderer({ content }: { content: MessageContent }) {
 }
 
 /**
- * 消息操作按钮
- */
-function MessageActions({ 
-  message, 
-  onCopy, 
-  onRegenerate,
-  onRating,
-  copied = false
-}: { 
-  message: ChatMessage;
-  onCopy?: () => void;
-  onRegenerate?: () => void;
-  onRating?: (rating: 'up' | 'down') => void;
-  copied?: boolean;
-}) {
-  const isAssistant = message.role === 'assistant';
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
-    >
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onCopy}
-        className="h-7 px-2 text-xs"
-      >
-        {copied ? (
-          <>
-            <Check className="h-3 w-3 mr-1 text-green-600" />
-            已复制
-          </>
-        ) : (
-          <>
-            <Copy className="h-3 w-3 mr-1" />
-            复制
-          </>
-        )}
-      </Button>
-
-      {isAssistant && (
-        <>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onRegenerate}
-            className="h-7 px-2 text-xs"
-          >
-            <RotateCcw className="h-3 w-3 mr-1" />
-            重新生成
-          </Button>
-
-          <div className="h-4 w-px bg-border mx-1" />
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onRating?.('up')}
-            className="h-7 w-7 p-0"
-          >
-            <ThumbsUp className="h-3 w-3" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onRating?.('down')}
-            className="h-7 w-7 p-0"
-          >
-            <ThumbsDown className="h-3 w-3" />
-          </Button>
-        </>
-      )}
-    </motion.div>
-  );
-}
-
-/**
  * 流式输出指示器
  */
 function TypingIndicator() {
+  const { t } = useTranslation();
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -329,7 +253,7 @@ function TypingIndicator() {
           transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
         />
       </div>
-      <span className="text-sm">AI 正在输入...</span>
+      <span className="text-sm">{t('chat.aiTyping')}</span>
     </motion.div>
   );
 }
@@ -350,6 +274,7 @@ const MessageItem = React.memo(function MessageItem({
   highlightedToolId?: string;
   botName?: string;
 }) {
+  const { t } = useTranslation();
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
   const [copied, setCopied] = useState(false);
@@ -478,7 +403,7 @@ const MessageItem = React.memo(function MessageItem({
             className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg"
           >
             <div className="text-destructive text-sm font-medium">
-              ⚠️ 发生错误
+              ⚠️ {t('chat.errorOccurred')}
             </div>
             <div className="text-destructive text-sm mt-1">
               {message.error}
@@ -513,6 +438,7 @@ export function NewMessageList({
   highlightedToolId,
   botName = 'MatterAI'
 }: MessageListProps) {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // 自动滚动到底部 - 优化版本，减少抖动
@@ -594,7 +520,7 @@ export function NewMessageList({
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               />
-              <span className="text-sm">正在加载消息...</span>
+              <span className="text-sm">{t('chat.loadingMessages')}</span>
             </div>
           </motion.div>
         )}
