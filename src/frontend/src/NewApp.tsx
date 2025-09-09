@@ -69,7 +69,7 @@ function AppContent() {
   } | null>(null);
   const [highlightedToolId, setHighlightedToolId] = useState<string | null>(null);
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
-  const [customTools, setCustomTools] = useState<any[]>([]);
+  // const [customTools] = useState<any[]>([]);
   const { isDesktop } = useResponsive();
   
   // 使用聊天 Hook
@@ -119,9 +119,8 @@ function AppContent() {
   /**
    * 处理工具选择变化
    */
-  const handleToolsChange = (tools: string[], customToolsData: any[]) => {
+  const handleToolsChange = (tools: string[]) => {
     setSelectedTools(tools);
-    setCustomTools(customToolsData);
   };
 
   /**
@@ -165,7 +164,7 @@ function AppContent() {
   }, [isDesktop]);
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden chat-background">
       {/* 侧边栏 */}
       <AnimatePresence mode="wait">
         <NewSidebar
@@ -193,7 +192,7 @@ function AppContent() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b bg-background"
+          className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b header-background"
         >
           <div className="flex items-center gap-4">
             {/* 侧边栏切换按钮 */}
@@ -201,11 +200,12 @@ function AppContent() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleSidebar}
-              className="p-2 hover:bg-accent rounded-lg transition-colors group"
+              className="p-2 hover:bg-accent/20 rounded-lg transition-colors group"
               title={sidebarOpen ? "隐藏侧边栏" : "显示侧边栏"}
+              style={{ color: 'rgb(0, 103, 112)' }}
             >
               <svg 
-                className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" 
+                className="h-5 w-5 transition-colors" 
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -215,15 +215,15 @@ function AppContent() {
             </motion.button>
             
             {/* 会话图标 */}
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <svg className="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-2 bg-teal-900/10 rounded-lg">
+              <svg className="h-5 w-5" style={{ color: 'rgb(0, 103, 112)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
             
             {/* 会话信息 */}
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-foreground">
+              <h2 className="text-lg font-semibold" style={{ color: 'rgb(0, 103, 112)' }}>
                 {state.currentSessionId ? (
                   // 查找当前会话的标题
                   state.sessions.find(s => s.id === state.currentSessionId)?.title || '新对话'
@@ -231,7 +231,7 @@ function AppContent() {
               </h2>
               
               {currentMessages.length > 0 && (
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-3 text-sm" style={{ color: 'rgba(0, 103, 112, 0.7)' }}>
                   <div className="flex items-center gap-1">
                     <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -245,19 +245,30 @@ function AppContent() {
             </div>
           </div>
           
+          {/* 中间Logo区域 */}
+          <div className="flex-1 flex justify-center">
+            <img 
+              src="/assets/images/institute-logo.jpg" 
+              alt="Institute Logo"
+              className="h-8 object-contain"
+            />
+          </div>
+          
           {/* 状态指示器和语言切换 */}
           <div className="flex items-center gap-3">
             {/* 语言切换按钮 */}
-            <LanguageToggle variant="icon" size="sm" />
+            <div style={{ color: 'rgb(0, 103, 112)' }}>
+              <LanguageToggle variant="icon" size="sm" />
+            </div>
             
             {/* 状态指示器 */}
             <div className="flex items-center gap-2">
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="w-2 h-2 bg-emerald-500 rounded-full"
+                className="w-2 h-2 bg-emerald-400 rounded-full"
               />
-              <span className="text-xs text-emerald-600 dark:text-emerald-400">
+              <span className="text-xs" style={{ color: 'rgba(0, 103, 112, 0.8)' }}>
                 AI 助手在线
               </span>
             </div>
@@ -390,7 +401,7 @@ function AppContent() {
                 : '向 MatterAI 发送消息...'
             }
             selectedTools={selectedTools}
-            onToolsChange={handleToolsChange}
+            onToolsChange={(tools, customToolsData) => handleToolsChange(tools)}
           />
         </motion.div>
         </motion.div>

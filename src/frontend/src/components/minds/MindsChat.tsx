@@ -49,28 +49,38 @@ export function MindsChat({
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* 顶部导航栏 */}
-      <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-border/50 bg-background/80 backdrop-blur-sm">
+      <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-border/50 header-background">
         <div className="flex items-center space-x-3">
           {/* 侧边栏切换按钮 */}
           {onSidebarToggle && (
             <button 
               onClick={onSidebarToggle}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              className="p-2 hover:bg-teal-900/20 rounded-lg transition-colors"
               title={t('minds.history')}
+              style={{ color: 'rgba(0, 103, 112, 0.8)' }}
             >
-              <Menu className="w-4 h-4 text-muted-foreground" />
+              <Menu className="w-4 h-4" />
             </button>
           )}
           <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
             <span className="text-lg">⭐</span>
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">MINDS</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-lg font-semibold" style={{ color: 'rgb(0, 103, 112)' }}>MINDS</h1>
+            <p className="text-xs" style={{ color: 'rgba(0, 103, 112, 0.7)' }}>
               Material Interaction Decoupling & Scientific insight extraction
             </p>
           </div>
-          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+        </div>
+        
+        {/* 中间Logo区域 */}
+        <div className="flex-1 flex justify-center">
+          <img 
+            src="/assets/images/institute-logo.jpg" 
+            alt="Institute Logo"
+            className="h-7 object-contain"
+          />
         </div>
         
         {/* 当前选择的模块显示 */}
@@ -95,9 +105,11 @@ export function MindsChat({
 
         <div className="flex items-center space-x-2">
           {/* 语言切换按钮 */}
-          <LanguageToggle variant="icon" size="sm" />
-          <button className="p-2 hover:bg-muted rounded-lg transition-colors" title={t('sidebar.settings')}>
-            <Settings className="w-4 h-4 text-muted-foreground" />
+          <div style={{ color: 'rgb(0, 103, 112)' }}>
+            <LanguageToggle variant="icon" size="sm" />
+          </div>
+          <button className="p-2 hover:bg-teal-900/20 rounded-lg transition-colors" title={t('sidebar.settings')} style={{ color: 'rgba(0, 103, 112, 0.8)' }}>
+            <Settings className="w-4 h-4" />
           </button>
         </div>
       </div>

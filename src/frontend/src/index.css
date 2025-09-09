@@ -298,6 +298,23 @@
     background: linear-gradient(135deg, hsl(var(--welcome-gradient-from)) 0%, hsl(var(--welcome-gradient-to)) 100%);
   }
 
+  /* 聊天窗背景 */
+  .chat-background {
+    background-image: url('./assets/images/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  /* 顶部标题栏背景 */
+  .header-background {
+    background-image: url('./assets/images/header.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
   /* 卡片阴影 */
   .shadow-chat {
     box-shadow: 0 1px 3px 0 hsl(var(--border) / 0.1), 0 1px 2px 0 hsl(var(--border) / 0.06);

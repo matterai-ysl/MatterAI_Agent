@@ -147,7 +147,7 @@ function MindsAppContent() {
   const showWelcome = !state.currentSessionId || currentMessages.length === 0;
 
   return (
-    <div className="flex h-screen bg-background text-foreground">
+    <div className="flex h-screen bg-background text-foreground chat-background">
       {/* 侧边栏 */}
       <NewSidebar
         sessions={state.sessions}

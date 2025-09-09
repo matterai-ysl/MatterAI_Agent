@@ -100,36 +100,45 @@ export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendM
   return (
     <div className="flex-1 flex flex-col">
       {/* 顶部导航栏 */}
-      <div className="flex items-center justify-between p-4 border-b border-border/50">
+      <div className="flex items-center justify-between p-4 border-b border-border/50 header-background">
         <div className="flex items-center space-x-3">
           {/* 历史记录按钮 */}
           {onSidebarToggle && (
             <button 
               onClick={onSidebarToggle}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              className="p-2 hover:bg-teal-900/20 rounded-lg transition-colors"
               title={t('minds.history')}
+              style={{ color: 'rgba(0, 103, 112, 0.8)' }}
             >
-              <Menu className="w-5 h-5 text-muted-foreground" />
+              <Menu className="w-5 h-5" />
             </button>
           )}
-        </div>
-        <div className="flex-1 flex justify-center">
           <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+              <span className="text-lg">⭐</span>
+            </div>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">MINDS</h1>
-              <p className="text-sm text-muted-foreground">
+              <h1 className="text-lg font-semibold" style={{ color: 'rgb(0, 103, 112)' }}>MINDS</h1>
+              <p className="text-xs" style={{ color: 'rgba(0, 103, 112, 0.7)' }}>
                 Material Interaction Decoupling & Scientific insight extraction
               </p>
             </div>
-            <div className="w-3 h-3 bg-green-500 rounded-full ml-2"></div>
+            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
           </div>
         </div>
+        
+        {/* 中间Logo区域 */}
+        <div className="flex-1 flex justify-center">
+          <img 
+            src="/assets/images/institute-logo.jpg" 
+            alt="Institute Logo"
+            className="h-8 object-contain"
+          />
+        </div>
+        
         <div className="flex items-center space-x-2">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <span className="text-2xl">⭐</span>
-          </div>
-          <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-            <Settings className="w-5 h-5 text-muted-foreground" />
+          <button className="p-2 hover:bg-teal-900/20 rounded-lg transition-colors" style={{ color: 'rgba(0, 103, 112, 0.8)' }}>
+            <Settings className="w-5 h-5" />
           </button>
         </div>
       </div>
