@@ -52,7 +52,7 @@ const MINDS_MODULES: MindsModule[] = [
   }
 ];
 
-const USER_ID = 'minds_user';
+// USER_ID 不再需要，现在从认证状态获取
 
 /**
  * MINDS 应用内容组件
@@ -79,7 +79,7 @@ function MindsAppContent() {
     sendMessage,
     switchSession,
     createNewSession,
-  } = useChat(USER_ID, 'minds');
+  } = useChat('minds'); // USER_ID 现在从认证状态获取
 
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);

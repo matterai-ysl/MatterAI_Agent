@@ -17,7 +17,10 @@ import {
   Search,
   Edit3,
   Trash2,
-  Clock
+  Clock,
+  User,
+  LogOut,
+  Key
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ChatSession } from '../../types/chat';
@@ -25,6 +28,7 @@ import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
 import { LanguageToggle } from '../ui/LanguageToggle';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 /**
  * 侧边栏组件属性接口
@@ -196,6 +200,78 @@ function SearchBox({
         placeholder={placeholder || t('sidebar.searchChats')}
         className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
       />
+    </div>
+  );
+}
+
+/**
+ * 用户菜单组件
+ */
+function UserMenu() {
+  const { t } = useTranslation();
+  const { user, logout } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  if (!user) return null;
+
+  return (
+    <div className="relative">
+      <Button
+        variant="ghost"
+        className="w-full h-12 px-3 justify-start"
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+      >
+        <div className="flex items-center gap-3 w-full">
+          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <User className="h-4 w-4 text-primary" />
+          </div>
+          <div className="flex-1 text-left min-w-0">
+            <div className="font-medium text-sm truncate">
+              {user.name || user.email}
+            </div>
+            <div className="text-xs text-muted-foreground truncate">
+              {user.email}
+            </div>
+          </div>
+        </div>
+      </Button>
+
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute bottom-full left-0 right-0 mb-2 bg-popover border rounded-md shadow-lg p-1"
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-2"
+              onClick={() => {
+                // TODO: Navigate to change password page
+                window.location.href = '/auth?view=changePassword';
+              }}
+            >
+              <Key className="h-4 w-4" />
+              {t('auth.changePassword.button', '修改密码')}
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-2 text-destructive hover:text-destructive"
+              onClick={() => {
+                logout();
+                setIsMenuOpen(false);
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+              {t('auth.logout', '退出登录')}
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -429,17 +505,14 @@ export function NewSidebar({
           </div>
 
           {/* 底部设置区域 */}
-          <div className="p-4 border-t">
+          <div className="p-4 border-t space-y-3">
+            {/* 用户信息 */}
+            <UserMenu />
+            
+            {/* 设置选项 */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-                <span className="text-sm text-muted-foreground">设置</span>
+                <LanguageToggle variant="text" size="sm" />
               </div>
               
               <ThemeToggle />

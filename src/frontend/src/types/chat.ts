@@ -99,7 +99,7 @@ export interface CustomToolConfig {
 }
 
 export interface ChatRequest {
-  user_id: string;
+  // user_id 现在从JWT token获取，不再需要在请求中发送
   query: string;
   session_id?: string;
   selected_tools?: string[];
@@ -154,7 +154,7 @@ export interface AppState {
   messages: Record<string, ChatMessage[]>;
   isLoading: boolean;
   error: string | null;
-  userId: string;
+  // userId 现在从认证状态获取，不再存储在AppState中
   uploadStatus?: {
     isUploading: boolean;
     message: string;

@@ -38,9 +38,9 @@ interface UseChatReturn {
 }
 
 /**
- * 聊天功能主 Hook
+ * 聊天功能主 Hook（用户ID现在从认证状态获取）
  */
-export function useChat(userId: string, appName: string = 'default'): UseChatReturn {
+export function useChat(appName: string = 'default'): UseChatReturn {
   const { i18n } = useTranslation();
   
   // 核心状态
@@ -50,7 +50,7 @@ export function useChat(userId: string, appName: string = 'default'): UseChatRet
     messages: {},
     isLoading: false,
     error: null,
-    userId,
+    // userId 现在从认证状态获取
   });
 
   // SSE 连接管理
@@ -398,7 +398,7 @@ export function useChat(userId: string, appName: string = 'default'): UseChatRet
       setIsConnected(true);
       const sseClient = await chatApiService.startStreamingChat(
         {
-          user_id: userId,
+          // user_id 现在从JWT token获取
           query: content,
           session_id: state.currentSessionId || undefined,
           selected_tools: selectedTools || [],
@@ -426,12 +426,13 @@ export function useChat(userId: string, appName: string = 'default'): UseChatRet
     }
   }, [
     state.currentSessionId, 
-    userId, 
+    // userId 已移除，现在从认证状态获取
     addMessage, 
     updateState, 
     handleSSEMessage, 
     handleSSEError, 
-    handleSSEComplete
+    handleSSEComplete,
+    i18n.language  // 添加缺失的依赖项
   ]);
 
   /**
@@ -472,7 +473,7 @@ export function useChat(userId: string, appName: string = 'default'): UseChatRet
    */
   const loadSessions = useCallback(async () => {
     try {
-      const response = await chatApiService.getSessions(userId, appName);
+      const response = await chatApiService.getSessions(appName);
       
       // 转换为 ChatSession 格式，并为每个会话获取第一条用户消息作为标题
       const sessions: ChatSession[] = [];
@@ -480,7 +481,7 @@ export function useChat(userId: string, appName: string = 'default'): UseChatRet
       for (const id of response.sessions) {
         try {
           // 获取会话的第一条消息作为标题
-          const historyResponse = await chatApiService.getHistory(userId, id, appName);
+          const historyResponse = await chatApiService.getHistory(id, appName);
           let title = `会话 ${id.slice(-8)}`; // 默认标题
           
           // 查找第一条用户消息
@@ -541,14 +542,14 @@ export function useChat(userId: string, appName: string = 'default'): UseChatRet
         error: error instanceof Error ? error.message : '加载会话列表失败' 
       }));
     }
-  }, [userId, appName, updateState]);
+  }, [appName, updateState]);
 
   /**
    * 加载会话历史
    */
   const loadHistory = useCallback(async (sessionId: string) => {
     try {
-      const response = await chatApiService.getHistory(userId, sessionId, appName);
+      const response = await chatApiService.getHistory(sessionId, appName);
       console.log('📚 加载历史记录:', response);
       
       // 转换历史消息格式
@@ -584,7 +585,7 @@ export function useChat(userId: string, appName: string = 'default'): UseChatRet
         isLoading: false 
       }));
     }
-  }, [userId, appName, updateState]);
+  }, [appName, updateState]);
 
   /**
    * 上传文件

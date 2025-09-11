@@ -28,6 +28,25 @@ class HttpClient {
   }
 
   /**
+   * 获取认证头
+   */
+  private getAuthHeaders(): HeadersInit {
+    const token = localStorage.getItem('token');
+    const baseHeaders: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      return {
+        ...baseHeaders,
+        'Authorization': `Bearer ${token}`,
+      };
+    }
+
+    return baseHeaders;
+  }
+
+  /**
    * 发送 GET 请求
    */
   async get<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
@@ -43,9 +62,7 @@ class HttpClient {
 
     const response = await fetch(url.toString(), {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: this.getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -64,9 +81,7 @@ class HttpClient {
     
     const response = await fetch(url.toString(), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: this.getAuthHeaders(),
       body: data ? JSON.stringify(data) : undefined,
     });
 
@@ -176,18 +191,17 @@ export class ChatApiService {
   }
 
   /**
-   * 获取用户会话列表
+   * 获取用户会话列表（用户ID现在从JWT token获取）
    */
-  async getSessions(userId: string, appName: string = 'default'): Promise<SessionListResponse> {
-    return this.httpClient.get('/sessions', { user_id: userId, app_name: appName });
+  async getSessions(appName: string = 'default'): Promise<SessionListResponse> {
+    return this.httpClient.get('/sessions', { app_name: appName });
   }
 
   /**
-   * 获取会话历史记录
+   * 获取会话历史记录（用户ID现在从JWT token获取）
    */
-  async getHistory(userId: string, sessionId: string, appName: string = 'default'): Promise<HistoryResponse> {
+  async getHistory(sessionId: string, appName: string = 'default'): Promise<HistoryResponse> {
     return this.httpClient.get('/history', { 
-      user_id: userId, 
       session_id: sessionId,
       app_name: appName
     });
@@ -209,11 +223,18 @@ export class ChatApiService {
       const url = new URL('/chat/stream', baseUrl).toString();
       console.log('📡 请求URL:', url);
       
+      const token = localStorage.getItem('token');
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify(request),
       });
 
@@ -336,6 +357,134 @@ export class ApiError extends Error {
     this.name = 'ApiError';
   }
 }
+
+/**
+ * 认证相关 API 接口
+ */
+export interface AuthApiService {
+  // 邮箱验证
+  sendVerificationCode(request: { email: string; purpose: string }): Promise<any>;
+  verifyCode(request: { email: string; code: string; purpose: string }): Promise<any>;
+  
+  // 用户注册和登录
+  registerWithVerification(request: { 
+    name?: string; 
+    email: string; 
+    password: string; 
+    verification_code: string; 
+  }): Promise<any>;
+  resetPassword(request: { 
+    email: string; 
+    new_password: string; 
+    verification_code: string; 
+  }): Promise<any>;
+  
+  // 账户管理
+  bindEmail(request: { new_email: string; verification_code: string }): Promise<any>;
+  changePassword(request: { 
+    email: string; 
+    current_password: string; 
+    new_password: string; 
+  }): Promise<any>;
+  getUserProfile(): Promise<any>;
+}
+
+/**
+ * 认证 API 服务实现
+ */
+class AuthApiServiceImpl implements AuthApiService {
+  private baseUrl: string = API_BASE_URL;
+
+  private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string> || {}),
+    };
+
+    if (token && !endpoint.includes('login') && !endpoint.includes('register')) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+      throw new Error(errorData.detail || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async sendVerificationCode(request: { email: string; purpose: string }): Promise<any> {
+    return this.makeRequest('/auth/send-verification-code', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async verifyCode(request: { email: string; code: string; purpose: string }): Promise<any> {
+    return this.makeRequest('/auth/verify-code', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async registerWithVerification(request: { 
+    name?: string; 
+    email: string; 
+    password: string; 
+    verification_code: string; 
+  }): Promise<any> {
+    return this.makeRequest('/auth/register-with-verification', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async resetPassword(request: { 
+    email: string; 
+    new_password: string; 
+    verification_code: string; 
+  }): Promise<any> {
+    return this.makeRequest('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async bindEmail(request: { new_email: string; verification_code: string }): Promise<any> {
+    return this.makeRequest('/auth/bind-email', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async changePassword(request: { 
+    email: string; 
+    current_password: string; 
+    new_password: string; 
+  }): Promise<any> {
+    return this.makeRequest('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async getUserProfile(): Promise<any> {
+    return this.makeRequest('/auth/me', {
+      method: 'GET',
+    });
+  }
+}
+
+/**
+ * 导出认证 API 服务实例
+ */
+export const api = new AuthApiServiceImpl();
 
 /**
  * API 响应包装器

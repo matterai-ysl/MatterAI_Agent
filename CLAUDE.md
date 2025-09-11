@@ -18,7 +18,8 @@ MatterAI Agent is a materials science-focused AI assistant with a React + TypeSc
 
 - **Backend**: FastAPI in `src/backend/main.py`
   - Google ADK (Agent Development Kit) integration
-  - PostgreSQL database for session management
+  - PostgreSQL database for session management and user authentication
+  - JWT-based authentication system
   - MCP tools integration for materials science workflows
   - **Multi-agent architecture** with app_name differentiation
   - Dynamic agent creation with tool selection
@@ -42,6 +43,9 @@ npm test
 
 ### Backend (src/backend/)
 ```bash
+# Install authentication dependencies
+pip install -r auth_requirements.txt
+
 # Start backend server (runs on port 9000)
 python main.py
 
@@ -69,15 +73,27 @@ Required environment variables:
 - `src/components/sidebar/`: Session management (Sidebar, SessionList)
 - `src/components/tools/`: Tool selection and display (ToolSelector, ToolDisplay)
 - `src/components/viewer/`: HTML report viewer with iframe rendering
+- **`src/components/auth/`**: Authentication system components
+  - `AuthPage.tsx`: Main authentication page with view switching
+  - `LoginForm.tsx`: User login interface
+  - `RegisterForm.tsx`: User registration interface
+  - `ChangePasswordForm.tsx`: Password change interface
+  - `ProtectedRoute.tsx`: Route protection wrapper
 - **`src/components/minds/`**: MINDS intelligent agent components
   - `MindsApp.tsx`: MINDS agent main container
   - `MindsWelcome.tsx`: Welcome page with module selection chips
   - `MindsChat.tsx`: MINDS-specific chat interface
+- `src/contexts/AuthContext.tsx`: Authentication state management
 - `src/hooks/useChat.ts`: Central chat state management with SSE handling
-- `src/services/api.ts`: API client with streaming support
-- `src/index.tsx`: Multi-agent routing configuration
+- `src/services/api.ts`: API client with streaming support and authentication headers
+- `src/index.tsx`: Multi-agent routing configuration with authentication
 
 ### Backend Architecture
+- **Authentication System**: JWT-based user authentication
+  - `src/backend/auth_api/`: Authentication API routes and models
+  - `src/backend/database.py`: PostgreSQL user management with bcrypt
+  - JWT token-based session management
+  - Protected endpoints with user ID extraction from tokens
 - **Multi-Agent System**: Agent differentiation via app_name parameter
   - Default agent: General MatterAI functionality
   - MINDS agent: Specialized materials science modules
@@ -95,6 +111,14 @@ Required environment variables:
 - **HTML Reports**: Tools can generate HTML reports displayed in split-screen view
 
 ## Key Features
+
+### User Authentication & Security
+- **JWT-based Authentication**: Secure token-based user sessions
+- **User Registration & Login**: Complete authentication flow with email/password
+- **Password Management**: Secure password hashing (bcrypt) and change functionality
+- **Route Protection**: All chat endpoints require authentication
+- **User Session Isolation**: Each user can only access their own chat data
+- **Automatic Token Management**: Frontend automatically includes auth headers
 
 ### Multi-Agent Architecture
 - **Route-based Agent Access**: Default agent at `/`, MINDS agent at `/minds`
@@ -127,10 +151,27 @@ Required environment variables:
 
 ## Database Schema
 
+The system uses a unified PostgreSQL database with two main components:
+
+### User Authentication Schema
+```sql
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Chat Session Schema (Google ADK)
 The system uses Google ADK's DatabaseSessionService for session persistence, storing:
-- User sessions and metadata
+- User sessions and metadata (linked by user_id from JWT token)
 - Message history with tool calls and results
 - Event-driven storage for streaming reconstruction
+- Multi-user session isolation and caching
 
 ## Testing
 
@@ -141,6 +182,37 @@ Test files are located in `src/backend/`:
 - `history_test.py`: Message history retrieval tests
 
 ## Common Tasks
+
+### Authentication & User Management
+
+#### Setting Up Authentication
+1. **Backend Setup**:
+   - Install required dependencies: `pip install -r src/backend/auth_requirements.txt`
+   - Ensure database environment variables are configured
+   - The system will automatically create the users table on first run
+
+2. **Frontend Setup**:
+   - Authentication is automatically integrated via `AuthProvider` in `src/index.tsx`
+   - All routes except `/auth` require authentication
+   - User state is managed via `useAuth` hook from `AuthContext`
+
+#### API Endpoints
+- `POST /auth/register`: User registration
+- `POST /auth/login`: User login  
+- `POST /auth/change-password`: Password change
+- `POST /auth/verify`: Token verification
+- `GET /auth/me`: Get current user info
+
+#### Adding Authentication to New Endpoints
+```python
+from auth_api.auth_routes import get_current_user
+
+@app.get("/protected-endpoint")
+async def protected_route(user_id: str = Depends(get_current_user_id)):
+    # user_id is automatically extracted from JWT token
+    # Endpoint is protected - requires valid token
+    pass
+```
 
 ### Adding New Intelligent Agents
 1. **Backend Configuration**:
@@ -300,6 +372,7 @@ import { LanguageToggle } from '../ui/LanguageToggle';
 - MINDS welcome page and modules
 - Language toggle and theme selector
 - Message actions (copy, regenerate, ratings)
+- Authentication system (login, registration, password change)
 
 **Partially Translated**:
 - Error messages and notifications
@@ -412,9 +485,45 @@ To extend internationalization:
   - Tested responsive design across different screen sizes
   - Confirmed functionality across both MatterAI and MINDS interfaces
 
+## Recent Updates (v2.3.0)
+
+### JWT Authentication System Integration
+- **Complete Authentication Flow**: Implemented full user registration, login, and password management
+- **Database Integration**: Added PostgreSQL user table with secure bcrypt password hashing
+- **Token-based Security**: All chat endpoints now require JWT authentication
+- **User Session Isolation**: Each user can only access their own chat data and sessions
+- **Frontend Integration**: Automatic token management and route protection
+- **API Modernization**: Removed hardcoded user IDs, now extracted from JWT tokens
+- **Security Enhancements**: 
+  - Protected routes with authentication middleware
+  - Secure password storage with bcrypt
+  - Token expiration and validation
+  - User-specific data access control
+
+### Authentication System Components
+- **Backend**: 
+  - `src/backend/auth_api/`: Complete authentication API
+  - `src/backend/database.py`: User management with PostgreSQL
+  - JWT token extraction in `main.py`
+  - Protected endpoints for all chat functionality
+- **Frontend**:
+  - `src/components/auth/`: Login, registration, and password change forms
+  - `src/contexts/AuthContext.tsx`: Authentication state management
+  - `ProtectedRoute` component for route security
+  - Automatic authentication headers in API calls
+
+### Technical Improvements
+- **Code Quality**: Fixed all TypeScript compilation errors and warnings
+- **API Consistency**: Updated all endpoints to use authenticated user IDs
+- **Type Safety**: Removed hardcoded user ID from frontend types
+- **Database Schema**: Unified database for both authentication and chat data
+- **Error Handling**: Comprehensive error handling for authentication flows
+
 ## Deployment Notes
 
 - Frontend builds to static files in `build/` directory
 - Backend runs on port 9000 with CORS enabled
-- Requires PostgreSQL database connection
+- Requires PostgreSQL database connection with authentication tables
+- Install additional dependencies: `pip install -r src/backend/auth_requirements.txt`
 - MCP tools run as separate services on different ports
+- Environment variables now include database credentials for user authentication

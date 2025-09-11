@@ -10,9 +10,9 @@ import { ChatPanel } from './components/chat/ChatPanel';
 import { cn } from './utils/cn';
 
 /**
- * 用户 ID（在实际应用中应该从认证系统获取）
+ * 用户 ID 现在从认证状态获取
  */
-const USER_ID = 'user_1';
+// const USER_ID = 'user_1'; // 不再需要
 
 /**
  * 主应用组件
@@ -28,7 +28,7 @@ function App() {
     sendMessage,
     switchSession,
     createNewSession,
-  } = useChat(USER_ID);
+  } = useChat(); // USER_ID 现在从认证状态获取
 
   /**
    * 切换侧边栏

@@ -40,7 +40,7 @@
     "previewFailed": "Preview generation failed"
   },
   "tools": {
-    "toolSelection": "Tool Selection",
+    "toolSelection": "MCP Tool Selection",
     "toolCalls": "Tool Calls ({{count}})",
     "presetTools": "Preset Tools",
     "customTools": "Custom Tools",
@@ -83,6 +83,14 @@
       "supportVectorMachine": {
         "name": "Support Vector Machine",
         "description": "Support Vector Machine algorithm for classification and regression"
+      },
+      "vaspCalculation": {
+        "name": "VASP Calculation",
+        "description": "First-principles calculation tool based on density functional theory"
+      },
+      "activeLearning": {
+        "name": "Active Learning",
+        "description": "Smart sampling strategy to optimize experimental design and data collection efficiency"
       }
     }
   },
@@ -123,5 +131,96 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "subtitle": "Access MatterAI Agent",
+      "button": "Sign In",
+      "loading": "Signing in...",
+      "noAccount": "Don't have an account?"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Join MatterAI Agent",
+      "button": "Sign Up",
+      "loading": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "passwordHint": "Password must be at least 6 characters",
+      "passwordMismatch": "Passwords do not match"
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "subtitle": "For account",
+      "subtitleSuffix": "change password",
+      "button": "Change Password",
+      "loading": "Changing password...",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "currentPasswordPlaceholder": "Enter your current password",
+      "newPasswordPlaceholder": "Enter new password (at least 6 characters)",
+      "confirmPasswordPlaceholder": "Confirm your new password",
+      "passwordHint": "New password must be at least 6 characters",
+      "passwordMismatch": "New passwords do not match",
+      "samePassword": "New password cannot be the same as current password",
+      "success": "Password Changed Successfully",
+      "successMessage": "Your password has been updated successfully"
+    },
+    "email": "Email Address",
+    "password": "Password",
+    "name": "Full Name",
+    "confirmPassword": "Confirm Password",
+    "emailPlaceholder": "Enter your email address",
+    "passwordPlaceholder": "Enter your password",
+    "namePlaceholder": "Enter your full name",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordNotImplemented": "Password reset requires you to be logged in. Please contact administrator to reset password.",
+    "logout": "Sign Out"
+  },
+  "matterai": {
+    "welcome": {
+      "title": "Hello! I'm MatterAI, your reliable research partner",
+      "description": "Focused on materials research and development. I can assist you with materials design, performance analysis, process optimization, machine learning modeling, theoretical calculations, and more. Let's explore the infinite possibilities of materials science together!",
+      "exampleTitle": "You can try the following materials research questions",
+      "examples": {
+        "lithiumBattery": {
+          "title": "Lithium Battery Material Synthesis",
+          "description": "How to synthesize high-performance silicon nanowire anode materials?"
+        },
+        "alloyAnalysis": {
+          "title": "Alloy Performance Analysis",
+          "description": "Analyze the mechanical properties of Ti-6Al-4V titanium alloy"
+        },
+        "ceramicOptimization": {
+          "title": "Ceramic Material Optimization",
+          "description": "Optimize alumina ceramic sintering process parameters using active learning algorithms"
+        },
+        "dataCollection": {
+          "title": "Materials Data Collection",
+          "description": "Collect and organize structured data on lithium battery materials from literature"
+        },
+        "characterization": {
+          "title": "Material Characterization Methods",
+          "description": "Calculate DOS properties of NiO nanoparticles using VASP"
+        },
+        "composition": {
+          "title": "Material Composition-Property Relationships",
+          "description": "Study material composition-property relationships using machine learning methods"
+        }
+      }
+    },
+    "placeholder": {
+      "loading": "Processing, please wait...",
+      "default": "Send a message to MatterAI..."
+    },
+    "ui": {
+      "newChat": "New Chat",
+      "hideSession": "Hide Sidebar",
+      "showSession": "Show Sidebar", 
+      "messagesCount": "messages",
+      "recentlyActive": "Recently Active"
+    }
   }
 }

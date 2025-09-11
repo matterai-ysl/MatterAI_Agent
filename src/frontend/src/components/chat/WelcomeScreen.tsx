@@ -14,6 +14,7 @@ import {
   MessageCircle,
   Sparkles
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../utils/cn';
 
 /**
@@ -71,42 +72,44 @@ export function WelcomeScreen({
 }: { 
   onExampleClick: (message: string) => void;
 }) {
+  const { t } = useTranslation();
+  
   const examples = [
     {
       icon: MapPin,
-      title: "规划旅游行程",
-      description: "帮我规划一次3天2夜的北京旅游行程，包括景点推荐和路线安排",
-      message: "帮我规划一次3天2夜的北京旅游行程，包括景点推荐和路线安排"
+      title: t('matterai.welcome.examples.lithiumBattery.title'),
+      description: t('matterai.welcome.examples.lithiumBattery.description'),
+      message: t('matterai.welcome.examples.lithiumBattery.description')
     },
     {
       icon: Cloud,
-      title: "查询天气信息",
-      description: "查询上海未来一周的天气预报，包括温度和降雨情况",
-      message: "查询上海未来一周的天气预报"
+      title: t('matterai.welcome.examples.alloyAnalysis.title'),
+      description: t('matterai.welcome.examples.alloyAnalysis.description'),
+      message: t('matterai.welcome.examples.alloyAnalysis.description')
     },
     {
       icon: Star,
-      title: "推荐热门景点",
-      description: "推荐杭州最值得游览的热门景点，以及最佳游览时间",
-      message: "推荐杭州最值得游览的热门景点"
+      title: t('matterai.welcome.examples.ceramicOptimization.title'),
+      description: t('matterai.welcome.examples.ceramicOptimization.description'),
+      message: t('matterai.welcome.examples.ceramicOptimization.description')
     },
     {
       icon: Compass,
-      title: "旅行建议咨询",
-      description: "为初次出国旅行的游客提供实用的旅行建议和注意事项",
-      message: "为初次出国旅行的游客提供实用的旅行建议"
+      title: t('matterai.welcome.examples.dataCollection.title'),
+      description: t('matterai.welcome.examples.dataCollection.description'),
+      message: t('matterai.welcome.examples.dataCollection.description')
     },
     {
       icon: MessageCircle,
-      title: "交通路线查询",
-      description: "查询从北京到上海的最佳交通方式和时间安排",
-      message: "查询从北京到上海的最佳交通方式"
+      title: t('matterai.welcome.examples.characterization.title'),
+      description: t('matterai.welcome.examples.characterization.description'),
+      message: t('matterai.welcome.examples.characterization.description')
     },
     {
       icon: Sparkles,
-      title: "美食推荐",
-      description: "推荐成都必吃的特色美食和著名餐厅",
-      message: "推荐成都必吃的特色美食和著名餐厅"
+      title: t('matterai.welcome.examples.composition.title'),
+      description: t('matterai.welcome.examples.composition.description'),
+      message: t('matterai.welcome.examples.composition.description')
     }
   ];
 
@@ -141,7 +144,7 @@ export function WelcomeScreen({
               transition={{ delay: 0.3, duration: 0.5 }}
               className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent"
             >
-              你好！我是 MatterAI
+              {t('matterai.welcome.title')}
             </motion.h1>
             
             <motion.p
@@ -150,8 +153,7 @@ export function WelcomeScreen({
               transition={{ delay: 0.4, duration: 0.5 }}
               className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed"
             >
-              我是您的智能旅游规划助手，可以帮您规划行程、查询景点、获取天气信息等。
-              让我们开始一段美妙的旅程吧！
+              {t('matterai.welcome.description')}
             </motion.p>
           </div>
         </motion.div>
@@ -164,7 +166,7 @@ export function WelcomeScreen({
           className="space-y-6"
         >
           <h2 className="text-xl font-semibold text-foreground">
-            您可以尝试以下问题
+            {t('matterai.welcome.exampleTitle')}
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -194,7 +196,7 @@ export function WelcomeScreen({
           className="pt-8"
         >
           <p className="text-sm text-muted-foreground">
-            点击上方示例开始对话，或在下方输入框中输入您的问题
+            {t('chat.dragOrClick')}
           </p>
         </motion.div>
       </div>

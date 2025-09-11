@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useChat } from './hooks/useChat';
 import { useResponsive } from './hooks/useResponsive';
 import { NewSidebar } from './components/sidebar/NewSidebar';
@@ -18,7 +19,7 @@ import { cn } from './utils/cn';
 /**
  * 用户 ID（在实际应用中应该从认证系统获取）
  */
-const USER_ID = 'user_1';
+// USER_ID 不再需要，现在从认证状态获取
 
 /**
  * 错误提示组件
@@ -55,13 +56,14 @@ function ErrorToast({ error, onClose }: { error: string; onClose: () => void }) 
  * 现代化主应用组件内容
  */
 function AppContent() {
+  const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [errorDismissed, setErrorDismissed] = useState(false);
   
   // 设置动态标题
   useEffect(() => {
-    document.title = 'MatterAI Agent - 您可靠的科研伙伴';
-  }, []);
+    document.title = `MatterAI Agent - ${t('matterai.welcome.title')}`;
+  }, [t]);
   const [splitViewOpen, setSplitViewOpen] = useState(false);
   const [htmlViewerData, setHtmlViewerData] = useState<{
     htmlPath: string;
@@ -80,7 +82,7 @@ function AppContent() {
     sendMessage,
     switchSession,
     createNewSession,
-  } = useChat(USER_ID);
+  } = useChat(); // USER_ID 现在从认证状态获取
 
   /**
    * 切换侧边栏
@@ -201,7 +203,7 @@ function AppContent() {
               whileTap={{ scale: 0.95 }}
               onClick={toggleSidebar}
               className="p-2 hover:bg-accent/20 rounded-lg transition-colors group"
-              title={sidebarOpen ? "隐藏侧边栏" : "显示侧边栏"}
+              title={sidebarOpen ? t('matterai.ui.hideSession') : t('matterai.ui.showSession')}
               style={{ color: 'rgb(0, 103, 112)' }}
             >
               <svg 
@@ -226,8 +228,8 @@ function AppContent() {
               <h2 className="text-lg font-semibold" style={{ color: 'rgb(0, 103, 112)' }}>
                 {state.currentSessionId ? (
                   // 查找当前会话的标题
-                  state.sessions.find(s => s.id === state.currentSessionId)?.title || '新对话'
-                ) : '新对话'}
+                  state.sessions.find(s => s.id === state.currentSessionId)?.title || t('matterai.ui.newChat')
+                ) : t('matterai.ui.newChat')}
               </h2>
               
               {currentMessages.length > 0 && (
@@ -236,10 +238,10 @@ function AppContent() {
                     <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>{currentMessages.length} 条消息</span>
+                    <span>{currentMessages.length} {t('matterai.ui.messagesCount')}</span>
                   </div>
                   <span>·</span>
-                  <span>刚刚活跃</span>
+                  <span>{t('matterai.ui.recentlyActive')}</span>
                 </div>
               )}
             </div>
@@ -319,7 +321,7 @@ function AppContent() {
                         transition={{ delay: 0.3, duration: 0.5 }}
                         className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent"
                       >
-                        你好！我是 MatterAI，您可靠的科研伙伴
+                        {t('matterai.welcome.title')}
                       </motion.h1>
                       
                       <motion.p
@@ -328,8 +330,7 @@ function AppContent() {
                         transition={{ delay: 0.4, duration: 0.5 }}
                         className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed"
                       >
-                        专注于材料研发领域。我能协助您进行材料设计、性能分析、工艺优化、机器学习建模、理论计算等研究工作。
-                        让我们一起探索材料科学的无限可能！
+                        {t('matterai.welcome.description')}
                       </motion.p>
                     </div>
                   </motion.div>
@@ -342,7 +343,7 @@ function AppContent() {
                     className="space-y-4"
                   >
                     <h2 className="text-lg font-semibold text-foreground">
-                      您可以尝试以下材料研发问题
+                      {t('matterai.welcome.exampleTitle')}
                     </h2>
                     
                     {/* 根据工具选择器状态动态调整间距 */}
@@ -352,12 +353,12 @@ function AppContent() {
                     )}>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        { title: "锂电池材料合成", desc: "如何合成高性能的硅纳米线负极材料？" },
-                        { title: "合金性能分析", desc: "分析Ti-6Al-4V钛合金的力学性能特征" },
-                        { title: "陶瓷材料优化", desc: "利用主动学习算法优化氧化铝陶瓷的烧结工艺参数" },
-                        { title: "材料数据收集", desc: "从文献中收集和整理锂电池材料的结构化数据" },
-                        { title: "材料表征方法", desc: "使用VASP计算NiO纳米粒子的DOS特性" },
-                        { title: "材料组成与性能关系", desc: "利用机器学习方法研究材料组成与性能关系" }
+                        { title: t('matterai.welcome.examples.lithiumBattery.title'), desc: t('matterai.welcome.examples.lithiumBattery.description') },
+                        { title: t('matterai.welcome.examples.alloyAnalysis.title'), desc: t('matterai.welcome.examples.alloyAnalysis.description') },
+                        { title: t('matterai.welcome.examples.ceramicOptimization.title'), desc: t('matterai.welcome.examples.ceramicOptimization.description') },
+                        { title: t('matterai.welcome.examples.dataCollection.title'), desc: t('matterai.welcome.examples.dataCollection.description') },
+                        { title: t('matterai.welcome.examples.characterization.title'), desc: t('matterai.welcome.examples.characterization.description') },
+                        { title: t('matterai.welcome.examples.composition.title'), desc: t('matterai.welcome.examples.composition.description') }
                       ].map((example, index) => (
                         <motion.div
                           key={example.title}

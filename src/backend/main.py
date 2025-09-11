@@ -7,7 +7,6 @@ from google.adk.runners import Runner
 from google.adk.sessions import DatabaseSessionService
 from google.genai import types 
 from google.adk.agents.run_config import RunConfig, StreamingMode
-import warnings
 import asyncio
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import SseConnectionParams,StreamableHTTPServerParams
@@ -16,11 +15,10 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import List, Optional, AsyncGenerator, Any, Dict, cast, Tuple
+from typing import List, Optional, AsyncGenerator, Any, Dict
 import json
 import uuid
 import time
-from datetime import datetime
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 import os
@@ -32,12 +30,26 @@ config_module = import_module('Config')  # 注意文件名带空格
 PRESET_TOOLS_CONFIG = config_module.PRESET_TOOLS_CONFIG
 MINDS_TOOLS_CONFIG = config_module.MINDS_TOOLS_CONFIG
 AGENT_CONFIGS = config_module.AGENT_CONFIGS
+# 导入认证相关模块
+from auth_api.auth_routes import router as auth_router, get_current_user
+from database import db_manager
+from auth_api.email_service import start_cleanup_task
+from fastapi.security import HTTPBearer
+from fastapi import Depends
 load_dotenv(override=True)
 
 
 APP_NAME = "chatbot"
-USER_ID = "user_1"
+# 移除硬编码的用户ID，现在从JWT token获取
+# USER_ID = "user_1"  # 已弃用
 SESSION_ID = "session_1"
+
+# HTTP Bearer token scheme
+security = HTTPBearer()
+
+async def get_current_user_id(current_user: dict = Depends(get_current_user)) -> str:
+    """从JWT token获取当前用户ID"""
+    return current_user.get("id") or current_user.get("sub", "anonymous")
 
 # 配置模型
 model = LiteLlm(
@@ -108,11 +120,8 @@ async def list_existing_sessions(session_service, user_id, app_name: str):
     except Exception as e:
         print(f"\n❌ 获取会话列表失败: {e}")
         return []
-def test_html(format: str = "html") -> dict:
+def test_html() -> dict:
     """用于测试html文件前端显示效果
-    
-    Args:
-        format: 输出格式，默认为html
     
     Returns:
         dict: 包含html_path的字典
@@ -429,7 +438,7 @@ async def cleanup_expired_sessions():
     for session_key, last_access in session_last_access.items():
         # 从session_key中提取实际的session_id用于检查活跃状态
         if ":" in session_key:
-            user_id, session_id = session_key.split(":", 1)
+            _, session_id = session_key.split(":", 1)  # user_id 不需要使用
         else:
             session_id = session_key  # 兼容旧格式
             
@@ -503,7 +512,7 @@ session_agents: Dict[str, Runner] = {}
 session_agent_configs: Dict[str, Any] = {}  # 存储每个会话的工具配置
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):  # app 参数不使用，改名避免警告
     global runner, session_service, cleanup_task
     # 启动时执行
     print("🔄 启动 FastAPI 应用生命周期...")
@@ -512,11 +521,19 @@ async def lifespan(app: FastAPI):
         session_service = DatabaseSessionService(DATABASE_URL)
         print("✅ 数据库服务初始化成功")
         
+        print("🔗 正在初始化用户认证数据库...")
+        await db_manager.initialize()
+        print("✅ 用户认证数据库初始化成功")
         
         # 🚀 启动定期清理任务
         print("🚀 启动智能体自动清理任务...")
         cleanup_task = asyncio.create_task(periodic_cleanup_task())
         print("✅ 自动清理任务已启动 (30分钟超时，每10分钟检查一次)")
+        
+        # 🚀 启动邮件验证码清理任务
+        print("🚀 启动邮件验证码清理任务...")
+        start_cleanup_task()
+        print("✅ 邮件验证码清理任务已启动")
         
         print(f"📊 当前 session_service 状态: {session_service is not None}")
     except Exception as e:
@@ -561,6 +578,13 @@ async def lifespan(app: FastAPI):
                 print("✅ 主Runner已关闭")
             except Exception as e:
                 print(f"⚠️ 关闭主Runner时出错: {str(e)}")
+        
+        # 关闭用户认证数据库
+        try:
+            await db_manager.close()
+            print("✅ 用户认证数据库已关闭")
+        except Exception as e:
+            print(f"⚠️ 关闭用户认证数据库时出错: {str(e)}")
 
 app = FastAPI(title="MatterAI Agent API", version="0.1.0", lifespan=lifespan)
 
@@ -573,6 +597,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 注册认证路由
+app.include_router(auth_router)
+
 # 静态文件（上传文件访问）
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
@@ -582,7 +609,7 @@ class CustomToolConfig(BaseModel):
     transport: str  # "http" 或 "sse"
 
 class ChatRequest(BaseModel):
-    user_id: str
+    # user_id 现在从JWT token中获取，不再从请求体传入
     query: str
     session_id: Optional[str] = None
     selected_tools: Optional[List[str]] = None
@@ -615,7 +642,7 @@ def _sse_pack(payload: Dict[str, Any]) -> str:
         # 尝试直接序列化
         serialized = json.dumps(payload, ensure_ascii=False)
         return f"data: {serialized}\n\n"
-    except (TypeError, ValueError) as e:
+    except (TypeError, ValueError):
         # 如果序列化失败，递归处理不可序列化的对象
         safe_payload = _make_json_safe(payload)
         serialized = json.dumps(safe_payload, ensure_ascii=False)
@@ -682,7 +709,7 @@ async def get_cache_status() -> Dict[str, Any]:
     for session_key, last_access in session_last_access.items():
         # 从session_key中提取实际的session_id用于检查活跃状态
         if ":" in session_key:
-            user_id, session_id = session_key.split(":", 1)
+            _, session_id = session_key.split(":", 1)  # user_id 不需要使用
         else:
             session_id = session_key  # 兼容旧格式
             
@@ -708,7 +735,7 @@ async def get_cache_status() -> Dict[str, Any]:
 
 
 @app.get("/sessions")
-async def list_sessions(user_id: str = Query(..., description="用户ID"), app_name: str = Query("default", description="应用名称")) -> Dict[str, List[str]]:
+async def list_sessions(user_id: str = Depends(get_current_user_id), app_name: str = Query("default", description="应用名称")) -> Dict[str, List[str]]:
     print(f"📋 收到获取会话列表请求 - user_id: {user_id}, app_name: {app_name}")
     print(f"📊 session_service 状态: {session_service is not None}")
     
@@ -726,7 +753,7 @@ async def list_sessions(user_id: str = Query(..., description="用户ID"), app_n
 
 
 @app.get("/history")
-async def get_history(user_id: str = Query(...), session_id: str = Query(...), app_name: str = Query("default")) -> JSONResponse:
+async def get_history(user_id: str = Depends(get_current_user_id), session_id: str = Query(...), app_name: str = Query("default")) -> JSONResponse:
     if session_service is None:
         raise HTTPException(status_code=503, detail="Service not ready")
     full_app_name = f"{APP_NAME}_{app_name}"
@@ -762,19 +789,19 @@ async def get_history(user_id: str = Query(...), session_id: str = Query(...), a
             if not evt_timestamp:
                 evt_timestamp = int(time.time() * 1000)
             
-            # 检查事件类型
-            has_function_call = False
+            # 检查事件类型（用于调试）
+            # has_function_call = False
             has_function_response = False
-            has_text = False
+            # has_text = False
             
             if content and getattr(content, 'parts', None):
                 for part in content.parts:
-                    if hasattr(part, 'function_call') and part.function_call:
-                        has_function_call = True
+                    # if hasattr(part, 'function_call') and part.function_call:
+                    #     has_function_call = True
                     if hasattr(part, 'function_response') and part.function_response:
                         has_function_response = True
-                    if hasattr(part, 'text') and part.text and part.text.strip():
-                        has_text = True
+                    # if hasattr(part, 'text') and part.text and part.text.strip():
+                    #     has_text = True
             
             #print(f"🔍 处理事件: role={role}, 工具调用={has_function_call}, 工具结果={has_function_response}, 文本={has_text}, timestamp={evt_timestamp}")
             
@@ -882,9 +909,9 @@ async def get_history(user_id: str = Query(...), session_id: str = Query(...), a
 
 
 @app.post("/chat/stream")
-async def chat_stream(payload: ChatRequest) -> StreamingResponse:
+async def chat_stream(payload: ChatRequest, user_id: str = Depends(get_current_user_id)) -> StreamingResponse:
     print(f"💬 收到流式聊天请求:")
-    print(f"   用户ID: {payload.user_id}")
+    print(f"   认证用户ID: {user_id}")
     print(f"   查询: {payload.query}")
     print(f"   会话ID: {payload.session_id}")
     print(f"   应用名称: {payload.app_name}")
@@ -895,17 +922,17 @@ async def chat_stream(payload: ChatRequest) -> StreamingResponse:
     
     # 确定实际的会话ID（如果没有则生成一个）
     actual_session_id = payload.session_id or str(uuid.uuid4())
-    # 始终按 app_name 和工具配置获取/创建“会话级智能体”
+    # 始终按 app_name 和工具配置获取/创建"会话级智能体"
     print("🔧 获取或创建会话级智能体（允许无工具）...")
     local_runner = await get_or_create_session_agent(
-        payload.user_id,
+        user_id,  # 使用认证的用户ID
         actual_session_id,
         payload.selected_tools,
         payload.custom_tools,
         payload.app_name or "default"
     )
     
-    user_id = payload.user_id
+    # user_id 已经是认证的用户ID，无需从payload获取
     requested_session_id = payload.session_id
     query_text = payload.query
 
@@ -956,7 +983,7 @@ async def chat_stream(payload: ChatRequest) -> StreamingResponse:
                 if hasattr(event, 'get_function_calls') and event.get_function_calls():
                     calls = event.get_function_calls()
                     print(f"🔧 工具调用数量: {len(calls)}")
-                    for i, call in enumerate(calls):
+                    for _, call in enumerate(calls):  # i 变量不使用
                         call_data = {
                             "type": "tool_call",
                             "name": getattr(call, 'name', 'unknown'),
@@ -969,7 +996,7 @@ async def chat_stream(payload: ChatRequest) -> StreamingResponse:
                 if hasattr(event, 'get_function_responses') and event.get_function_responses():
                     responses = event.get_function_responses()
                     print(f"📋 工具结果数量: {len(responses)}")
-                    for i, resp in enumerate(responses):
+                    for _, resp in enumerate(responses):  # i 变量不使用
                         result_data = {
                             "type": "tool_result",
                             "name": getattr(resp, 'name', 'unknown'),

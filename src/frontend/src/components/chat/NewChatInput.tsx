@@ -13,6 +13,7 @@ import {
   Square,
   Image as ImageIcon
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
 import { ToolSelector } from '../tools/ToolSelector';
@@ -175,11 +176,13 @@ function SendButton({
 export function NewChatInput({ 
   onSendMessage, 
   disabled = false, 
-  placeholder = "向 MatterAI 发送消息...",
+  placeholder,
   className,
   selectedTools = [],
   onToolsChange
 }: ChatInputProps) {
+  const { t } = useTranslation();
+  const defaultPlaceholder = placeholder || t('matterai.placeholder.default');
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
   const [isRecording, setIsRecording] = useState(false); // TODO: 实现语音录制功能
@@ -377,7 +380,7 @@ export function NewChatInput({
               onKeyDown={handleKeyDown}
               onCompositionStart={handleCompositionStart}
               onCompositionEnd={handleCompositionEnd}
-              placeholder={placeholder}
+              placeholder={defaultPlaceholder}
               disabled={disabled}
               rows={1}
               className={cn(

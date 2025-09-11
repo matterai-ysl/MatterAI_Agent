@@ -43,6 +43,18 @@ PRESET_TOOLS_CONFIG = {
         "type": "mcp",
         "url": "http://127.0.0.1:8102/mcp",
         "transport": "http"
+    },
+    "preset-vasp-calculation": {
+        "name": "VASP理论计算",
+        "type": "mcp",
+        "url": "http://127.0.0.1:8130/mcp",
+        "transport": "http"
+    },
+    "preset-active-learning": {
+        "name": "主动学习",
+        "type": "mcp",
+        "url": "http://127.0.0.1:8080/mcp",
+        "transport": "http"
     }
 }
 

@@ -10,6 +10,9 @@ import './index.css';
 import './i18n'; // 初始化 i18n
 import NewApp from './NewApp';
 import { MindsApp } from './components/minds/MindsApp';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { AuthPage } from './components/auth/AuthPage';
 
 // 获取根元素
 const root = ReactDOM.createRoot(
@@ -19,17 +22,43 @@ const root = ReactDOM.createRoot(
 // 渲染应用
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        {/* 默认路由 - 通用智能体 */}
-        <Route path="/" element={<NewApp />} />
-        
-        {/* MINDS 智能体路由 */}
-        <Route path="/minds" element={<MindsApp />} />
-        
-        {/* 未匹配的路由重定向到首页 */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* 认证路由 */}
+          <Route 
+            path="/auth" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <AuthPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* 默认路由 - 通用智能体 (需要认证) */}
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute>
+                <NewApp />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* MINDS 智能体路由 (需要认证) */}
+          <Route 
+            path="/minds" 
+            element={
+              <ProtectedRoute>
+                <MindsApp />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* 未匹配的路由重定向到首页 */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   </React.StrictMode>
 );

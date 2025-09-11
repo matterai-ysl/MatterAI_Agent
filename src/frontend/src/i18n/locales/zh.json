@@ -40,7 +40,7 @@
     "previewFailed": "生成预览失败"
   },
   "tools": {
-    "toolSelection": "工具选择",
+    "toolSelection": "MCP工具选择",
     "toolCalls": "工具调用 ({{count}})",
     "presetTools": "预设工具",
     "customTools": "自定义工具",
@@ -83,6 +83,14 @@
       "supportVectorMachine": {
         "name": "支持向量机",
         "description": "支持向量机算法用于分类和回归分析"
+      },
+      "vaspCalculation": {
+        "name": "VASP理论计算",
+        "description": "基于密度泛函理论的第一性原理计算工具"
+      },
+      "activeLearning": {
+        "name": "主动学习",
+        "description": "智能采样策略，优化实验设计和数据收集效率"
       }
     }
   },
@@ -123,5 +131,222 @@
     "light": "浅色",
     "dark": "深色",
     "system": "系统"
+  },
+  "auth": {
+    "login": {
+      "title": "登录您的账户",
+      "subtitle": "访问 MatterAI Agent",
+      "button": "登录",
+      "loading": "登录中...",
+      "noAccount": "还没有账户？"
+    },
+    "register": {
+      "title": "创建新账户",
+      "subtitle": "注册 MatterAI Agent 账户，需要邮箱验证",
+      "button": "立即注册",
+      "loading": "注册中...",
+      "hasAccount": "已有账户？",
+      "passwordHint": "密码长度至少6个字符",
+      "passwordMismatch": "两次输入的密码不匹配"
+    },
+    "changePassword": {
+      "title": "修改密码",
+      "subtitle": "为账户",
+      "subtitleSuffix": "修改密码",
+      "button": "修改密码",
+      "loading": "修改中...",
+      "currentPassword": "当前密码",
+      "newPassword": "新密码",
+      "confirmPassword": "确认新密码",
+      "currentPasswordPlaceholder": "请输入当前密码",
+      "newPasswordPlaceholder": "请输入新密码（至少6位）",
+      "confirmPasswordPlaceholder": "请再次输入新密码",
+      "passwordHint": "新密码长度至少6个字符",
+      "passwordMismatch": "两次输入的新密码不匹配",
+      "samePassword": "新密码不能与当前密码相同",
+      "success": "密码修改成功",
+      "successMessage": "您的密码已成功更新"
+    },
+    "email": "邮箱地址",
+    "password": "密码",
+    "name": "姓名",
+    "confirmPassword": "确认密码",
+    "emailPlaceholder": "请输入邮箱地址",
+    "passwordPlaceholder": "请输入密码",
+    "namePlaceholder": "请输入您的姓名",
+    "confirmPasswordPlaceholder": "请再次输入密码",
+    "forgotPassword": "忘记密码？",
+    "forgotPasswordNotImplemented": "密码重置功能需要您先登录。请联系管理员重置密码。",
+    "logout": "退出登录",
+    
+    "registerWithVerification": {
+      "button": "邮箱验证注册"
+    },
+    
+    "verificationTitle": {
+      "register": "邮箱验证 - 注册账户",
+      "passwordReset": "邮箱验证 - 重置密码",
+      "emailBinding": "邮箱验证 - 绑定邮箱",
+      "default": "邮箱验证"
+    },
+    "verificationDesc": {
+      "register": "请输入发送到您邮箱的6位验证码完成注册",
+      "passwordReset": "请输入发送到您邮箱的6位验证码完成密码重置",
+      "emailBinding": "请输入发送到新邮箱的6位验证码完成绑定",
+      "default": "请输入验证码"
+    },
+    "sendCode": {
+      "register": "发送注册验证码",
+      "passwordReset": "发送重置验证码",
+      "emailBinding": "发送绑定验证码",
+      "default": "发送验证码"
+    },
+    "verify": {
+      "register": "完成注册",
+      "passwordReset": "验证并重置",
+      "emailBinding": "完成绑定",
+      "default": "验证"
+    },
+    
+    "verificationCode": "验证码",
+    "emailAddress": "邮箱地址",
+    "sending": "发送中...",
+    "resendIn": "重新发送 ({{seconds}}s)",
+    "resendCode": "重新发送验证码",
+    "verifying": "验证中...",
+    "codeSentSuccess": "验证码已发送",
+    "codeSentFailed": "验证码发送失败",
+    "codeSentError": "发送验证码时出错",
+    "codeInvalid": "请输入6位验证码",
+    "codeVerifySuccess": "验证码验证成功",
+    "codeVerifyFailed": "验证码验证失败",
+    "codeVerifyError": "验证码验证时出错",
+    "codeHint": "请输入6位数字验证码",
+    
+    "createAccount": "创建账户",
+    "registerDescription": "注册新的 MatterAI Agent 账户",
+    "enterName": "请输入姓名",
+    "enterEmail": "请输入邮箱地址",
+    "enterPassword": "请输入密码",
+    "confirmPasswordPlaceholder": "请再次输入密码",
+    "passwordRequirement": "密码至少需要6个字符",
+    "fillAllFields": "请填写所有必填字段",
+    "passwordTooShort": "密码至少需要6个字符",
+    "passwordMismatch": "两次输入的密码不一致",
+    "invalidEmail": "请输入有效的邮箱地址",
+    "processing": "处理中...",
+    "nextStep": "下一步：邮箱验证",
+    "alreadyHaveAccount": "已有账户？",
+    "loginNow": "立即登录",
+    "emailVerificationNotice": "邮箱验证说明",
+    "emailVerificationDescription": "点击\"下一步\"后，系统将向您的邮箱发送6位验证码，请查收邮件并完成验证。",
+    "registrationFailed": "注册失败，请重试",
+    
+    "resetSuccess": "密码重置成功",
+    "resetSuccessMessage": "您的密码已成功重置，请使用新密码登录。",
+    "backToLogin": "返回登录",
+    "setNewPassword": "设置新密码",
+    "newPassword": "新密码",
+    "confirmNewPassword": "确认新密码",
+    "enterNewPassword": "请输入新密码",
+    "confirmNewPasswordPlaceholder": "请再次输入新密码",
+    "forgotPasswordDescription": "请输入您的邮箱地址，我们将发送验证码以重置密码",
+    "sendResetCode": "发送重置验证码",
+    "resetInstructions": "密码重置说明",
+    "resetInstructionsText": "只有经过邮箱验证的账户才能通过邮箱重置密码。如果您的账户尚未验证邮箱，请联系管理员协助重置。",
+    "resetPasswordFailed": "密码重置失败，请重试",
+    "emailRequired": "请输入邮箱地址",
+    "passwordRequired": "请设置新密码"
+  },
+  "profile": {
+    "title": "个人信息",
+    "description": "管理您的账户信息和设置",
+    "basicInfo": "基本信息",
+    "userId": "用户ID",
+    "name": "姓名",
+    "email": "邮箱地址",
+    "role": "角色",
+    "joinDate": "注册时间",
+    "verified": "已验证",
+    "unverified": "未验证",
+    "admin": "管理员",
+    "user": "普通用户",
+    "bindEmail": "绑定邮箱",
+    "bindEmailDescription": "绑定邮箱后可以使用邮箱重置密码等功能",
+    "bindNewEmail": "绑定新邮箱",
+    "enterNewEmail": "请输入新的邮箱地址",
+    "bindEmailButton": "绑定邮箱",
+    "emailBindSuccess": "邮箱绑定成功",
+    "emailBindError": "邮箱绑定失败",
+    "sameEmail": "新邮箱不能与当前邮箱相同",
+    "changePassword": "修改密码",
+    "changePasswordDescription": "定期更改密码可以提高账户安全性",
+    "changePasswordButton": "修改密码",
+    "currentPassword": "当前密码",
+    "newPassword": "新密码",
+    "confirmNewPassword": "确认新密码",
+    "updatePassword": "更新密码",
+    "passwordChangeSuccess": "密码修改成功",
+    "passwordChangeError": "密码修改失败",
+    "accountActions": "账户操作",
+    "logout": "退出登录",
+    "loadError": "加载用户信息失败",
+    "userNotFound": "用户信息不存在"
+  },
+  "common": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "edit": "编辑",
+    "delete": "删除",
+    "loading": "加载中...",
+    "success": "成功",
+    "error": "错误",
+    "warning": "警告",
+    "info": "信息"
+  },
+  "matterai": {
+    "welcome": {
+      "title": "你好！我是您可靠的科研伙伴",
+      "description": "专注于材料研发领域。我能协助您进行材料设计、性能分析、工艺优化、机器学习建模、理论计算等研究工作。让我们一起探索材料科学的无限可能！",
+      "exampleTitle": "您可以尝试以下材料研发问题",
+      "examples": {
+        "lithiumBattery": {
+          "title": "锂电池材料合成",
+          "description": "如何合成高性能的硅纳米线负极材料？"
+        },
+        "alloyAnalysis": {
+          "title": "合金性能分析",
+          "description": "分析Ti-6Al-4V钛合金的力学性能特征"
+        },
+        "ceramicOptimization": {
+          "title": "陶瓷材料优化",
+          "description": "利用主动学习算法优化氧化铝陶瓷的烧结工艺参数"
+        },
+        "dataCollection": {
+          "title": "材料数据收集",
+          "description": "从文献中收集和整理锂电池材料的结构化数据"
+        },
+        "characterization": {
+          "title": "材料表征方法",
+          "description": "使用VASP计算NiO纳米粒子的DOS特性"
+        },
+        "composition": {
+          "title": "材料组成与性能关系",
+          "description": "利用机器学习方法研究材料组成与性能关系"
+        }
+      }
+    },
+    "placeholder": {
+      "loading": "正在处理中，请稍候...",
+      "default": "向 MatterAI 发送消息..."
+    },
+    "ui": {
+      "newChat": "新对话",
+      "hideSession": "隐藏侧边栏",
+      "showSession": "显示侧边栏",
+      "messagesCount": "条消息",
+      "recentlyActive": "刚刚活跃"
+    }
   }
 }
