@@ -1,65 +1,65 @@
-mcp_server_url = "http://47.99.180.80/"
-
+#mcp_server_url = "http://47.99.180.80/"
+mcp_server_url = "http://127.0.0.1"
 # 预设工具配置
 PRESET_TOOLS_CONFIG = {
     "preset-material-knowledge": {
         "name": "材料领域知识",
         "type": "mcp", 
-        "url": f"{mcp_server_url}/materialknowledge/mcp",
+        "url": f"{mcp_server_url}:8110/mcp",
         "transport": "http"
     },
     "preset-xgboost": {
         "name": "XGBoost",
         "type": "mcp",
-        "url": f"{mcp_server_url}/xgboost/mcp", 
+        "url": f"{mcp_server_url}:8100/mcp", 
         "transport": "http"
     },
     "preset-material-extraction": {
         "name": "材料结构化数据提取",
         "type": "mcp",
-        "url": f"{mcp_server_url}/datacollect/mcp",
+        "url": f"{mcp_server_url}:8030/mcp",
         "transport": "http"
     },
     "preset-literature-extraction": {
         "name": "文献数据抽取",
         "type": "mcp",
-        "url": f"{mcp_server_url}/datacollect/mcp",
+        "url": f"{mcp_server_url}:8030/mcp",
         "transport": "http"
     },
     "preset-neural-network": {
         "name": "神经网络",
         "type": "mcp",
-        "url": f"{mcp_server_url}/neuralnetwork/mcp",
+        "url": f"{mcp_server_url}:8090/mcp",
         "transport": "http"
     },
     "preset-random-forest": {
         "name": "随机森林",
         "type": "mcp",
-        "url": f"{mcp_server_url}/randomforest/mcp",
+        "url": f"{mcp_server_url}:8040/mcp",
         "transport": "http"
     },
     "preset-support-vector-machine": {
         "name": "支持向量机",
         "type": "mcp",
-        "url": f"{mcp_server_url}/svm/mcp",
+        "url": f"{mcp_server_url}:8050/mcp",
         "transport": "http"
     },
     "preset-vasp-calculation": {
         "name": "VASP理论计算",
         "type": "mcp",
-        "url": f"{mcp_server_url}/vasp/mcp",
+        "url": f"{mcp_server_url}:8130/mcp",
         "transport": "http"
     },
     "preset-active-learning": {
         "name": "主动学习",
         "type": "mcp",
-        "url": f"{mcp_server_url}/activelearning/mcp",
+        "url": f"{mcp_server_url}:8080/mcp",
         "transport": "http"
     },
     "preset-automated-laboratory": {
         "name": "自动化实验室",
         "type": "mcp",
-        "url": f"{mcp_server_url}/autolab/mcp",
+        "url": f"{mcp_server_url}:9090/mcp",
         "transport": "http"
     }
 }
@@ -69,31 +69,31 @@ MINDS_TOOLS_CONFIG = {
     "preset-active-learning": {
         "name": "Active Learning",
         "type": "mcp",
-        "url": f"{mcp_server_url}/activelearning/mcp",
+        "url": f"{mcp_server_url}:8080/mcp",
         "transport": "http"
     },
     "preset-shap-analysis": {
         "name": "SHAP Analysis", 
         "type": "mcp",
-        "url": f"{mcp_server_url}/xgboost/mcp",
+        "url": f"{mcp_server_url}:8100/mcp",
         "transport": "http"
     },
     "preset-neural-network": {
         "name": "Neural Network",
         "type": "mcp",
-        "url": f"{mcp_server_url}/neuralnetwork/mcp",
+        "url": f"{mcp_server_url}:8090/mcp",
         "transport": "http"
     },
     "preset-llm-rag": {
         "name": "LLM-RAG",
         "type": "mcp",
-        "url": f"{mcp_server_url}/materialknowledge/mcp",
+        "url": f"{mcp_server_url}:8110/mcp",
         "transport": "http"
     },
     "preset-automated-laboratory": {
         "name": "Automated Laboratory",
         "type": "mcp",
-        "url": f"{mcp_server_url}/autolab/mcp",
+        "url": f"{mcp_server_url}:9090/mcp",
         "transport": "http"
     }
 }
