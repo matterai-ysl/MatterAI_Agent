@@ -9,7 +9,7 @@ from auth_api.models import (
     SendVerificationCodeRequest, VerifyCodeRequest, 
     RegisterWithVerificationRequest, PasswordResetRequest, EmailBindingRequest
 )
-from auth_api.user_utils import create_user, verify_user, change_password
+from auth_api.user_utils import create_user, verify_user, change_password, get_user_by_email
 from auth_api.email_service import email_service
 
 # Secret key for JWT encoding/decoding - in production, use a secure environment variable
@@ -20,6 +20,15 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+@router.get("/debug/email-exists")
+async def debug_email_exists(email: str):
+    """调试：检查邮箱是否存在（标准化后）"""
+    try:
+        normalized = email.strip().lower()
+        user = await get_user_by_email(normalized)
+        return {"normalized": normalized, "exists": bool(user)}
+    except Exception as e:
+        return {"error": str(e)}
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -87,11 +96,19 @@ async def verify_token(token: str = None, token_data: dict = Body(None)):
 async def register_user(user_data: UserCreate):
     """Register a new user"""
     try:
-        print(f"Received registration request for: {user_data.email}")
+        normalized_email = user_data.email.strip().lower()
+        print(f"Received registration request for: {normalized_email}")
+        # Pre-check: email already exists
+        existing = await get_user_by_email(normalized_email)
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="该邮箱已注册"
+            )
         
         user = await create_user(
-            name=user_data.name or user_data.email.split('@')[0],
-            email=user_data.email,
+            name=user_data.name or normalized_email.split('@')[0],
+            email=normalized_email,
             password=user_data.password
         )
         
@@ -255,9 +272,18 @@ async def verify_verification_code(request: VerifyCodeRequest):
 async def register_with_verification(request: RegisterWithVerificationRequest):
     """Register user with email verification"""
     try:
+        normalized_email = request.email.strip().lower()
+        # Pre-check: email already exists
+        existing = await get_user_by_email(normalized_email)
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="该邮箱已注册"
+            )
+
         # First verify the verification code
         verify_result = email_service.verify_code(
-            email=request.email,
+            email=normalized_email,
             code=request.verification_code,
             purpose="register"
         )
@@ -270,8 +296,8 @@ async def register_with_verification(request: RegisterWithVerificationRequest):
         
         # Create user with verified email
         user = await create_user(
-            name=request.name or request.email.split('@')[0],
-            email=request.email,
+            name=request.name or normalized_email.split('@')[0],
+            email=normalized_email,
             password=request.password,
             email_verified=True  # Mark as verified since code was verified
         )

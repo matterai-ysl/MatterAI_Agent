@@ -146,7 +146,7 @@ Required environment variables:
 - Claude/ChatGPT-style interface
 - Markdown rendering with syntax highlighting
 - Mobile-responsive design
-- File upload support
+- File upload support (external service: http://47.99.180.80/file/upload)
 - Dark/light theme support
 
 ## Database Schema
@@ -518,6 +518,46 @@ To extend internationalization:
 - **Type Safety**: Removed hardcoded user ID from frontend types
 - **Database Schema**: Unified database for both authentication and chat data
 - **Error Handling**: Comprehensive error handling for authentication flows
+
+## Recent Updates (v2.4.0)
+
+### File Upload Service Migration
+- **External Upload Service**: Migrated file upload functionality to dedicated public server
+- **API Endpoint**: Files now uploaded to `http://47.99.180.80/file/upload`
+- **Supported File Types**: csv, doc, docx, gif, jpeg, jpg, pdf, png, rar, txt, xls, xlsx, zip
+- **Response Format Adaptation**: Frontend adapted to handle new API response format
+- **Backend Cleanup**: Removed local upload endpoint and static file serving
+- **Scalability Improvement**: External service provides better performance and scalability
+
+### File Upload Technical Details
+- **Single File Response**:
+  ```json
+  {
+    "success": true,
+    "url": "http://47.99.180.80/file/uploads/filename.ext",
+    "filename": "filename.ext",
+    "original_filename": "filename.ext",
+    "size": 1024,
+    "upload_time": "2023-12-01T10:30:00.123456"
+  }
+  ```
+- **Multiple Files Response**:
+  ```json
+  {
+    "files": [
+      {
+        "success": true,
+        "url": "http://47.99.180.80/file/uploads/file1.ext",
+        "filename": "file1.ext",
+        "original_filename": "file1.ext",
+        "size": 1024,
+        "upload_time": "2023-12-01T10:30:00.123456"
+      }
+    ]
+  }
+  ```
+- **Frontend Integration**: Seamless transition with no changes required to UI components
+- **Error Handling**: Proper handling of unsupported file types and upload failures
 
 ## Deployment Notes
 

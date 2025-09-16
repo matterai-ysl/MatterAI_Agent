@@ -5,7 +5,7 @@
 /**
  * 预设工具类型
  */
-export type PresetToolType = 'material-knowledge' | 'xgboost' | 'material-extraction' | 'neural-network' | 'random-forest' | 'support-vector-machine' | 'vasp-calculation' | 'active-learning';
+export type PresetToolType = 'material-knowledge' | 'xgboost' | 'material-extraction' | 'neural-network' | 'random-forest' | 'support-vector-machine' | 'vasp-calculation' | 'active-learning' | 'automated-laboratory';
 
 /**
  * 工具基础接口
@@ -57,13 +57,14 @@ export interface ToolSelectorState {
  */
 export const PRESET_TOOL_TRANSLATION_KEYS: Record<PresetToolType, string> = {
   'material-knowledge': 'materialKnowledge',
-  'xgboost': 'xgboost', 
+  'xgboost': 'xgboost',
   'material-extraction': 'materialExtraction',
   'neural-network': 'neuralNetwork',
   'random-forest': 'randomForest',
   'support-vector-machine': 'supportVectorMachine',
   'vasp-calculation': 'vaspCalculation',
   'active-learning': 'activeLearning',
+  'automated-laboratory': 'automatedLaboratory',
 };
 
 /**
@@ -109,5 +110,10 @@ export const PRESET_TOOLS: Omit<PresetTool, 'id' | 'enabled' | 'name' | 'descrip
     type: 'preset',
     toolType: 'active-learning',
     icon: '🎯',
+  },
+  {
+    type: 'preset',
+    toolType: 'automated-laboratory',
+    icon: '🧪🤖',
   },
 ];

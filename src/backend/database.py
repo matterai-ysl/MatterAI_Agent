@@ -28,6 +28,7 @@ class DatabaseManager:
     async def initialize(self):
         """Initialize database connection pool"""
         try:
+            print(f"📦 Connecting DB - host={DB_CONFIG['host']} db={DB_CONFIG['database']} user={DB_CONFIG['user']}")
             self.pool = await asyncpg.create_pool(
                 host=DB_CONFIG['host'],
                 port=DB_CONFIG['port'],
@@ -58,8 +59,19 @@ class DatabaseManager:
             updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
         
-        -- Set the starting value for the ID sequence to 10001
-        SELECT setval(pg_get_serial_sequence('users', 'id'), 10000, true);
+        -- Safely align the ID sequence to avoid duplicate primary keys
+        DO $$
+        DECLARE
+            seq_name text;
+            max_id bigint;
+        BEGIN
+            SELECT pg_get_serial_sequence('users', 'id') INTO seq_name;
+            SELECT COALESCE(MAX(id), 10000) INTO max_id FROM users;
+            IF max_id < 10000 THEN
+                max_id := 10000;
+            END IF;
+            PERFORM setval(seq_name, max_id, true);
+        END $$;
         
         CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
         
@@ -106,6 +118,7 @@ class DatabaseManager:
     
     async def create_user(self, name: str, email: str, password: str, is_admin: bool = False, email_verified: bool = False) -> Dict[str, Any]:
         """Create a new user"""
+        normalized_email = email.strip().lower()
         password_hash = self.hash_password(password)
         created_at = datetime.now(timezone.utc)
         
@@ -117,8 +130,15 @@ class DatabaseManager:
         
         try:
             async with self.pool.acquire() as connection:
+                # Double-check existing user to improve error messages
+                existing = await connection.fetchrow(
+                    "SELECT 1 FROM users WHERE lower(email) = lower($1)",
+                    normalized_email,
+                )
+                if existing:
+                    raise ValueError("User with this email already exists")
                 result = await connection.fetchrow(
-                    query, name, email.lower(), password_hash, is_admin, email_verified, created_at
+                    query, name, normalized_email, password_hash, is_admin, email_verified, created_at
                 )
                 
                 return {
@@ -129,7 +149,24 @@ class DatabaseManager:
                     "emailVerified": result['email_verified'],
                     "createdAt": result['created_at']
                 }
-        except asyncpg.UniqueViolationError:
+        except asyncpg.UniqueViolationError as e:
+            # Extra diagnostics to locate real conflict source
+            try:
+                print("⚠️ UniqueViolation on users(email)")
+                print(f"   error: {repr(e)}")
+                async with self.pool.acquire() as diag_conn:
+                    row_exact = await diag_conn.fetchrow(
+                        "SELECT id, email FROM users WHERE email = $1 LIMIT 1",
+                        normalized_email,
+                    )
+                    row_ilower = await diag_conn.fetchrow(
+                        "SELECT id, email FROM users WHERE lower(email) = lower($1) LIMIT 1",
+                        normalized_email,
+                    )
+                    print(f"   exact_match: {row_exact}")
+                    print(f"   lower_match: {row_ilower}")
+            except Exception as diag_e:
+                print(f"   diag_failed: {diag_e}")
             raise ValueError("User with this email already exists")
         except Exception as e:
             print(f"❌ Error creating user: {e}")
@@ -140,11 +177,11 @@ class DatabaseManager:
         query = """
         SELECT id, name, email, password_hash, is_admin, email_verified, verification_email, created_at
         FROM users 
-        WHERE email = $1;
+        WHERE lower(email) = lower($1);
         """
         
         async with self.pool.acquire() as connection:
-            result = await connection.fetchrow(query, email.lower())
+            result = await connection.fetchrow(query, email.strip().lower())
             
             if result:
                 return {
@@ -252,7 +289,7 @@ class DatabaseManager:
             print(f"❌ Error confirming email binding: {e}")
             return False
     
-    async def get_user_by_id(self, user_id: str) -> Optional[Dict[str, Any]]:
+    async def get_user_by_id(self, user_id: int) -> Optional[Dict[str, Any]]:
         """Get user by ID"""
         query = """
         SELECT id, name, email, is_admin, email_verified, verification_email, created_at
@@ -261,7 +298,12 @@ class DatabaseManager:
         """
         
         async with self.pool.acquire() as connection:
-            result = await connection.fetchrow(query, user_id)
+            # 安全转换，防止上层误传字符串
+            try:
+                id_param = int(user_id)
+            except (TypeError, ValueError):
+                return None
+            result = await connection.fetchrow(query, id_param)
             
             if result:
                 return {

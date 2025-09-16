@@ -193,6 +193,7 @@ class EmailService:
     
     async def send_verification_code(self, email: str, purpose: str) -> Dict:
         """Send verification code to email"""
+        email = email.strip().lower()
         # Check if email service is configured
         if not SMTP_USERNAME or not SMTP_PASSWORD:
             return {
@@ -235,6 +236,7 @@ class EmailService:
     
     def verify_code(self, email: str, code: str, purpose: str) -> Dict:
         """Verify the verification code"""
+        email = email.strip().lower()
         stored_data = verification_codes.get(email)
         
         if not stored_data:

@@ -91,6 +91,10 @@
       "activeLearning": {
         "name": "主动学习",
         "description": "智能采样策略，优化实验设计和数据收集效率"
+      },
+      "automatedLaboratory": {
+        "name": "自动化实验室",
+        "description": "自动化实验设备控制与实验流程管理"
       }
     }
   },

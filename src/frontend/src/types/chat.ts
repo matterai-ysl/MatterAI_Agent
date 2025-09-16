@@ -141,9 +141,40 @@ export interface HistoryResponse {
 }
 
 /**
- * 文件上传响应
+ * 单个文件上传结果
  */
-export type FileUploadResponse = string[];
+export interface FileUploadResult {
+  success: boolean;
+  url: string;
+  filename: string;
+  original_filename: string;
+  size: number;
+  upload_time: string;
+}
+
+/**
+ * 文件上传响应 - 单个文件
+ */
+export interface SingleFileUploadResponse {
+  success: boolean;
+  url: string;
+  filename: string;
+  original_filename: string;
+  size: number;
+  upload_time: string;
+}
+
+/**
+ * 文件上传响应 - 多个文件
+ */
+export interface MultipleFileUploadResponse {
+  files: FileUploadResult[];
+}
+
+/**
+ * 文件上传响应联合类型
+ */
+export type FileUploadResponse = SingleFileUploadResponse | MultipleFileUploadResponse;
 
 /**
  * 应用状态接口

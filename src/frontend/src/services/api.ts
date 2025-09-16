@@ -15,7 +15,8 @@ import {
 /**
  * API 基础配置
  */
-const API_BASE_URL = 'http://localhost:9000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://47.99.180.80/matterai';
+const FILE_UPLOAD_URL = process.env.REACT_APP_FILE_UPLOAD_URL || 'http://47.99.180.80/file/upload';
 
 /**
  * HTTP 请求工具类
@@ -24,7 +25,7 @@ class HttpClient {
   private baseUrl: string;
 
   constructor(baseUrl: string = API_BASE_URL) {
-    this.baseUrl = baseUrl || 'http://localhost:9000';
+    this.baseUrl = baseUrl || API_BASE_URL;
   }
 
   /**
@@ -93,18 +94,17 @@ class HttpClient {
   }
 
   /**
-   * 上传文件
+   * 上传文件到新的公网服务器
    */
-  async uploadFiles(files: FileList): Promise<FileUploadResponse> {
-    const baseUrl = this.baseUrl || 'http://localhost:9000';
-    const url = new URL('/upload', baseUrl);
+  async uploadFiles(files: FileList): Promise<string[]> {
+    const uploadUrl = FILE_UPLOAD_URL;
     const formData = new FormData();
-    
+
     Array.from(files).forEach((file) => {
       formData.append('files', file);
     });
 
-    const response = await fetch(url.toString(), {
+    const response = await fetch(uploadUrl, {
       method: 'POST',
       body: formData,
     });
@@ -113,7 +113,16 @@ class HttpClient {
       throw new Error(`Upload failed! status: ${response.status}`);
     }
 
-    return response.json();
+    const result: FileUploadResponse = await response.json();
+
+    // 根据响应格式提取 URL 列表
+    if ('files' in result) {
+      // 多文件上传响应
+      return result.files.filter(file => file.success).map(file => file.url);
+    } else {
+      // 单文件上传响应
+      return result.success ? [result.url] : [];
+    }
   }
 }
 
@@ -334,7 +343,7 @@ export class ChatApiService {
   /**
    * 上传文件
    */
-  async uploadFiles(files: FileList): Promise<FileUploadResponse> {
+  async uploadFiles(files: FileList): Promise<string[]> {
     return this.httpClient.uploadFiles(files);
   }
 }
@@ -351,6 +360,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status?: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public code?: string
   ) {
     super(message);

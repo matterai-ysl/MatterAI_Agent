@@ -91,6 +91,10 @@
       "activeLearning": {
         "name": "Active Learning",
         "description": "Smart sampling strategy to optimize experimental design and data collection efficiency"
+      },
+      "automatedLaboratory": {
+        "name": "Automated Laboratory",
+        "description": "Automated experimental equipment control and workflow management"
       }
     }
   },

@@ -99,7 +99,7 @@ class UserManager:
             print(f"❌ 获取用户信息失败: {e}")
             return None
     
-    async def get_user_by_id(self, user_id: str) -> Optional[Dict]:
+    async def get_user_by_id(self, user_id: int) -> Optional[Dict]:
         """根据ID获取用户信息"""
         try:
             user = await self.db.get_user_by_id(user_id)
@@ -111,7 +111,7 @@ class UserManager:
             print(f"❌ 获取用户信息失败: {e}")
             return None
     
-    async def delete_user_by_id(self, user_id: str) -> bool:
+    async def delete_user_by_id(self, user_id: int) -> bool:
         """根据ID删除用户"""
         query = "DELETE FROM users WHERE id = $1"
         
@@ -135,7 +135,7 @@ class UserManager:
             print(f"❌ 删除用户失败: {e}")
             return False
     
-    async def update_user_email_verification(self, user_id: str, verified: bool) -> bool:
+    async def update_user_email_verification(self, user_id: int, verified: bool) -> bool:
         """更新用户邮箱验证状态"""
         query = """
         UPDATE users 
@@ -273,12 +273,17 @@ async def find_user_by_email_action(user_manager: UserManager):
 
 async def find_user_by_id_action(user_manager: UserManager):
     """根据ID查找用户"""
-    user_id = input("请输入用户ID: ").strip()
-    if not user_id:
+    user_id_text = input("请输入用户ID: ").strip()
+    if not user_id_text:
         print("❌ 用户ID不能为空")
         return
+    try:
+        user_id = int(user_id_text)
+    except ValueError:
+        print("❌ 用户ID必须为数字")
+        return
     
-    print(f"\n🔍 查找用户ID: {user_id}")
+    print(f"\n🔍 查找用户ID: {user_id_text}")
     user = await user_manager.get_user_by_id(user_id)
     
     if user:
@@ -317,9 +322,14 @@ async def delete_user_by_email_action(user_manager: UserManager):
 
 async def delete_user_by_id_action(user_manager: UserManager):
     """根据ID删除用户"""
-    user_id = input("请输入要删除的用户ID: ").strip()
-    if not user_id:
+    user_id_text = input("请输入要删除的用户ID: ").strip()
+    if not user_id_text:
         print("❌ 用户ID不能为空")
+        return
+    try:
+        user_id = int(user_id_text)
+    except ValueError:
+        print("❌ 用户ID必须为数字")
         return
     
     # 先查找用户
@@ -345,9 +355,14 @@ async def delete_user_by_id_action(user_manager: UserManager):
 
 async def update_verification_status_action(user_manager: UserManager):
     """更新用户邮箱验证状态"""
-    user_id = input("请输入用户ID: ").strip()
-    if not user_id:
+    user_id_text = input("请输入用户ID: ").strip()
+    if not user_id_text:
         print("❌ 用户ID不能为空")
+        return
+    try:
+        user_id = int(user_id_text)
+    except ValueError:
+        print("❌ 用户ID必须为数字")
         return
     
     # 先查找用户

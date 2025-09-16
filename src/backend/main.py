@@ -9,11 +9,15 @@ from google.genai import types
 from google.adk.agents.run_config import RunConfig, StreamingMode
 import asyncio
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
+from google.adk.tools.openapi_tool.auth.auth_helpers import token_to_scheme_credential
 from google.adk.tools.mcp_tool.mcp_session_manager import SseConnectionParams,StreamableHTTPServerParams
-from fastapi import FastAPI, UploadFile, File, Request, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query
+# 文件上传相关导入已移除，现使用外部服务
+# from fastapi import UploadFile, File, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+# 静态文件服务已移除，文件现由外部服务处理
+# from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional, AsyncGenerator, Any, Dict
 import json
@@ -96,6 +100,9 @@ async def create_or_get_session(runner, user_id, session_id=None):
         user_id=user_id,
         session_id=session_id  # 可以是 None 或指定值
     )
+    # new_session.state.update({
+    #     "user_id": user_id
+    # })
     
     print(f"✅ 会话创建成功并保存到数据库，Session ID: {new_session.id}")
     return new_session.id  # 返回实际的 session_id
@@ -120,142 +127,27 @@ async def list_existing_sessions(session_service, user_id, app_name: str):
     except Exception as e:
         print(f"\n❌ 获取会话列表失败: {e}")
         return []
-def test_html() -> dict:
-    """用于测试html文件前端显示效果
-    
-    Returns:
-        dict: 包含html_path的字典
-    """
-    # return {"html_path": "/Users/ysl/Desktop/Code/MatterAI_Agent/test_report.html"}
-    # return {"test_html_path": "http://localhost:8080/static/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/seed_selection_report.html"}
-    return {
-  "result": {
-    "content": [
-      {
-        "text": "{\"session_id\":\"47a07f3a-1465-46c9-9a18-13094de01ddd\",\"timestamp\":\"20250903_154013\",\"optimal_k\":8,\"total_candidates\":10000,\"selected_seeds_count\":8,\"seeds\":[{\"A\":6.4,\"B\":17.8,\"C\":2.32,\"D\":10.8,\"E\":2.42,\"cluster_id\":0.0,\"distance_to_centroid\":1.4538946333052678},{\"A\":8.5,\"B\":29.5,\"C\":1.82,\"D\":15.2,\"E\":4.0,\"cluster_id\":1.0,\"distance_to_centroid\":1.4742807260834505},{\"A\":2.2,\"B\":33.9,\"C\":1.02,\"D\":18.7,\"E\":4.86,\"cluster_id\":2.0,\"distance_to_centroid\":1.9602466490236132},{\"A\":0.5,\"B\":1.9,\"C\":2.06,\"D\":10.0,\"E\":3.96,\"cluster_id\":3.0,\"distance_to_centroid\":2.0769497745169354},{\"A\":8.1,\"B\":23.5,\"C\":1.04,\"D\":14.5,\"E\":4.36,\"cluster_id\":4.0,\"distance_to_centroid\":1.224148591144482},{\"A\":1.1,\"B\":1.9,\"C\":2.64,\"D\":19.5,\"E\":3.92,\"cluster_id\":5.0,\"distance_to_centroid\":1.6358312357461648},{\"A\":7.4,\"B\":27.0,\"C\":2.42,\"D\":10.3,\"E\":4.46,\"cluster_id\":6.0,\"distance_to_centroid\":1.4596048491249867},{\"A\":9.7,\"B\":9.5,\"C\":1.92,\"D\":18.9,\"E\":2.66,\"cluster_id\":7.0,\"distance_to_centroid\":1.5313627257093076}],\"clustering_info\":{\"k_range\":[2,20],\"optimization_method\":\"elbow\",\"scaling_method\":\"standard\",\"selection_method\":\"random\"},\"cluster_distribution\":{\"0\":1319,\"1\":1190,\"2\":1204,\"3\":1194,\"4\":1292,\"5\":1232,\"6\":1322,\"7\":1247},\"seeds_csv_path\":\"trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/selected_seeds.csv\",\"results_json_path\":\"trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/seed_selection_results.json\",\"candidates_with_clusters_path\":\"trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/candidates_with_clusters.csv\",\"visualization_path\":\"trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/clustering_visualization.png\",\"sse_plot_path\":\"trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/sse_plot.png\",\"seed_selection_report_summary_html_path\":\"http://localhost:8080/static/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/seed_selection_report.html\",\"archive_details_zip_path\":\"http://localhost:8080/download/file/seed_selection/archives/seed_selection_47a07f3a-1465-46c9-9a18-13094de01ddd_20250903_154014.zip\",\"archive_path\":\"trained_models/seed_selection/archives/seed_selection_47a07f3a-1465-46c9-9a18-13094de01ddd_20250903_154014.zip\",\"download_url\":\"/download/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd\"}",
-        "type": "text"
-      }
-    ],
-    "isError": False,
-    "structuredContent": {
-      "seeds": [
-        {
-          "A": 6.4,
-          "B": 17.8,
-          "C": 2.32,
-          "D": 10.8,
-          "E": 2.42,
-          "cluster_id": 0,
-          "distance_to_centroid": 1.4538946333052678
-        },
-        {
-          "A": 8.5,
-          "B": 29.5,
-          "C": 1.82,
-          "D": 15.2,
-          "E": 4,
-          "cluster_id": 1,
-          "distance_to_centroid": 1.4742807260834505
-        },
-        {
-          "A": 2.2,
-          "B": 33.9,
-          "C": 1.02,
-          "D": 18.7,
-          "E": 4.86,
-          "cluster_id": 2,
-          "distance_to_centroid": 1.9602466490236132
-        },
-        {
-          "A": 0.5,
-          "B": 1.9,
-          "C": 2.06,
-          "D": 10,
-          "E": 3.96,
-          "cluster_id": 3,
-          "distance_to_centroid": 2.0769497745169354
-        },
-        {
-          "A": 8.1,
-          "B": 23.5,
-          "C": 1.04,
-          "D": 14.5,
-          "E": 4.36,
-          "cluster_id": 4,
-          "distance_to_centroid": 1.224148591144482
-        },
-        {
-          "A": 1.1,
-          "B": 1.9,
-          "C": 2.64,
-          "D": 19.5,
-          "E": 3.92,
-          "cluster_id": 5,
-          "distance_to_centroid": 1.6358312357461648
-        },
-        {
-          "A": 7.4,
-          "B": 27,
-          "C": 2.42,
-          "D": 10.3,
-          "E": 4.46,
-          "cluster_id": 6,
-          "distance_to_centroid": 1.4596048491249867
-        },
-        {
-          "A": 9.7,
-          "B": 9.5,
-          "C": 1.92,
-          "D": 18.9,
-          "E": 2.66,
-          "cluster_id": 7,
-          "distance_to_centroid": 1.5313627257093076
-        }
-      ],
-      "optimal_k": 8,
-      "timestamp": "20250903_154013",
-      "session_id": "47a07f3a-1465-46c9-9a18-13094de01ddd",
-      "archive_path": "trained_models/seed_selection/archives/seed_selection_47a07f3a-1465-46c9-9a18-13094de01ddd_20250903_154014.zip",
-      "download_url": "/download/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd",
-      "sse_plot_path": "trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/sse_plot.png",
-      "seeds_csv_path": "trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/selected_seeds.csv",
-      "clustering_info": {
-        "k_range": [
-          2,
-          20
-        ],
-        "scaling_method": "standard",
-        "selection_method": "random",
-        "optimization_method": "elbow"
-      },
-      "total_candidates": 10000,
-      "results_json_path": "trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/seed_selection_results.json",
-      "visualization_path": "trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/clustering_visualization.png",
-      "cluster_distribution": {
-        "0": 1319,
-        "1": 1190,
-        "2": 1204,
-        "3": 1194,
-        "4": 1292,
-        "5": 1232,
-        "6": 1322,
-        "7": 1247
-      },
-      "selected_seeds_count": 8,
-      "archive_details_zip_path": "http://localhost:8080/download/file/seed_selection/archives/seed_selection_47a07f3a-1465-46c9-9a18-13094de01ddd_20250903_154014.zip",
-      "candidates_with_clusters_path": "trained_models/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/candidates_with_clusters.csv",
-      "seed_selection_report_summary_html_path": "http://localhost:8080/static/seed_selection/47a07f3a-1465-46c9-9a18-13094de01ddd/seed_selection_report.html"
-    }
-  }
-}
+
 ############################
 # MCP 工具与 Agent 定义
 ############################
 
 
-def create_mcp_tool_from_config(tool_config):
+def create_mcp_tool_from_config(tool_config,user_id):
     """根据配置创建MCP工具"""
     print(f"🔧 创建MCP工具: {tool_config}")
+    if user_id:
+        # 使用 ADK 官方推荐的方式创建 API Key 认证
+        auth_scheme, auth_credential = token_to_scheme_credential(
+            "apikey",           # token_type: API Key 类型
+            "header",            # location: 查询参数位置
+            "user_id",              # name: 参数名
+            user_id        # credential_value: API Key 值
+        )
+        
+    else:
+        auth_scheme = None
+        auth_credential = None
     try:
         if tool_config["transport"] == "http":
             connection_params = StreamableHTTPServerParams(
@@ -265,8 +157,13 @@ def create_mcp_tool_from_config(tool_config):
                 terminate_on_close=True
             )
             return MCPToolset(
-                connection_params=connection_params
+                connection_params=connection_params,
+                auth_scheme=auth_scheme,
+                auth_credential=auth_credential
             )
+
+
+
         elif tool_config["transport"] == "sse":
             connection_params = SseConnectionParams(
                 url=tool_config["url"],
@@ -274,7 +171,9 @@ def create_mcp_tool_from_config(tool_config):
                 sse_read_timeout=1200  # 减少SSE读取超时
             )
             return MCPToolset(
-                connection_params=connection_params
+                connection_params=connection_params,
+                auth_scheme=auth_scheme,
+                auth_credential=auth_credential
             )
         # 可以扩展支持其他传输方式
         return None
@@ -323,7 +222,7 @@ async def get_or_create_session_agent(user_id: str, session_id: str, selected_to
     
     # 创建新的智能体
     print(f"🔧 为用户 {user_id} 会话 {session_id} 创建新智能体 (应用: {app_name})...")
-    dynamic_agent = create_dynamic_agent(selected_tools, custom_tools, app_name)
+    dynamic_agent = create_dynamic_agent(selected_tools, custom_tools, app_name,user_id)
     new_runner = Runner(agent=dynamic_agent, app_name=f"{APP_NAME}_{app_name}", session_service=session_service)  # type: ignore
     
     # 缓存新智能体和配置
@@ -333,9 +232,9 @@ async def get_or_create_session_agent(user_id: str, session_id: str, selected_to
     print(f"✅ 用户 {user_id} 会话 {session_id} 的新智能体创建完成并已缓存")
     return new_runner
 
-def create_dynamic_agent(selected_tools=None, custom_tools=None, app_name="default"):
+def create_dynamic_agent(selected_tools=None, custom_tools=None, app_name="default",user_id=None):
     """根据选中的工具动态创建智能体"""
-    tools = [test_html]  # 默认包含测试工具
+    tools = []  # 开始时为空工具列表
     
     # 根据应用名称选择工具配置
     agent_config = AGENT_CONFIGS.get(app_name, AGENT_CONFIGS["default"])
@@ -350,7 +249,7 @@ def create_dynamic_agent(selected_tools=None, custom_tools=None, app_name="defau
                 # 预设工具 - 优先从当前应用的工具配置查找
                 if tool_id in tools_config:
                     config = tools_config[tool_id]
-                    tool = create_mcp_tool_from_config(config)
+                    tool = create_mcp_tool_from_config(config,user_id)
                     if tool:
                         tools.append(tool)  # type: ignore
                         print(f"✅ 加载应用 {app_name} 的预设工具: {config['name']}")
@@ -359,7 +258,7 @@ def create_dynamic_agent(selected_tools=None, custom_tools=None, app_name="defau
                 # 如果当前应用没有，再从通用配置查找
                 elif tool_id in PRESET_TOOLS_CONFIG:
                     config = PRESET_TOOLS_CONFIG[tool_id]
-                    tool = create_mcp_tool_from_config(config)
+                    tool = create_mcp_tool_from_config(config,user_id)
                     if tool:
                         tools.append(tool)  # type: ignore
                         print(f"✅ 加载通用预设工具: {config['name']}")
@@ -387,7 +286,7 @@ def create_dynamic_agent(selected_tools=None, custom_tools=None, app_name="defau
                                     "url": url,
                                     "transport": transport
                                 }
-                                tool = create_mcp_tool_from_config(custom_config)
+                                tool = create_mcp_tool_from_config(custom_config,user_id)
                                 if tool:
                                     tools.append(tool)  # type: ignore
                                     print(f"✅ 加载自定义工具: {url} ({transport})")
@@ -600,8 +499,8 @@ app.add_middleware(
 # 注册认证路由
 app.include_router(auth_router)
 
-# 静态文件（上传文件访问）
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+# 静态文件（上传文件访问）- 已迁移到公网服务器
+# app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 class CustomToolConfig(BaseModel):
     """自定义工具配置"""
@@ -931,7 +830,12 @@ async def chat_stream(payload: ChatRequest, user_id: str = Depends(get_current_u
         payload.custom_tools,
         payload.app_name or "default"
     )
-    
+        # 只设置必要的用户信息
+    # session.state.update({
+    #     "user_id": user_id,
+    #     "user_email": current_user.get("email"),
+    #     "user_permissions": current_user.get("permissions", [])
+    # })
     # user_id 已经是认证的用户ID，无需从payload获取
     requested_session_id = payload.session_id
     query_text = payload.query
@@ -1016,7 +920,7 @@ async def chat_stream(payload: ChatRequest, user_id: str = Depends(get_current_u
                             delta_text = current_text[len(accumulated_text):]
                             if delta_text:
                                 delta_data = {"type": "delta", "text": delta_text}
-                                #print(f"📤 发送增量文本: '{delta_text[:50]}{'...' if len(delta_text) > 50 else ''}'")
+                                print(f"📤 发送增量文本: '{delta_text[:]}{'...' if len(delta_text) > 50 else ''}'")
                                 yield _sse_pack(delta_data)
                                 accumulated_text = current_text
                         else:
@@ -1130,36 +1034,37 @@ async def get_html_content(file_path: str = Query(..., description="HTML文件�
         raise HTTPException(status_code=500, detail=f"读取文件失败: {str(e)}")
 
 
-@app.post("/upload")
-async def upload_files(request: Request, files: List[UploadFile] = File(...)) -> List[str]:
-    urls: List[str] = []
-    for f in files:
-        orig_name = f.filename or "file"
-        name_without_ext = os.path.splitext(orig_name)[0]
-        suffix = os.path.splitext(orig_name)[1]
-        
-        # 检查文件是否已存在，如果存在则添加数字后缀
-        counter = 1
-        final_name = orig_name
-        dest_path = os.path.join(UPLOAD_DIR, final_name)
-        
-        while os.path.exists(dest_path):
-            final_name = f"{name_without_ext}({counter}){suffix}"
-            dest_path = os.path.join(UPLOAD_DIR, final_name)
-            counter += 1
-        
-        # 保存文件
-        content = await f.read()
-        with open(dest_path, 'wb') as out:
-            out.write(content)
-        
-        file_url = str(request.base_url) + "uploads/" + final_name
-        print(f"🔍 文件URL: {file_url}")
-        urls.append(file_url)
-        print(f"📁 文件上传成功: {orig_name} -> {final_name}")
-    
-    print(f"✅ 总共上传了 {len(urls)} 个文件")
-    return urls
+# 文件上传功能已迁移到公网服务器 http://47.99.180.80/file/upload
+# @app.post("/upload")
+# async def upload_files(request: Request, files: List[UploadFile] = File(...)) -> List[str]:
+#     urls: List[str] = []
+#     for f in files:
+#         orig_name = f.filename or "file"
+#         name_without_ext = os.path.splitext(orig_name)[0]
+#         suffix = os.path.splitext(orig_name)[1]
+#
+#         # 检查文件是否已存在，如果存在则添加数字后缀
+#         counter = 1
+#         final_name = orig_name
+#         dest_path = os.path.join(UPLOAD_DIR, final_name)
+#
+#         while os.path.exists(dest_path):
+#             final_name = f"{name_without_ext}({counter}){suffix}"
+#             dest_path = os.path.join(UPLOAD_DIR, final_name)
+#             counter += 1
+#
+#         # 保存文件
+#         content = await f.read()
+#         with open(dest_path, 'wb') as out:
+#             out.write(content)
+#
+#         file_url = str(request.base_url) + "uploads/" + final_name
+#         print(f"🔍 文件URL: {file_url}")
+#         urls.append(file_url)
+#         print(f"📁 文件上传成功: {orig_name} -> {final_name}")
+#
+#     print(f"✅ 总共上传了 {len(urls)} 个文件")
+#     return urls
 
 
 if __name__ == "__main__":
