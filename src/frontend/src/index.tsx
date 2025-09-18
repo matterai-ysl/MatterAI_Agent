@@ -23,7 +23,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/agent">
         <Routes>
           {/* 认证路由 */}
           <Route 

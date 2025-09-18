@@ -139,7 +139,7 @@ export function SessionList({
       <div className="p-4 border-t text-xs text-muted-foreground">
         <div className="flex items-center justify-between">
           <span>{t('sidebar.totalSessions', { count: sessions.length })}</span>
-          <span>MatterAI Agent</span>
+          <span>MatMind Agent</span> {/* 临时改为MatMind，要恢复请改回'MatterAI Agent' */}
         </div>
       </div>
     </div>

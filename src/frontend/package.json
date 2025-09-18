@@ -2,6 +2,7 @@
   "name": "matterai-agent-frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/agent",
   "dependencies": {
     "@headlessui/react": "^2.2.7",
     "@types/node": "^18.0.0",

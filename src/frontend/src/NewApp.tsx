@@ -62,7 +62,7 @@ function AppContent() {
   
   // 设置动态标题
   useEffect(() => {
-    document.title = `MatterAI Agent - ${t('matterai.welcome.title')}`;
+    document.title = `MatMind Agent - ${t('matterai.welcome.title')}`; // 临时改为MatMind，要恢复请改回'MatterAI'
   }, [t]);
   const [splitViewOpen, setSplitViewOpen] = useState(false);
   const [htmlViewerData, setHtmlViewerData] = useState<{
@@ -247,13 +247,15 @@ function AppContent() {
             </div>
           </div>
           
-          {/* 中间Logo区域 */}
+          {/* 中间Logo区域 - 临时隐藏研究所logo */}
           <div className="flex-1 flex justify-center">
-            <img 
-              src="/assets/images/institute-logo.jpg" 
+            {/* 临时注释掉研究所logo - 要恢复请取消注释下面的代码
+            <img
+              src={`${process.env.PUBLIC_URL || ''}/assets/images/institute-logo.jpg`}
               alt="Institute Logo"
               className="h-8 object-contain"
             />
+            */}
           </div>
           
           {/* 状态指示器和语言切换 */}
@@ -298,19 +300,26 @@ function AppContent() {
                     transition={{ duration: 0.6 }}
                     className="space-y-4"
                   >
-                    {/* Logo 图标 */}
+                    {/* Logo 图标 - 临时替换为MatMind */}
                     <motion.div
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ delay: 0.2, duration: 0.5 }}
                       className="relative mx-auto w-16 h-16"
                     >
+                      {/* 临时使用MatMind.jpg图标 - 要恢复请取消注释下面的SVG代码并删除img标签
                       <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80 rounded-xl rotate-3 opacity-20" />
                       <div className="relative bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center w-full h-full shadow-lg">
                         <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                       </div>
+                      */}
+                      <img
+                        src={`${process.env.PUBLIC_URL || ''}/assets/images/MatMind.jpg`}
+                        alt="MatMind Logo"
+                        className="w-full h-full object-cover rounded-xl shadow-lg"
+                      />
                     </motion.div>
 
                     {/* 标题 */}
@@ -399,7 +408,7 @@ function AppContent() {
             placeholder={
               state.isLoading || isConnected
                 ? '正在处理中，请稍候...' 
-                : '向 MatterAI 发送消息...'
+                : '向 MatMind 发送消息...' // 临时改为MatMind，要恢复请改回'MatterAI'
             }
             selectedTools={selectedTools}
             onToolsChange={(tools, customToolsData) => handleToolsChange(tools)}

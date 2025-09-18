@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { API_BASE_URL } from '../services/api';
 
 export interface User {
   id: string;
@@ -94,8 +95,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'CLEAR_ERROR' });
 
+    const apiBaseUrl = API_BASE_URL || process.env.REACT_APP_API_BASE_URL || '';
+    const loginUrl = `${apiBaseUrl.replace(/\/$/, '')}/auth/login`;
+
+    console.log('🔐 开始登录流程...');
+    console.log('📧 邮箱:', email);
+    console.log('🌐 API Base URL:', apiBaseUrl);
+    console.log('🎯 登录URL:', loginUrl);
+
     try {
-      const response = await fetch('/auth/login', {
+      console.log('📤 发送登录请求...');
+      const response = await fetch(loginUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,9 +113,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('📥 收到响应:', response.status, response.statusText);
+
       const data = await response.json();
+      console.log('📋 响应数据:', data);
 
       if (!response.ok) {
+        console.error('❌ 登录失败:', data.detail || 'Login failed');
         throw new Error(data.detail || 'Login failed');
       }
 
@@ -118,6 +132,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         token: data.token,
       };
 
+      console.log('👤 用户信息:', { id: user.id, email: user.email, name: user.name });
+
       // Store token and user data
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify({
@@ -127,8 +143,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin: user.isAdmin,
       }));
 
+      console.log('✅ 登录成功，数据已保存到本地存储');
       dispatch({ type: 'SET_USER', payload: user });
     } catch (error) {
+      console.error('🚨 登录过程发生错误:', error);
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Login failed' });
       throw error;
     }
@@ -138,8 +156,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'CLEAR_ERROR' });
 
+    const apiBaseUrl = API_BASE_URL || process.env.REACT_APP_API_BASE_URL || '';
+    const registerUrl = `${apiBaseUrl.replace(/\/$/, '')}/auth/register`;
+
+    console.log('📝 开始注册流程...');
+    console.log('👤 用户名:', name);
+    console.log('📧 邮箱:', email);
+    console.log('🎯 注册URL:', registerUrl);
+
     try {
-      const response = await fetch('/auth/register', {
+      const response = await fetch(registerUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -192,8 +218,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'CLEAR_ERROR' });
 
+    const apiBaseUrl = API_BASE_URL || process.env.REACT_APP_API_BASE_URL || '';
+    const changePasswordUrl = `${apiBaseUrl.replace(/\/$/, '')}/auth/change-password`;
+
+    console.log('🔑 开始更改密码流程...');
+    console.log('🎯 更改密码URL:', changePasswordUrl);
+
     try {
-      const response = await fetch('/auth/change-password', {
+      const response = await fetch(changePasswordUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Maximize2, Minimize2, ExternalLink, RefreshCw } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { API_BASE_URL } from '../../services/api';
 import { cn } from '../../utils/cn';
 
 /**
@@ -52,8 +53,9 @@ export function HtmlViewer({
           return;
         }
         
-        // 通过后端API获取HTML文件内容（端口9000）
-        const response = await fetch(`http://localhost:9000/html-content?file_path=${encodeURIComponent(htmlPath)}`);
+        // 通过后端API获取HTML文件内容（使用统一 API_BASE_URL）
+        const baseUrl = API_BASE_URL || '';
+        const response = await fetch(`${baseUrl}/html-content?file_path=${encodeURIComponent(htmlPath)}`);
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
@@ -95,7 +97,8 @@ export function HtmlViewer({
     setError(null);
     
     try {
-      const response = await fetch(`http://localhost:9000/html-content?file_path=${encodeURIComponent(htmlPath)}`);
+      const baseUrl = API_BASE_URL || '';
+      const response = await fetch(`${baseUrl}/html-content?file_path=${encodeURIComponent(htmlPath)}`);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);

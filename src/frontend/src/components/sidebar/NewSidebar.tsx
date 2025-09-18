@@ -315,7 +315,7 @@ export function NewSidebar({
   onToggle,
   isLoading = false,
   className,
-  appTitle = "MatterAI",
+  appTitle = "MatMind", // 临时改为MatMind，要恢复请改回"MatterAI"
 }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
 

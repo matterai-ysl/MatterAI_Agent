@@ -128,13 +128,15 @@ export function MindsWelcome({ modules, onModuleSelect, selectedModules, onSendM
           </div>
         </div>
         
-        {/* 中间Logo区域 */}
+        {/* 中间Logo区域 - 临时隐藏研究所logo */}
         <div className="flex-1 flex justify-center">
-          <img 
-            src="/assets/images/institute-logo.jpg" 
+          {/* 临时注释掉研究所logo - 要恢复请取消注释下面的代码
+          <img
+            src={`${process.env.PUBLIC_URL || ''}/assets/images/institute-logo.jpg`}
             alt="Institute Logo"
             className="h-8 object-contain"
           />
+          */}
         </div>
         
         <div className="flex items-center space-x-2">

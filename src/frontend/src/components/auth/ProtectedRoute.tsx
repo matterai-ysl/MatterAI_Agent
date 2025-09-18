@@ -32,7 +32,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If user is authenticated but trying to access auth page, redirect to main app
   if (!requireAuth && isAuthenticated) {
-    window.location.href = '/';
+    const base = (process.env.PUBLIC_URL && process.env.PUBLIC_URL !== '.') ? process.env.PUBLIC_URL : '/agent';
+    window.location.href = base.endsWith('/') ? base : `${base}/`;
     return null;
   }
 

@@ -567,3 +567,42 @@ To extend internationalization:
 - Install additional dependencies: `pip install -r src/backend/auth_requirements.txt`
 - MCP tools run as separate services on different ports
 - Environment variables now include database credentials for user authentication
+
+## Troubleshooting
+
+### Google ADK Version Compatibility Issues
+
+**Problem**: Database errors like `column events.custom_metadata does not exist` when using the same cloud database between local and server environments.
+
+**Root Cause**: Different versions of Google ADK create different database table structures. Newer versions add fields like `custom_metadata` to the `events` table that older versions don't recognize.
+
+**Symptoms**:
+- Local environment works fine
+- Server environment throws `psycopg2.errors.UndefinedColumn` errors
+- Both environments use the same cloud PostgreSQL database
+
+**Solution**:
+1. **Check ADK versions** on both environments:
+   ```bash
+   pip show google-adk
+   ```
+
+2. **Ensure version consistency** - use the same Google ADK version across all environments:
+   ```bash
+   pip install google-adk==1.8.0  # Use specific version
+   ```
+
+3. **If downgrading server**: The database tables created by newer ADK versions are backward compatible, but newer fields won't be used.
+
+4. **If upgrading local**: The ADK will automatically add missing columns to existing tables.
+
+**Prevention**:
+- Pin Google ADK version in `requirements.txt`
+- Use consistent Python environments across local and server deployments
+- Test database schema changes in staging before production deployment
+
+**Alternative Manual Fix** (if version sync is not possible):
+```sql
+-- Add missing column manually
+ALTER TABLE events ADD COLUMN IF NOT EXISTS custom_metadata JSONB;
+```

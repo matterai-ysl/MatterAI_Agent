@@ -804,8 +804,8 @@ async def get_history(user_id: str = Depends(get_current_user_id), session_id: s
 
     events = getattr(session, 'events', [])
     messages = process_events(events)
-    return JSONResponse({"session_id": session.id, "messages": messages})
-
+    # return JSONResponse({"session_id": session.id, "messages": messages})
+    return {"session_id": session.id, "messages": messages} # type: ignore
 
 @app.post("/chat/stream")
 async def chat_stream(payload: ChatRequest, user_id: str = Depends(get_current_user_id)) -> StreamingResponse:
@@ -1033,38 +1033,6 @@ async def get_html_content(file_path: str = Query(..., description="HTML文件�
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"读取文件失败: {str(e)}")
 
-
-# 文件上传功能已迁移到公网服务器 http://47.99.180.80/file/upload
-# @app.post("/upload")
-# async def upload_files(request: Request, files: List[UploadFile] = File(...)) -> List[str]:
-#     urls: List[str] = []
-#     for f in files:
-#         orig_name = f.filename or "file"
-#         name_without_ext = os.path.splitext(orig_name)[0]
-#         suffix = os.path.splitext(orig_name)[1]
-#
-#         # 检查文件是否已存在，如果存在则添加数字后缀
-#         counter = 1
-#         final_name = orig_name
-#         dest_path = os.path.join(UPLOAD_DIR, final_name)
-#
-#         while os.path.exists(dest_path):
-#             final_name = f"{name_without_ext}({counter}){suffix}"
-#             dest_path = os.path.join(UPLOAD_DIR, final_name)
-#             counter += 1
-#
-#         # 保存文件
-#         content = await f.read()
-#         with open(dest_path, 'wb') as out:
-#             out.write(content)
-#
-#         file_url = str(request.base_url) + "uploads/" + final_name
-#         print(f"🔍 文件URL: {file_url}")
-#         urls.append(file_url)
-#         print(f"📁 文件上传成功: {orig_name} -> {final_name}")
-#
-#     print(f"✅ 总共上传了 {len(urls)} 个文件")
-#     return urls
 
 
 if __name__ == "__main__":

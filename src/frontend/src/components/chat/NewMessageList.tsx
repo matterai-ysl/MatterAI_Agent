@@ -266,7 +266,7 @@ const MessageItem = React.memo(function MessageItem({
   isLast,
   onViewHtml,
   highlightedToolId,
-  botName = 'MatterAI'
+  botName = 'MatMind' // 临时改为MatMind，要恢复请改回'MatterAI'
 }: { 
   message: ChatMessage;
   isLast?: boolean;
@@ -436,7 +436,7 @@ export function NewMessageList({
   className,
   onViewHtml,
   highlightedToolId,
-  botName = 'MatterAI'
+  botName = 'MatMind' // 临时改为MatMind，要恢复请改回'MatterAI'
 }: MessageListProps) {
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);

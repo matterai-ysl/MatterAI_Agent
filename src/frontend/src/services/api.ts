@@ -15,8 +15,21 @@ import {
 /**
  * API 基础配置
  */
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://47.99.180.80/matterai';
-const FILE_UPLOAD_URL = process.env.REACT_APP_FILE_UPLOAD_URL || 'http://47.99.180.80/file/upload';
+export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://47.99.180.80/agent/api';
+export const FILE_UPLOAD_URL = process.env.REACT_APP_FILE_UPLOAD_URL || 'http://47.99.180.80/file/upload';
+
+// 调试信息
+console.log('🔧 API配置调试信息:');
+console.log('  REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
+console.log('  实际API_BASE_URL:', API_BASE_URL);
+console.log('  FILE_UPLOAD_URL:', FILE_UPLOAD_URL);
+
+/**
+ * 确保基础URL以斜杠结尾，保证相对路径拼接不会截断最后一段
+ */
+function ensureTrailingSlash(url: string): string {
+  return url.endsWith('/') ? url : url + '/';
+}
 
 /**
  * HTTP 请求工具类
@@ -52,8 +65,10 @@ class HttpClient {
    */
   async get<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
     // 确保 baseUrl 不为空且格式正确
-    const baseUrl = this.baseUrl || 'http://localhost:9000';
-    const url = new URL(endpoint, baseUrl);
+    const baseUrl = this.baseUrl || 'http://localhost:9000/agent/api';
+    // 规范化端点，避免以 / 开头导致丢失 /agent/api 路径
+    const normalizedEndpoint = endpoint.replace(/^\//, '');
+    const url = new URL(normalizedEndpoint, ensureTrailingSlash(baseUrl));
     
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -77,8 +92,10 @@ class HttpClient {
    * 发送 POST 请求
    */
   async post<T>(endpoint: string, data?: any): Promise<T> {
-    const baseUrl = this.baseUrl || 'http://localhost:9000';
-    const url = new URL(endpoint, baseUrl);
+    const baseUrl = this.baseUrl || 'http://localhost:9000/agent/api';
+    // 规范化端点，避免以 / 开头导致丢失 /agent/api 路径
+    const normalizedEndpoint = endpoint.replace(/^\//, '');
+    const url = new URL(normalizedEndpoint, ensureTrailingSlash(baseUrl));
     
     const response = await fetch(url.toString(), {
       method: 'POST',
@@ -228,8 +245,9 @@ export class ChatApiService {
     console.log('🚀 开始流式聊天请求:', request);
     
     try {
-      const baseUrl = API_BASE_URL || 'http://localhost:9000';
-      const url = new URL('/chat/stream', baseUrl).toString();
+      const baseUrl = API_BASE_URL || 'http://localhost:9000/agent/api';
+      // 不以 / 开头，确保保留 /agent/api 前缀
+      const url = new URL('chat/stream', ensureTrailingSlash(baseUrl)).toString();
       console.log('📡 请求URL:', url);
       
       const token = localStorage.getItem('token');

@@ -8,14 +8,15 @@ MatterAI Agent 前端已配置为支持静态部署，可以部署到任何静�
 
 ### 生产环境变量 (.env.production)
 ```bash
-REACT_APP_API_BASE_URL=http://47.99.180.80/matterai
+REACT_APP_API_BASE_URL=http://47.99.180.80/agent/api
 REACT_APP_FILE_UPLOAD_URL=http://47.99.180.80/file/upload
 GENERATE_SOURCEMAP=false
+PUBLIC_URL=/agent
 ```
 
 ### 开发环境变量 (.env.development)
 ```bash
-REACT_APP_API_BASE_URL=http://localhost:9000
+REACT_APP_API_BASE_URL=http://47.99.180.80/agent/api
 REACT_APP_FILE_UPLOAD_URL=http://47.99.180.80/file/upload
 ```
 
@@ -38,11 +39,11 @@ npm run serve
 
 ### 测试所有路由
 构建完成后，测试以下页面是否正常工作：
-- `http://localhost:3000/` - MatterAI 主页面
-- `http://localhost:3000/minds` - MINDS 智能体页面
-- `http://localhost:3000/auth` - 认证页面
+- `http://localhost:3000/agent/` - MatterAI 主页面
+- `http://localhost:3000/agent/minds` - MINDS 智能体页面
+- `http://localhost:3000/agent/auth` - 认证页面
 
-如果直接访问 `/minds` 显示 404，说明服务器配置有问题。
+如果直接访问 `/agent/minds` 显示 404，说明服务器配置有问题。
 
 ### ⚠️ 重要：不能直接打开 index.html
 **不要**直接在浏览器中打开 `build/index.html` 文件，因为：
@@ -98,7 +99,7 @@ server {
 
     # API 代理（如果需要）
     location /api/ {
-        proxy_pass http://47.99.180.80/matterai/;
+        proxy_pass http://47.99.180.80/agent/api/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
@@ -127,16 +128,16 @@ server {
 
 ### SPA 路由支持
 **这是最重要的配置！** 应用有多个页面路由：
-- `/` - MatterAI 主页面
-- `/minds` - MINDS 智能体页面
-- `/auth` - 认证页面
+- `/agent/` - MatterAI 主页面
+- `/agent/minds` - MINDS 智能体页面
+- `/agent/auth` - 认证页面
 
 但只有一个 `index.html` 文件，这是 SPA (Single Page Application) 的特点。
 
-**必须配置服务器将所有未找到的路径重定向到 `index.html`**，否则用户直接访问 `/minds` 会看到 404 错误。
+**必须配置服务器将所有未找到的路径重定向到 `index.html`**，否则用户直接访问 `/agent/minds` 会看到 404 错误。
 
 ### 1. 跨域问题
-- 确保后端 API 服务器（http://47.99.180.80/matterai）配置了正确的 CORS 设置
+- 确保后端 API 服务器（http://47.99.180.80/agent/api）配置了正确的 CORS 设置
 - 允许您的静态网站域名访问
 
 ### 2. 路由配置
