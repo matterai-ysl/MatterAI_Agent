@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useChat } from './hooks/useChat';
 import { useResponsive } from './hooks/useResponsive';
+import { useAuth } from './contexts/AuthContext';
 import { NewSidebar } from './components/sidebar/NewSidebar';
 import { NewMessageList } from './components/chat/NewMessageList';
 import { NewChatInput } from './components/chat/NewChatInput';
@@ -57,9 +58,39 @@ function ErrorToast({ error, onClose }: { error: string; onClose: () => void }) 
  */
 function AppContent() {
   const { t } = useTranslation();
+  const { handleSSOLogin } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [errorDismissed, setErrorDismissed] = useState(false);
-  
+
+  // 处理SSO登录
+  useEffect(() => {
+    const handleSSOParams = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const ssoToken = urlParams.get('sso_token');
+      const isSso = urlParams.get('sso');
+
+      if (ssoToken && isSso === 'true') {
+        try {
+          console.log('🔐 检测到SSO登录，处理token...');
+
+          // 处理SSO登录
+          await handleSSOLogin(ssoToken);
+
+          // 清理URL参数
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, newUrl);
+
+          console.log('✅ SSO登录成功，已清理URL参数');
+        } catch (error) {
+          console.error('❌ SSO登录失败:', error);
+          // SSO失败不影响正常使用，错误已在AuthContext中处理
+        }
+      }
+    };
+
+    handleSSOParams();
+  }, [handleSSOLogin]);
+
   // 设置动态标题
   useEffect(() => {
     document.title = `MatMind Agent - ${t('matterai.welcome.title')}`; // 临时改为MatMind，要恢复请改回'MatterAI'

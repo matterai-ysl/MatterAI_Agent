@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { API_BASE_URL } from '../services/api';
+import { API_BASE_URL, api } from '../services/api';
 
 export interface User {
   id: string;
@@ -31,6 +31,9 @@ interface AuthContextType extends AuthState {
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   clearError: () => void;
   updateUser: (user: User) => void;
+  // SSO 相关方法
+  handleSSOLogin: (ssoToken: string) => Promise<void>;
+  generateSSOUrl: (targetSiteUrl: string, redirectPath?: string) => string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -261,6 +264,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('token', user.token);
   };
 
+  // SSO 相关方法
+  const handleSSOLogin = async (ssoToken: string): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'CLEAR_ERROR' });
+
+    try {
+      console.log('🔐 处理SSO登录，token:', ssoToken.substring(0, 20) + '...');
+
+      // 验证SSO token并获取用户信息
+      const response = await api.verifySSOToken(ssoToken);
+
+      console.log('✅ SSO验证成功:', response);
+
+      const user: User = {
+        id: response.id,
+        email: response.email,
+        name: response.name,
+        isAdmin: response.isAdmin,
+        emailVerified: response.emailVerified,
+        token: response.token,
+      };
+
+      // 更新用户状态
+      updateUser(user);
+
+      console.log('✅ SSO登录完成');
+    } catch (error: any) {
+      console.error('❌ SSO登录失败:', error);
+      const errorMessage = error.response?.data?.detail || error.message || 'SSO登录失败';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw error;
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
+  const generateSSOUrl = (targetSiteUrl: string, redirectPath: string = '/'): string => {
+    try {
+      return api.generateSSOUrl(targetSiteUrl, redirectPath);
+    } catch (error: any) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      throw error;
+    }
+  };
+
   const value: AuthContextType = {
     ...state,
     login,
@@ -269,6 +317,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     changePassword,
     updateUser,
     clearError,
+    // SSO 方法
+    handleSSOLogin,
+    generateSSOUrl,
   };
 
   return (

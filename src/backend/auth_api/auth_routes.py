@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, status, Body
+from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
@@ -428,4 +429,112 @@ async def bind_email(request: EmailBindingRequest, current_user: dict = Depends(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="邮箱绑定失败，请稍后重试"
+        )
+
+
+# SSO (Single Sign-On) endpoints
+@router.get("/sso")
+async def sso_login(token: str, redirect_to: str = "/"):
+    """
+    单点登录接口 - A网站跳转B网站免登录
+    接收A网站的token，验证后重定向到B网站前端
+    """
+    try:
+        print(f"🔐 SSO Login attempt with token: {token[:20]}...")
+
+        # 验证token
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_email = payload.get("sub")
+        user_id = payload.get("id")
+
+        if not user_email or not user_id:
+            print(f"❌ Invalid token payload: {payload}")
+            return RedirectResponse(url="/auth?error=invalid_token")
+
+        # 验证用户是否存在
+        user = await get_user_by_email(user_email)
+        if not user:
+            print(f"❌ User not found: {user_email}")
+            return RedirectResponse(url="/auth?error=user_not_found")
+
+        print(f"✅ SSO Login successful for: {user_email}")
+
+        # 生成新的token（更安全的做法）
+        new_token = create_access_token(
+            data={"sub": user["email"], "id": user["id"], "isAdmin": user["isAdmin"]},
+            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        )
+
+        # 安全重定向，只允许内部路径
+        safe_redirect = redirect_to if redirect_to.startswith('/') else '/'
+        redirect_url = f"{safe_redirect}?sso_token={new_token}&sso=true"
+
+        print(f"🔄 Redirecting to: {redirect_url}")
+        return RedirectResponse(url=redirect_url)
+
+    except jwt.ExpiredSignatureError:
+        print("❌ SSO Token expired")
+        return RedirectResponse(url="/auth?error=token_expired")
+    except jwt.InvalidTokenError as e:
+        print(f"❌ SSO Invalid token: {e}")
+        return RedirectResponse(url="/auth?error=invalid_token")
+    except Exception as e:
+        print(f"❌ SSO Error: {e}")
+        return RedirectResponse(url="/auth?error=sso_failed")
+
+
+@router.post("/sso/verify", response_model=TokenResponse)
+async def verify_sso_token(sso_token: str = Body(..., embed=True)):
+    """
+    验证SSO token并返回用户信息
+    前端收到sso_token后调用此接口验证并获取用户信息
+    """
+    try:
+        print(f"🔐 Verifying SSO token: {sso_token[:20]}...")
+
+        # 验证token
+        payload = jwt.decode(sso_token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_email = payload.get("sub")
+        user_id = payload.get("id")
+
+        if not user_email or not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid SSO token"
+            )
+
+        # 获取完整用户信息
+        user = await get_user_by_email(user_email)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+
+        print(f"✅ SSO token verified for: {user_email}")
+
+        return {
+            "id": user["id"],
+            "email": user["email"],
+            "name": user["name"],
+            "token": sso_token,
+            "isAdmin": user["isAdmin"],
+            "emailVerified": user.get("emailVerified", False)
+        }
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="SSO token expired"
+        )
+    except jwt.InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid SSO token"
+        )
+    except Exception as e:
+        print(f"❌ SSO verification error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="SSO verification failed"
         ) 

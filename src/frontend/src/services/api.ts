@@ -12,6 +12,20 @@ import {
   ApiResponse
 } from '../types/chat';
 
+// SSO 相关类型
+export interface SSOTokenVerifyRequest {
+  sso_token: string;
+}
+
+export interface SSOTokenVerifyResponse {
+  id: string;
+  email: string;
+  name: string;
+  token: string;
+  isAdmin: boolean;
+  emailVerified: boolean;
+}
+
 /**
  * API 基础配置
  */
@@ -506,6 +520,25 @@ class AuthApiServiceImpl implements AuthApiService {
     return this.makeRequest('/auth/me', {
       method: 'GET',
     });
+  }
+
+  // SSO 相关方法
+  async verifySSOToken(ssoToken: string): Promise<SSOTokenVerifyResponse> {
+    return this.makeRequest('/auth/sso/verify', {
+      method: 'POST',
+      body: JSON.stringify({ sso_token: ssoToken }),
+    });
+  }
+
+  // 生成跳转到B网站的URL
+  generateSSOUrl(targetSiteUrl: string, redirectPath: string = '/'): string {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('用户未登录，无法进行SSO跳转');
+    }
+
+    const ssoUrl = `${targetSiteUrl}/auth/sso?token=${encodeURIComponent(token)}&redirect_to=${encodeURIComponent(redirectPath)}`;
+    return ssoUrl;
   }
 }
 
