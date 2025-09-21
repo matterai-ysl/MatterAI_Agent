@@ -65,26 +65,42 @@ function AppContent() {
   // 处理SSO登录
   useEffect(() => {
     const handleSSOParams = async () => {
+      console.log('🌐 NewApp: 检查URL参数...');
+
       const urlParams = new URLSearchParams(window.location.search);
+      console.log('📥 当前URL参数:', Object.fromEntries(urlParams.entries()));
+
       const ssoToken = urlParams.get('sso_token');
       const isSso = urlParams.get('sso');
 
+      console.log('🔍 SSO参数检查:');
+      console.log('   sso_token:', ssoToken ? ssoToken.substring(0, 20) + '...' : 'null');
+      console.log('   sso:', isSso);
+      console.log('   完整URL:', window.location.href);
+
       if (ssoToken && isSso === 'true') {
+        console.log('✅ 检测到SSO登录参数，开始处理...');
+
         try {
-          console.log('🔐 检测到SSO登录，处理token...');
+          console.log('🔐 调用AuthContext.handleSSOLogin...');
 
           // 处理SSO登录
           await handleSSOLogin(ssoToken);
+
+          console.log('✅ SSO登录处理完成，清理URL参数...');
 
           // 清理URL参数
           const newUrl = window.location.pathname;
           window.history.replaceState({}, document.title, newUrl);
 
-          console.log('✅ SSO登录成功，已清理URL参数');
+          console.log('🧹 URL已清理:', newUrl);
+          console.log('✅ SSO登录流程完全完成!');
         } catch (error) {
-          console.error('❌ SSO登录失败:', error);
+          console.error('❌ NewApp: SSO登录失败:', error);
           // SSO失败不影响正常使用，错误已在AuthContext中处理
         }
+      } else {
+        console.log('ℹ️  未检测到SSO参数，正常加载应用');
       }
     };
 

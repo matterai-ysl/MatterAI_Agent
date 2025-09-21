@@ -439,48 +439,102 @@ async def sso_login(token: str, redirect_to: str = "/"):
     单点登录接口 - A网站跳转B网站免登录
     接收A网站的token，验证后重定向到B网站前端
     """
+    print("=" * 60)
+    print("🚀 SSO LOGIN STARTED")
+    print(f"📥 接收到参数:")
+    print(f"   token (前20字符): {token[:20]}...")
+    print(f"   redirect_to: {redirect_to}")
+    print(f"   token长度: {len(token)}")
+
     try:
-        print(f"🔐 SSO Login attempt with token: {token[:20]}...")
+        print(f"🔍 开始验证token...")
+        print(f"🔑 使用SECRET_KEY: {SECRET_KEY[:10]}...")
+        print(f"🔑 使用ALGORITHM: {ALGORITHM}")
 
         # 验证token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(f"✅ Token解码成功!")
+        print(f"📄 Token payload: {payload}")
+
         user_email = payload.get("sub")
         user_id = payload.get("id")
+        is_admin = payload.get("isAdmin")
+
+        print(f"👤 从token提取信息:")
+        print(f"   user_email: {user_email}")
+        print(f"   user_id: {user_id}")
+        print(f"   is_admin: {is_admin}")
 
         if not user_email or not user_id:
-            print(f"❌ Invalid token payload: {payload}")
-            return RedirectResponse(url="/auth?error=invalid_token")
+            print(f"❌ Token payload缺少必要字段!")
+            print(f"   需要: sub, id")
+            print(f"   实际: {list(payload.keys())}")
+            return RedirectResponse(url="/agent/auth?error=invalid_token")
+
+        print(f"🔍 验证用户是否存在: {user_email}")
 
         # 验证用户是否存在
         user = await get_user_by_email(user_email)
         if not user:
-            print(f"❌ User not found: {user_email}")
-            return RedirectResponse(url="/auth?error=user_not_found")
+            print(f"❌ 数据库中未找到用户: {user_email}")
+            return RedirectResponse(url="/agent/auth?error=user_not_found")
 
-        print(f"✅ SSO Login successful for: {user_email}")
+        print(f"✅ 用户验证成功!")
+        print(f"👤 用户信息: id={user['id']}, email={user['email']}, name={user['name']}")
+
+        print(f"🔐 生成新的SSO token...")
 
         # 生成新的token（更安全的做法）
+        new_token_data = {"sub": user["email"], "id": user["id"], "isAdmin": user["isAdmin"]}
+        print(f"📄 新token数据: {new_token_data}")
+
         new_token = create_access_token(
-            data={"sub": user["email"], "id": user["id"], "isAdmin": user["isAdmin"]},
+            data=new_token_data,
             expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         )
 
+        print(f"✅ 新token生成成功! (前20字符): {new_token[:20]}...")
+
         # 安全重定向，只允许内部路径
         safe_redirect = redirect_to if redirect_to.startswith('/') else '/'
+
+        # 考虑前端部署路径前缀 /agent/
+        if not safe_redirect.startswith('/agent/'):
+            if safe_redirect == '/':
+                safe_redirect = '/agent/'
+            else:
+                safe_redirect = f"/agent{safe_redirect}"
+
         redirect_url = f"{safe_redirect}?sso_token={new_token}&sso=true"
 
-        print(f"🔄 Redirecting to: {redirect_url}")
+        print(f"🔄 准备重定向:")
+        print(f"   目标URL: {redirect_url}")
+        print(f"   包含参数:")
+        print(f"     - sso_token: {new_token[:20]}...")
+        print(f"     - sso: true")
+        print("✅ SSO LOGIN SUCCESSFUL - 即将重定向")
+        print("=" * 60)
+
         return RedirectResponse(url=redirect_url)
 
     except jwt.ExpiredSignatureError:
-        print("❌ SSO Token expired")
-        return RedirectResponse(url="/auth?error=token_expired")
+        print("❌ SSO Token已过期")
+        print("=" * 60)
+        return RedirectResponse(url="/agent/auth?error=token_expired")
     except jwt.InvalidTokenError as e:
-        print(f"❌ SSO Invalid token: {e}")
-        return RedirectResponse(url="/auth?error=invalid_token")
+        print(f"❌ SSO Token无效: {e}")
+        print(f"   Token: {token}")
+        print(f"   Error详情: {str(e)}")
+        print("=" * 60)
+        return RedirectResponse(url="/agent/auth?error=invalid_token")
     except Exception as e:
-        print(f"❌ SSO Error: {e}")
-        return RedirectResponse(url="/auth?error=sso_failed")
+        print(f"❌ SSO处理出错: {e}")
+        print(f"   错误类型: {type(e).__name__}")
+        print(f"   错误详情: {str(e)}")
+        import traceback
+        print(f"   调用栈: {traceback.format_exc()}")
+        print("=" * 60)
+        return RedirectResponse(url="/agent/auth?error=sso_failed")
 
 
 @router.post("/sso/verify", response_model=TokenResponse)
@@ -489,31 +543,58 @@ async def verify_sso_token(sso_token: str = Body(..., embed=True)):
     验证SSO token并返回用户信息
     前端收到sso_token后调用此接口验证并获取用户信息
     """
+    print("=" * 50)
+    print("🔍 SSO TOKEN VERIFICATION STARTED")
+    print(f"📥 接收到SSO token (前20字符): {sso_token[:20]}...")
+    print(f"📏 Token长度: {len(sso_token)}")
+
     try:
-        print(f"🔐 Verifying SSO token: {sso_token[:20]}...")
+        print(f"🔑 使用配置:")
+        print(f"   SECRET_KEY: {SECRET_KEY[:10]}...")
+        print(f"   ALGORITHM: {ALGORITHM}")
 
         # 验证token
         payload = jwt.decode(sso_token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(f"✅ SSO Token解码成功!")
+        print(f"📄 Payload内容: {payload}")
+
         user_email = payload.get("sub")
         user_id = payload.get("id")
+        is_admin = payload.get("isAdmin")
+
+        print(f"👤 提取的用户信息:")
+        print(f"   email: {user_email}")
+        print(f"   id: {user_id}")
+        print(f"   isAdmin: {is_admin}")
 
         if not user_email or not user_id:
+            print(f"❌ Token payload缺少必要字段!")
+            print(f"   需要: sub, id")
+            print(f"   实际: {list(payload.keys())}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid SSO token"
+                detail="Invalid SSO token - missing required fields"
             )
 
         # 获取完整用户信息
+        print(f"🔍 从数据库查询用户: {user_email}")
         user = await get_user_by_email(user_email)
         if not user:
+            print(f"❌ 数据库中未找到用户: {user_email}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                detail="User not found in database"
             )
 
-        print(f"✅ SSO token verified for: {user_email}")
+        print(f"✅ 用户查询成功!")
+        print(f"👤 数据库用户信息:")
+        print(f"   id: {user['id']}")
+        print(f"   email: {user['email']}")
+        print(f"   name: {user['name']}")
+        print(f"   isAdmin: {user['isAdmin']}")
+        print(f"   emailVerified: {user.get('emailVerified', False)}")
 
-        return {
+        response_data = {
             "id": user["id"],
             "email": user["email"],
             "name": user["name"],
@@ -522,18 +603,37 @@ async def verify_sso_token(sso_token: str = Body(..., embed=True)):
             "emailVerified": user.get("emailVerified", False)
         }
 
+        print(f"✅ SSO验证成功!")
+        print(f"📤 返回数据: {response_data}")
+        print("=" * 50)
+
+        return response_data
+
     except jwt.ExpiredSignatureError:
+        print("❌ SSO Token已过期")
+        print("=" * 50)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="SSO token expired"
         )
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        print(f"❌ SSO Token无效: {e}")
+        print(f"   Token: {sso_token}")
+        print(f"   Error详情: {str(e)}")
+        print("=" * 50)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid SSO token"
         )
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"❌ SSO verification error: {e}")
+        print(f"❌ SSO验证出错: {e}")
+        print(f"   错误类型: {type(e).__name__}")
+        print(f"   错误详情: {str(e)}")
+        import traceback
+        print(f"   调用栈: {traceback.format_exc()}")
+        print("=" * 50)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="SSO verification failed"

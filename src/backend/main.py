@@ -488,14 +488,14 @@ async def lifespan(_app: FastAPI):  # app 参数不使用，改名避免警告
 app = FastAPI(title="MatterAI Agent API", version="0.1.0", lifespan=lifespan)
 
 # CORS（根据需要收敛域名）
-#本地调试开启跨域
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+# 本地调试开启跨域
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 注册认证路由
 app.include_router(auth_router)

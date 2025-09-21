@@ -524,10 +524,32 @@ class AuthApiServiceImpl implements AuthApiService {
 
   // SSO 相关方法
   async verifySSOToken(ssoToken: string): Promise<SSOTokenVerifyResponse> {
-    return this.makeRequest('/auth/sso/verify', {
-      method: 'POST',
-      body: JSON.stringify({ sso_token: ssoToken }),
-    });
+    console.log('=' + '='.repeat(40));
+    console.log('🌐 API: SSO Token验证开始');
+    console.log('📥 请求数据:');
+    console.log('   sso_token:', ssoToken.substring(0, 20) + '...');
+    console.log('   token长度:', ssoToken.length);
+    console.log('   请求URL: /auth/sso/verify');
+
+    try {
+      const result = await this.makeRequest('/auth/sso/verify', {
+        method: 'POST',
+        body: JSON.stringify({ sso_token: ssoToken }),
+      });
+
+      console.log('✅ API请求成功!');
+      console.log('📄 响应数据:', result);
+      console.log('=' + '='.repeat(40));
+
+      return result;
+    } catch (error: any) {
+      console.error('❌ API请求失败:');
+      console.error('   错误:', error);
+      console.error('   状态码:', error.response?.status);
+      console.error('   响应数据:', error.response?.data);
+      console.log('=' + '='.repeat(40));
+      throw error;
+    }
   }
 
   // 生成跳转到B网站的URL

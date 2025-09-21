@@ -266,16 +266,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // SSO 相关方法
   const handleSSOLogin = async (ssoToken: string): Promise<void> => {
+    console.log('='.repeat(50));
+    console.log('🚀 AuthContext: SSO登录开始');
+    console.log('📥 接收到SSO token:', ssoToken.substring(0, 20) + '...');
+    console.log('📏 Token长度:', ssoToken.length);
+
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'CLEAR_ERROR' });
 
     try {
-      console.log('🔐 处理SSO登录，token:', ssoToken.substring(0, 20) + '...');
+      console.log('🔍 调用API验证SSO token...');
 
       // 验证SSO token并获取用户信息
       const response = await api.verifySSOToken(ssoToken);
 
-      console.log('✅ SSO验证成功:', response);
+      console.log('✅ API验证成功!');
+      console.log('📄 响应数据:', response);
 
       const user: User = {
         id: response.id,
@@ -286,17 +292,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         token: response.token,
       };
 
+      console.log('👤 创建用户对象:', user);
+
       // 更新用户状态
+      console.log('💾 更新用户状态到localStorage和context...');
       updateUser(user);
 
-      console.log('✅ SSO登录完成');
+      console.log('✅ SSO登录完成!');
+      console.log('🎯 当前用户状态:', {
+        isAuthenticated: true,
+        user: { email: user.email, name: user.name }
+      });
+      console.log('='.repeat(50));
     } catch (error: any) {
-      console.error('❌ SSO登录失败:', error);
+      console.error('❌ SSO登录失败:');
+      console.error('   错误对象:', error);
+      console.error('   错误消息:', error.message);
+      console.error('   响应数据:', error.response?.data);
+      console.error('   状态码:', error.response?.status);
+
       const errorMessage = error.response?.data?.detail || error.message || 'SSO登录失败';
+      console.error('   最终错误消息:', errorMessage);
+
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      console.log('='.repeat(50));
       throw error;
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
+      console.log('🏁 SSO登录流程结束 (loading = false)');
     }
   };
 
