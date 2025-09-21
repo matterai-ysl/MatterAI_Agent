@@ -17,13 +17,13 @@ PRESET_TOOLS_CONFIG = {
     "preset-material-extraction": {
         "name": "材料结构化数据提取",
         "type": "mcp",
-        "url": f"{mcp_server_url}:8030/mcp",
+        "url": f"{mcp_server_url}:8150/mcp",
         "transport": "http"
     },
     "preset-literature-extraction": {
         "name": "文献数据抽取",
         "type": "mcp",
-        "url": f"{mcp_server_url}:8030/mcp",
+        "url": f"{mcp_server_url}:8150/mcp",
         "transport": "http"
     },
     "preset-neural-network": {
