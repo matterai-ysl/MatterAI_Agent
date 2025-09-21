@@ -469,7 +469,14 @@ async def sso_login(token: str, redirect_to: str = "/"):
             print(f"❌ Token payload缺少必要字段!")
             print(f"   需要: sub, id")
             print(f"   实际: {list(payload.keys())}")
-            return RedirectResponse(url="/agent/auth?error=invalid_token")
+            # 构建错误重定向URL
+            import os
+            frontend_base_url = os.getenv('FRONTEND_BASE_URL', 'https://www.matterai.cn')
+            if 'localhost' in frontend_base_url:
+                error_url = "/agent/auth?error=invalid_token"
+            else:
+                error_url = f"{frontend_base_url}/auth?error=invalid_token"
+            return RedirectResponse(url=error_url)
 
         print(f"🔍 验证用户是否存在: {user_email}")
 
@@ -477,7 +484,14 @@ async def sso_login(token: str, redirect_to: str = "/"):
         user = await get_user_by_email(user_email)
         if not user:
             print(f"❌ 数据库中未找到用户: {user_email}")
-            return RedirectResponse(url="/agent/auth?error=user_not_found")
+            # 构建错误重定向URL
+            import os
+            frontend_base_url = os.getenv('FRONTEND_BASE_URL', 'https://www.matterai.cn')
+            if 'localhost' in frontend_base_url:
+                error_url = "/agent/auth?error=user_not_found"
+            else:
+                error_url = f"{frontend_base_url}/auth?error=user_not_found"
+            return RedirectResponse(url=error_url)
 
         print(f"✅ 用户验证成功!")
         print(f"👤 用户信息: id={user['id']}, email={user['email']}, name={user['name']}")
@@ -498,20 +512,40 @@ async def sso_login(token: str, redirect_to: str = "/"):
         # 安全重定向，只允许内部路径
         safe_redirect = redirect_to if redirect_to.startswith('/') else '/'
 
-        # 考虑前端部署路径前缀 /agent/
-        if not safe_redirect.startswith('/agent/'):
-            if safe_redirect == '/':
+        # 根据部署环境构建完整的重定向URL
+        # 生产环境需要完整URL，本地开发可以使用相对路径
+        import os
+        frontend_base_url = os.getenv('FRONTEND_BASE_URL', 'https://www.matterai.cn')
+
+        # 在生产环境中，前端可能部署在主域名下，不需要 /agent 前缀
+        if safe_redirect == '/':
+            if 'localhost' in frontend_base_url:
+                # 本地开发环境，前端在 /agent/ 路径下
                 safe_redirect = '/agent/'
             else:
+                # 生产环境，前端在根路径下
+                safe_redirect = '/agent/'
+        else:
+            if 'localhost' in frontend_base_url and not safe_redirect.startswith('/agent/'):
+                # 本地开发环境需要 /agent 前缀
                 safe_redirect = f"/agent{safe_redirect}"
 
-        redirect_url = f"{safe_redirect}?sso_token={new_token}&sso=true"
+        # 构建完整URL
+        if 'localhost' in frontend_base_url:
+            # 本地开发使用相对路径
+            redirect_url = f"{safe_redirect}?sso_token={new_token}&sso=true"
+        else:
+            # 生产环境使用完整URL
+            redirect_url = f"{frontend_base_url}{safe_redirect}?sso_token={new_token}&sso=true"
 
         print(f"🔄 准备重定向:")
-        print(f"   目标URL: {redirect_url}")
+        print(f"   前端基础URL: {frontend_base_url}")
+        print(f"   重定向路径: {safe_redirect}")
+        print(f"   最终目标URL: {redirect_url}")
         print(f"   包含参数:")
         print(f"     - sso_token: {new_token[:20]}...")
         print(f"     - sso: true")
+        print(f"   环境检测: {'本地开发' if 'localhost' in frontend_base_url else '生产环境'}")
         print("✅ SSO LOGIN SUCCESSFUL - 即将重定向")
         print("=" * 60)
 
@@ -520,13 +554,27 @@ async def sso_login(token: str, redirect_to: str = "/"):
     except jwt.ExpiredSignatureError:
         print("❌ SSO Token已过期")
         print("=" * 60)
-        return RedirectResponse(url="/agent/auth?error=token_expired")
+        # 构建错误重定向URL
+        import os
+        frontend_base_url = os.getenv('FRONTEND_BASE_URL', 'https://www.matterai.cn')
+        if 'localhost' in frontend_base_url:
+            error_url = "/agent/auth?error=token_expired"
+        else:
+            error_url = f"{frontend_base_url}/auth?error=token_expired"
+        return RedirectResponse(url=error_url)
     except jwt.InvalidTokenError as e:
         print(f"❌ SSO Token无效: {e}")
         print(f"   Token: {token}")
         print(f"   Error详情: {str(e)}")
         print("=" * 60)
-        return RedirectResponse(url="/agent/auth?error=invalid_token")
+        # 构建错误重定向URL
+        import os
+        frontend_base_url = os.getenv('FRONTEND_BASE_URL', 'https://www.matterai.cn')
+        if 'localhost' in frontend_base_url:
+            error_url = "/agent/auth?error=invalid_token"
+        else:
+            error_url = f"{frontend_base_url}/auth?error=invalid_token"
+        return RedirectResponse(url=error_url)
     except Exception as e:
         print(f"❌ SSO处理出错: {e}")
         print(f"   错误类型: {type(e).__name__}")
@@ -534,7 +582,14 @@ async def sso_login(token: str, redirect_to: str = "/"):
         import traceback
         print(f"   调用栈: {traceback.format_exc()}")
         print("=" * 60)
-        return RedirectResponse(url="/agent/auth?error=sso_failed")
+        # 构建错误重定向URL
+        import os
+        frontend_base_url = os.getenv('FRONTEND_BASE_URL', 'https://www.matterai.cn')
+        if 'localhost' in frontend_base_url:
+            error_url = "/agent/auth?error=sso_failed"
+        else:
+            error_url = f"{frontend_base_url}/auth?error=sso_failed"
+        return RedirectResponse(url=error_url)
 
 
 @router.post("/sso/verify", response_model=TokenResponse)
