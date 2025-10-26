@@ -5,7 +5,7 @@
 /**
  * 预设工具类型
  */
-export type PresetToolType = 'material-knowledge' | 'xgboost' | 'material-extraction' | 'neural-network' | 'random-forest' | 'support-vector-machine' | 'vasp-calculation' | 'active-learning' | 'automated-laboratory';
+export type PresetToolType = 'material-knowledge' | 'xgboost' | 'material-extraction' | 'neural-network' | 'random-forest' | 'support-vector-machine' | 'vasp-calculation' | 'active-learning' | 'automated-laboratory' | 'wikipedia' | 'web-search' | 'feature-engineering';
 
 /**
  * 工具基础接口
@@ -65,6 +65,9 @@ export const PRESET_TOOL_TRANSLATION_KEYS: Record<PresetToolType, string> = {
   'vasp-calculation': 'vaspCalculation',
   'active-learning': 'activeLearning',
   'automated-laboratory': 'automatedLaboratory',
+  'wikipedia': 'wikipedia',
+  'web-search': 'webSearch',
+  'feature-engineering': 'featureEngineering',
 };
 
 /**
@@ -115,5 +118,20 @@ export const PRESET_TOOLS: Omit<PresetTool, 'id' | 'enabled' | 'name' | 'descrip
     type: 'preset',
     toolType: 'automated-laboratory',
     icon: '🧪🤖',
+  },
+  {
+    type: 'preset',
+    toolType: 'wikipedia',
+    icon: '📖',
+  },
+  {
+    type: 'preset',
+    toolType: 'web-search',
+    icon: '🔍',
+  },
+  {
+    type: 'preset',
+    toolType: 'feature-engineering',
+    icon: '⚙️',
   },
 ];

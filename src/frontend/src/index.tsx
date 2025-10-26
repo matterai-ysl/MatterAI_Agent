@@ -10,6 +10,7 @@ import './index.css';
 import './i18n'; // 初始化 i18n
 import NewApp from './NewApp';
 import { MindsApp } from './components/minds/MindsApp';
+import { MatNexusApp } from './components/matnexus/MatNexusApp';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AuthPage } from './components/auth/AuthPage';
@@ -46,15 +47,25 @@ root.render(
           />
           
           {/* MINDS 智能体路由 (需要认证) */}
-          <Route 
-            path="/minds" 
+          <Route
+            path="/minds"
             element={
               <ProtectedRoute>
                 <MindsApp />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
+          {/* MatNexus 智能体路由 (需要认证) */}
+          <Route
+            path="/matnexus"
+            element={
+              <ProtectedRoute>
+                <MatNexusApp />
+              </ProtectedRoute>
+            }
+          />
+
           {/* 未匹配的路由重定向到首页 */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

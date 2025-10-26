@@ -4,6 +4,7 @@ google-adk-version: 1.8.0
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
+from google.adk.artifacts import InMemoryArtifactService
 from google.adk.sessions import DatabaseSessionService
 from google.genai import types 
 from google.adk.agents.run_config import RunConfig, StreamingMode
@@ -12,6 +13,7 @@ from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
 from google.adk.tools.openapi_tool.auth.auth_helpers import token_to_scheme_credential
 from google.adk.tools.mcp_tool.mcp_session_manager import SseConnectionParams,StreamableHTTPServerParams
 from fastapi import FastAPI, HTTPException, Query
+from google.adk.planners import PlanReActPlanner,BuiltInPlanner
 # 文件上传相关导入已移除，现使用外部服务
 # from fastapi import UploadFile, File, Request
 from fastapi.responses import StreamingResponse, JSONResponse
@@ -40,9 +42,11 @@ from database import db_manager
 from auth_api.email_service import start_cleanup_task
 from fastapi.security import HTTPBearer
 from fastapi import Depends
+from google.adk.tools import load_artifacts,get_user_choice
+from Config import model
+from base_tool import save_file_to_artifact,load_artifacts_file
 load_dotenv(override=True)
-
-
+planner = PlanReActPlanner()
 APP_NAME = "chatbot"
 # 移除硬编码的用户ID，现在从JWT token获取
 # USER_ID = "user_1"  # 已弃用
@@ -50,14 +54,14 @@ SESSION_ID = "session_1"
 
 # HTTP Bearer token scheme
 security = HTTPBearer()
-
+artifact_service = InMemoryArtifactService()
 async def get_current_user_id(current_user: dict = Depends(get_current_user)) -> str:
     """从JWT token获取当前用户ID"""
     return current_user.get("id") or current_user.get("sub", "anonymous")
 
 # 配置模型
 model = LiteLlm(
-    model="openai/gpt-4o",  
+    model=model,  
     api_base=os.getenv("BASE_URL"),
     api_key=os.getenv("OPENAI_API_KEY")
 )
@@ -223,7 +227,7 @@ async def get_or_create_session_agent(user_id: str, session_id: str, selected_to
     # 创建新的智能体
     print(f"🔧 为用户 {user_id} 会话 {session_id} 创建新智能体 (应用: {app_name})...")
     dynamic_agent = create_dynamic_agent(selected_tools, custom_tools, app_name,user_id)
-    new_runner = Runner(agent=dynamic_agent, app_name=f"{APP_NAME}_{app_name}", session_service=session_service)  # type: ignore
+    new_runner = Runner(agent=dynamic_agent, app_name=f"{APP_NAME}_{app_name}", session_service=session_service,artifact_service=artifact_service)  # type: ignore
     
     # 缓存新智能体和配置
     session_agents[session_key] = new_runner
@@ -234,7 +238,7 @@ async def get_or_create_session_agent(user_id: str, session_id: str, selected_to
 
 def create_dynamic_agent(selected_tools=None, custom_tools=None, app_name="default",user_id=None):
     """根据选中的工具动态创建智能体"""
-    tools = []  # 开始时为空工具列表
+    tools = [save_file_to_artifact,load_artifacts_file]  # 开始时为空工具列表
     
     # 根据应用名称选择工具配置
     agent_config = AGENT_CONFIGS.get(app_name, AGENT_CONFIGS["default"])
@@ -307,6 +311,7 @@ def create_dynamic_agent(selected_tools=None, custom_tools=None, app_name="defau
         model=model,
         instruction=system_prompt,
         tools=tools,  # type: ignore
+        planner=planner,
     )
     
     print(f"🤖 智能体创建完成，共加载 {len(tools)} 个工具")
@@ -489,13 +494,13 @@ app = FastAPI(title="MatterAI Agent API", version="0.1.0", lifespan=lifespan)
 
 # CORS（根据需要收敛域名）
 # 本地调试开启跨域
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 注册认证路由
 app.include_router(auth_router)

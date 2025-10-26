@@ -95,6 +95,18 @@
       "automatedLaboratory": {
         "name": "自动化实验室",
         "description": "自动化实验设备控制与实验流程管理"
+      },
+      "wikipedia": {
+        "name": "维基百科",
+        "description": "从维基百科获取专业知识和背景信息"
+      },
+      "webSearch": {
+        "name": "网络搜索",
+        "description": "在互联网上搜索最新资讯和相关资料"
+      },
+      "featureEngineering": {
+        "name": "材料特征工程",
+        "description": "表格数据高质量特征生成、筛选与优化"
       }
     }
   },
@@ -222,6 +234,7 @@
     "codeSentFailed": "验证码发送失败",
     "codeSentError": "发送验证码时出错",
     "codeInvalid": "请输入6位验证码",
+    "spamWarning": "提示：如果未收到邮件，请检查垃圾邮件/垃圾箱文件夹",
     "codeVerifySuccess": "验证码验证成功",
     "codeVerifyFailed": "验证码验证失败",
     "codeVerifyError": "验证码验证时出错",

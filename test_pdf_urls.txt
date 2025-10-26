@@ -1,0 +1,60 @@
+# 测试用 PDF URL 列表
+
+## 学术论文（arXiv）
+
+1. Attention Is All You Need (Transformer 论文)
+   https://arxiv.org/pdf/1706.03762.pdf
+
+2. BERT 论文
+   https://arxiv.org/pdf/1810.04805.pdf
+
+3. GPT-3 论文
+   https://arxiv.org/pdf/2005.14165.pdf
+
+4. 计算机视觉论文示例
+   https://arxiv.org/pdf/1512.03385.pdf
+
+## 技术文档
+
+5. Python 3.12 新特性
+   https://docs.python.org/3.12/whatsnew/3.12.pdf
+
+## 测试命令示例
+
+在 ADK Web 界面输入：
+
+```
+请分析这个 PDF：https://arxiv.org/pdf/1706.03762.pdf
+```
+
+或
+
+```
+总结这篇论文的主要贡献：https://arxiv.org/pdf/1810.04805.pdf
+```
+
+## 测试问题示例
+
+### 论文分析
+- 这篇论文的研究方法是什么？
+- 主要创新点有哪些？
+- 实验结果如何？
+- 有哪些局限性？
+
+### 内容提取
+- 提取论文中的所有公式
+- 列出文中提到的所有数据集
+- 总结结论部分
+- 找出所有作者的机构信息
+
+### 对比分析
+- 对比 Transformer 和 BERT 的架构差异
+- 这两篇论文使用的实验方法有何不同？
+
+## 注意事项
+
+1. arXiv 链接通常稳定可靠
+2. 避免使用需要认证的 PDF
+3. 确保 URL 直接指向 .pdf 文件
+4. 大文件（>10MB）可能需要较长时间处理
+

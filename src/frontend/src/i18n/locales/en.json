@@ -95,6 +95,18 @@
       "automatedLaboratory": {
         "name": "Automated Laboratory",
         "description": "Automated experimental equipment control and workflow management"
+      },
+      "wikipedia": {
+        "name": "Wikipedia",
+        "description": "Retrieve professional knowledge and background information from Wikipedia"
+      },
+      "webSearch": {
+        "name": "Web Search",
+        "description": "Search the internet for latest information and relevant materials"
+      },
+      "featureEngineering": {
+        "name": "Feature Engineering",
+        "description": "High-quality feature generation, selection and optimization for tabular data"
       }
     }
   },
@@ -181,7 +193,134 @@
     "confirmPasswordPlaceholder": "Confirm your password",
     "forgotPassword": "Forgot password?",
     "forgotPasswordNotImplemented": "Password reset requires you to be logged in. Please contact administrator to reset password.",
-    "logout": "Sign Out"
+    "logout": "Sign Out",
+
+    "registerWithVerification": {
+      "button": "Register with Email Verification"
+    },
+
+    "verificationTitle": {
+      "register": "Email Verification - Register Account",
+      "passwordReset": "Email Verification - Reset Password",
+      "emailBinding": "Email Verification - Bind Email",
+      "default": "Email Verification"
+    },
+    "verificationDesc": {
+      "register": "Please enter the 6-digit verification code sent to your email to complete registration",
+      "passwordReset": "Please enter the 6-digit verification code sent to your email to reset password",
+      "emailBinding": "Please enter the 6-digit verification code sent to the new email to complete binding",
+      "default": "Please enter the verification code"
+    },
+    "sendCode": {
+      "register": "Send Registration Code",
+      "passwordReset": "Send Reset Code",
+      "emailBinding": "Send Binding Code",
+      "default": "Send Code"
+    },
+    "verify": {
+      "register": "Complete Registration",
+      "passwordReset": "Verify and Reset",
+      "emailBinding": "Complete Binding",
+      "default": "Verify"
+    },
+
+    "verificationCode": "Verification Code",
+    "emailAddress": "Email Address",
+    "sending": "Sending...",
+    "resendIn": "Resend in ({{seconds}}s)",
+    "resendCode": "Resend Verification Code",
+    "verifying": "Verifying...",
+    "codeSentSuccess": "Verification code sent",
+    "codeSentFailed": "Failed to send verification code",
+    "codeSentError": "Error sending verification code",
+    "codeInvalid": "Please enter a 6-digit verification code",
+    "spamWarning": "Tip: If you don't receive the email, please check your spam/junk folder",
+    "codeVerifySuccess": "Verification code verified successfully",
+    "codeVerifyFailed": "Verification code verification failed",
+    "codeVerifyError": "Error verifying verification code",
+    "codeHint": "Please enter 6-digit verification code",
+
+    "createAccount": "Create Account",
+    "registerDescription": "Register a new MatterAI Agent account",
+    "enterName": "Please enter your name",
+    "enterEmail": "Please enter email address",
+    "enterPassword": "Please enter password",
+    "confirmPasswordPlaceholder": "Please confirm your password",
+    "passwordRequirement": "Password must be at least 6 characters",
+    "fillAllFields": "Please fill in all required fields",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordMismatch": "Passwords do not match",
+    "invalidEmail": "Please enter a valid email address",
+    "processing": "Processing...",
+    "nextStep": "Next: Email Verification",
+    "alreadyHaveAccount": "Already have an account?",
+    "loginNow": "Sign In Now",
+    "emailVerificationNotice": "Email Verification Notice",
+    "emailVerificationDescription": "After clicking 'Next', the system will send a 6-digit verification code to your email. Please check your email and complete verification.",
+    "registrationFailed": "Registration failed, please try again",
+
+    "resetSuccess": "Password Reset Successful",
+    "resetSuccessMessage": "Your password has been reset successfully. Please sign in with your new password.",
+    "backToLogin": "Back to Sign In",
+    "setNewPassword": "Set New Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "enterNewPassword": "Please enter new password",
+    "confirmNewPasswordPlaceholder": "Please confirm new password",
+    "forgotPasswordDescription": "Please enter your email address, and we will send you a verification code to reset your password",
+    "sendResetCode": "Send Reset Code",
+    "resetInstructions": "Password Reset Instructions",
+    "resetInstructionsText": "Only accounts with verified email addresses can reset passwords via email. If your account has not verified an email, please contact an administrator for assistance.",
+    "resetPasswordFailed": "Password reset failed, please try again",
+    "emailRequired": "Please enter email address",
+    "passwordRequired": "Please set a new password"
+  },
+  "profile": {
+    "title": "Profile",
+    "description": "Manage your account information and settings",
+    "basicInfo": "Basic Information",
+    "userId": "User ID",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "joinDate": "Join Date",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "admin": "Administrator",
+    "user": "User",
+    "bindEmail": "Bind Email",
+    "bindEmailDescription": "After binding an email, you can use it to reset your password and more",
+    "bindNewEmail": "Bind New Email",
+    "enterNewEmail": "Please enter the new email address",
+    "bindEmailButton": "Bind Email",
+    "emailBindSuccess": "Email bound successfully",
+    "emailBindError": "Failed to bind email",
+    "sameEmail": "New email cannot be the same as current email",
+    "changePassword": "Change Password",
+    "changePasswordDescription": "Changing your password regularly can improve account security",
+    "changePasswordButton": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "updatePassword": "Update Password",
+    "passwordChangeSuccess": "Password changed successfully",
+    "passwordChangeError": "Failed to change password",
+    "accountActions": "Account Actions",
+    "logout": "Sign Out",
+    "loadError": "Failed to load user information",
+    "userNotFound": "User information not found"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Information"
   },
   "matterai": {
     "welcome": {

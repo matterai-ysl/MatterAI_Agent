@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSO参数调试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .debug-info {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 SSO参数调试页面</h1>
+
+    <div class="debug-info">
+        <h3>📋 当前页面信息</h3>
+        <div id="page-info"></div>
+    </div>
+
+    <div class="debug-info">
+        <h3>🔍 URL参数检查</h3>
+        <div id="url-params"></div>
+    </div>
+
+    <div class="debug-info">
+        <h3>💾 localStorage检查</h3>
+        <div id="localstorage-info"></div>
+    </div>
+
+    <div>
+        <button onclick="refreshInfo()">🔄 刷新信息</button>
+        <button onclick="clearStorage()">🧹 清空localStorage</button>
+        <button onclick="testSSO()">🧪 模拟SSO处理</button>
+    </div>
+
+    <script>
+        function refreshInfo() {
+            // 页面信息
+            const pageInfo = document.getElementById('page-info');
+            pageInfo.innerHTML = `
+                <strong>完整URL:</strong> ${window.location.href}<br>
+                <strong>域名:</strong> ${window.location.hostname}<br>
+                <strong>路径:</strong> ${window.location.pathname}<br>
+                <strong>查询字符串:</strong> ${window.location.search}<br>
+                <strong>时间:</strong> ${new Date().toLocaleString()}
+            `;
+
+            // URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const paramsDiv = document.getElementById('url-params');
+
+            const ssoToken = urlParams.get('sso_token');
+            const isSso = urlParams.get('sso');
+
+            let paramsHtml = '';
+            if (urlParams.toString()) {
+                paramsHtml += '<strong>所有参数:</strong><br>';
+                for (const [key, value] of urlParams.entries()) {
+                    paramsHtml += `${key}: ${key.includes('token') ? value.substring(0, 20) + '...' : value}<br>`;
+                }
+                paramsHtml += '<br>';
+            }
+
+            if (ssoToken && isSso === 'true') {
+                paramsHtml += `<div class="success">
+                    ✅ 检测到SSO参数!<br>
+                    sso_token: ${ssoToken.substring(0, 30)}...<br>
+                    sso: ${isSso}<br>
+                    token长度: ${ssoToken.length}
+                </div>`;
+            } else if (ssoToken || isSso) {
+                paramsHtml += `<div class="warning">
+                    ⚠️ 部分SSO参数存在<br>
+                    sso_token: ${ssoToken ? ssoToken.substring(0, 30) + '...' : '❌ 缺失'}<br>
+                    sso: ${isSso || '❌ 缺失'}
+                </div>`;
+            } else {
+                paramsHtml += `<div class="error">
+                    ❌ 未检测到SSO参数<br>
+                    需要: sso_token 和 sso=true
+                </div>`;
+            }
+
+            paramsDiv.innerHTML = paramsHtml;
+
+            // localStorage检查
+            const storageDiv = document.getElementById('localstorage-info');
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+
+            let storageHtml = '';
+            if (token) {
+                storageHtml += `<strong>token:</strong> ${token.substring(0, 30)}...<br>`;
+            } else {
+                storageHtml += '<strong>token:</strong> ❌ 不存在<br>';
+            }
+
+            if (user) {
+                try {
+                    const userObj = JSON.parse(user);
+                    storageHtml += `<strong>user:</strong> ${userObj.name} (${userObj.email})<br>`;
+                } catch (e) {
+                    storageHtml += `<strong>user:</strong> ⚠️ 解析失败<br>`;
+                }
+            } else {
+                storageHtml += '<strong>user:</strong> ❌ 不存在<br>';
+            }
+
+            storageDiv.innerHTML = storageHtml;
+        }
+
+        function clearStorage() {
+            localStorage.clear();
+            console.log('localStorage已清空');
+            refreshInfo();
+        }
+
+        function testSSO() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const ssoToken = urlParams.get('sso_token');
+            const isSso = urlParams.get('sso');
+
+            console.log('🧪 开始模拟SSO处理...');
+            console.log('sso_token:', ssoToken ? ssoToken.substring(0, 20) + '...' : 'null');
+            console.log('sso:', isSso);
+
+            if (ssoToken && isSso === 'true') {
+                console.log('✅ 参数有效，模拟调用SSO API...');
+
+                // 模拟API调用
+                fetch('/agent/api/auth/sso/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ sso_token: ssoToken }),
+                })
+                .then(response => {
+                    console.log('API响应状态:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✅ API响应成功:', data);
+
+                    // 模拟保存到localStorage
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify({
+                        id: data.id,
+                        email: data.email,
+                        name: data.name,
+                        isAdmin: data.isAdmin
+                    }));
+
+                    console.log('💾 已保存到localStorage');
+
+                    // 清理URL参数
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, newUrl);
+                    console.log('🧹 URL参数已清理');
+
+                    refreshInfo();
+                    alert('✅ SSO处理成功！');
+                })
+                .catch(error => {
+                    console.error('❌ API调用失败:', error);
+                    alert('❌ SSO处理失败: ' + error.message);
+                });
+            } else {
+                alert('❌ 缺少有效的SSO参数');
+            }
+        }
+
+        // 页面加载时执行
+        window.onload = function() {
+            refreshInfo();
+
+            // 检查是否有SSO参数
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('sso_token') && urlParams.get('sso') === 'true') {
+                console.log('🔍 页面加载时检测到SSO参数');
+            }
+        };
+    </script>
+</body>
+</html>
