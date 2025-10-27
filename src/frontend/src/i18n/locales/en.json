@@ -194,6 +194,10 @@
     "forgotPassword": "Forgot password?",
     "forgotPasswordNotImplemented": "Password reset requires you to be logged in. Please contact administrator to reset password.",
     "logout": "Sign Out",
+    "sessionExpired": "Session Expired",
+    "sessionExpiredMessage": "Your session has expired, please sign in again",
+    "sessionExpiredRedirecting": "Session expired, redirecting to login page...",
+    "redirectingToLogin": "Redirecting to login page...",
 
     "registerWithVerification": {
       "button": "Register with Email Verification"

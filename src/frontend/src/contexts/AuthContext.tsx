@@ -148,6 +148,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('✅ 登录成功，数据已保存到本地存储');
       dispatch({ type: 'SET_USER', payload: user });
+
+      // 检查是否需要跳转回之前的页面
+      const redirectPath = localStorage.getItem('redirectAfterLogin');
+      if (redirectPath) {
+        console.log('🔄 检测到登录前路径，准备跳转:', redirectPath);
+        localStorage.removeItem('redirectAfterLogin');
+        // 延迟一下让状态更新完成
+        setTimeout(() => {
+          window.location.href = redirectPath;
+        }, 100);
+      }
     } catch (error) {
       console.error('🚨 登录过程发生错误:', error);
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Login failed' });
@@ -201,6 +212,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }));
 
       dispatch({ type: 'SET_USER', payload: user });
+
+      // 检查是否需要跳转回之前的页面
+      const redirectPath = localStorage.getItem('redirectAfterLogin');
+      if (redirectPath) {
+        console.log('🔄 检测到登录前路径，准备跳转:', redirectPath);
+        localStorage.removeItem('redirectAfterLogin');
+        setTimeout(() => {
+          window.location.href = redirectPath;
+        }, 100);
+      }
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Registration failed' });
       throw error;
@@ -304,6 +325,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user: { email: user.email, name: user.name }
       });
       console.log('='.repeat(50));
+
+      // 检查是否需要跳转回之前的页面
+      const redirectPath = localStorage.getItem('redirectAfterLogin');
+      if (redirectPath) {
+        console.log('🔄 检测到登录前路径，准备跳转:', redirectPath);
+        localStorage.removeItem('redirectAfterLogin');
+        setTimeout(() => {
+          window.location.href = redirectPath;
+        }, 100);
+      }
     } catch (error: any) {
       console.error('❌ SSO登录失败:');
       console.error('   错误对象:', error);

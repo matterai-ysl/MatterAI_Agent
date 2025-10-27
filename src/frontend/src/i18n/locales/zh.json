@@ -194,6 +194,10 @@
     "forgotPassword": "忘记密码？",
     "forgotPasswordNotImplemented": "密码重置功能需要您先登录。请联系管理员重置密码。",
     "logout": "退出登录",
+    "sessionExpired": "登录已过期",
+    "sessionExpiredMessage": "您的登录已过期，请重新登录",
+    "sessionExpiredRedirecting": "登录已过期，正在跳转到登录页...",
+    "redirectingToLogin": "正在跳转到登录页...",
     
     "registerWithVerification": {
       "button": "邮箱验证注册"

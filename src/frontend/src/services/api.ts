@@ -75,6 +75,33 @@ class HttpClient {
   }
 
   /**
+   * 处理401错误 - 自动登出并跳转到登录页
+   */
+  private handleUnauthorized(): void {
+    console.warn('⚠️ 检测到401错误，token可能已过期，自动登出...');
+
+    // 保存当前路径，登录后跳回
+    const currentPath = window.location.pathname + window.location.search;
+    if (currentPath !== '/auth') {
+      localStorage.setItem('redirectAfterLogin', currentPath);
+    }
+
+    // 显示友好提示
+    import('../components/ui/Toast').then(({ toast }) => {
+      toast.warning('登录已过期，正在跳转到登录页...', 2000);
+    });
+
+    // 清除认证信息
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    // 延迟跳转，让用户看到提示
+    setTimeout(() => {
+      window.location.href = '/auth';
+    }, 500);
+  }
+
+  /**
    * 发送 GET 请求
    */
   async get<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
@@ -83,7 +110,7 @@ class HttpClient {
     // 规范化端点，避免以 / 开头导致丢失 /agent/api 路径
     const normalizedEndpoint = endpoint.replace(/^\//, '');
     const url = new URL(normalizedEndpoint, ensureTrailingSlash(baseUrl));
-    
+
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, value);
@@ -94,6 +121,11 @@ class HttpClient {
       method: 'GET',
       headers: this.getAuthHeaders(),
     });
+
+    if (response.status === 401) {
+      this.handleUnauthorized();
+      throw new Error('认证已过期，请重新登录');
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -110,12 +142,17 @@ class HttpClient {
     // 规范化端点，避免以 / 开头导致丢失 /agent/api 路径
     const normalizedEndpoint = endpoint.replace(/^\//, '');
     const url = new URL(normalizedEndpoint, ensureTrailingSlash(baseUrl));
-    
+
     const response = await fetch(url.toString(), {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: data ? JSON.stringify(data) : undefined,
     });
+
+    if (response.status === 401) {
+      this.handleUnauthorized();
+      throw new Error('认证已过期，请重新登录');
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -280,6 +317,32 @@ export class ChatApiService {
       });
 
       console.log('📥 响应状态:', response.status, response.statusText);
+
+      if (response.status === 401) {
+        console.warn('⚠️ 检测到401错误，token可能已过期，自动登出...');
+
+        // 保存当前路径
+        const currentPath = window.location.pathname + window.location.search;
+        if (currentPath !== '/auth') {
+          localStorage.setItem('redirectAfterLogin', currentPath);
+        }
+
+        // 显示友好提示
+        import('../components/ui/Toast').then(({ toast }) => {
+          toast.warning('登录已过期，正在跳转到登录页...', 2000);
+        });
+
+        // 清除认证信息
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+
+        // 延迟跳转
+        setTimeout(() => {
+          window.location.href = '/auth';
+        }, 500);
+
+        throw new Error('认证已过期，请重新登录');
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -452,6 +515,33 @@ class AuthApiServiceImpl implements AuthApiService {
       ...options,
       headers,
     });
+
+    // 处理401错误 - 自动登出
+    if (response.status === 401) {
+      console.warn('⚠️ 检测到401错误，token可能已过期，自动登出...');
+
+      // 保存当前路径
+      const currentPath = window.location.pathname + window.location.search;
+      if (currentPath !== '/auth') {
+        localStorage.setItem('redirectAfterLogin', currentPath);
+      }
+
+      // 显示友好提示
+      import('../components/ui/Toast').then(({ toast }) => {
+        toast.warning('登录已过期，正在跳转到登录页...', 2000);
+      });
+
+      // 清除认证信息
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+
+      // 延迟跳转
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 500);
+
+      throw new Error('认证已过期，请重新登录');
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
